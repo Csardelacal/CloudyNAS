@@ -3,12 +3,16 @@
 use spitfire\Model;
 use spitfire\storage\database\Schema;
 
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * This model allows the servers to manage a directory of their known peers.
+ * This allows any server to authenticate themselves with each other in the 
+ * event of them needing to communicate.
+ * 
+ * @property string $hostname The host name used to communicate with it
+ * @property string $uniqid   ID the server uses to identify itself
+ * @property string $pubKey   Server's public key
+ * @property int    $role     Server's role
  */
-
 class ServerModel extends Model
 {
 	
@@ -18,7 +22,9 @@ class ServerModel extends Model
 	 */
 	public function definitions(Schema $schema) {
 		$schema->hostname = new StringField(250);
+		$schema->uniqid   = new StringField(250);
 		$schema->pubKey   = new StringField(4096);
+		$schema->role     = new IntegerField(true);
 		$schema->lastSeen = new IntegerField(true);
 	}
 
