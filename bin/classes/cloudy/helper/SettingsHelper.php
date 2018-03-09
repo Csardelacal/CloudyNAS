@@ -1,4 +1,6 @@
-<?php
+<?php namespace cloudy\helper;
+
+use spitfire\storage\database\Table;
 
 /* 
  * The MIT License
@@ -25,16 +27,57 @@
  */
 
 /**
- * This model allows the server to define different settings to be stored in the
- * database so that the values can quickly be retrieved.
+ * This class should make it easy and straightforward to access and write the 
+ * app's settings.
+ * 
+ * Data read from this class may be cached throughout the lifespan of the request,
+ * if your application relies on the data being fresh from the database it will
+ * be required to read it itself.
+ * 
+ * @author César de la Cal Bretschneider <cesar@magic3w.com>
  */
-class SettingModel extends \spitfire\Model
+class SettingsHelper
 {
 	
+	/**
+	 * This model will be used to read the data from the database.
+	 *
+	 * @var Table
+	 */
+	private $table;
 	
-	public function definitions(\spitfire\storage\database\Schema $schema) {
-		$schema->key   = new StringField(255);
-		$schema->value = new TextField();
+	/**
+	 * 
+	 * @param Table $table
+	 */
+	public function __construct($table) {
+		$this->table = $table;
 	}
-
+	
+	/**
+	 * 
+	 * @param string $key
+	 * @return string
+	 */
+	public function read($key) {
+		$query = $this->table->get('key', $key);
+		return $query->fetch()->value;
+	}
+	
+	public function set($key, $value) {
+		
+		$query = $this->table->get('key', $key);
+		$model = $query->fetch();
+		
+		if (!$model) {
+			$model = $this->table->newRecord();
+			$model->key = $key;
+		}
+		
+		$model->value = $value;
+		$model->store();
+		
+		return true;
+	}
+	
 }

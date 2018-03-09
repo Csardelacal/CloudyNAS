@@ -24,17 +24,11 @@
  * THE SOFTWARE.
  */
 
-/**
- * This model allows the server to define different settings to be stored in the
- * database so that the values can quickly be retrieved.
- */
-class SettingModel extends \spitfire\Model
+class ServerController
 {
 	
-	
-	public function definitions(\spitfire\storage\database\Schema $schema) {
-		$schema->key   = new StringField(255);
-		$schema->value = new TextField();
+	public function info() {
+		die('OK');
 	}
-
+	
 }

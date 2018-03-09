@@ -7,4 +7,6 @@ use spitfire\core\Environment;
  * the behavior of an application.
  */
 $e = new Environment('test');
-$e->set('db_table_prefix', 'test_');
+$e->set('db', 'mysqlpdo://root:@localhost/cloudy');
+
+$e->set('debug_mode', true);

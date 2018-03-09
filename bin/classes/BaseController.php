@@ -1,5 +1,8 @@
 <?php
 
+use cloudy\helper\KeyHelper;
+use cloudy\helper\SettingsHelper;
+
 /* 
  * The MIT License
  *
@@ -24,17 +27,44 @@
  * THE SOFTWARE.
  */
 
-/**
- * This model allows the server to define different settings to be stored in the
- * database so that the values can quickly be retrieved.
- */
-class SettingModel extends \spitfire\Model
+class BaseController extends Controller
 {
 	
+	/**
+	 *
+	 * @var SettingsHelper
+	 */
+	protected $settings;
 	
-	public function definitions(\spitfire\storage\database\Schema $schema) {
-		$schema->key   = new StringField(255);
-		$schema->value = new TextField();
+	/**
+	 * Whenever the base controller is summoned, it will ensure that certain basic
+	 * requirements are available.
+	 */
+	public function _onload() {
+		
+		/*
+		 * Prepare a settings helper. This class will allow the application to 
+		 * read and write the settings for the application.
+		 */
+		$this->settings = new SettingsHelper(db()->setting);
+		
+		/*
+		 * Check if the server is configured. Otherwise, start the configuration
+		 * of the basic server settings.
+		 */
+		if (!$this->settings->read('privkey')) {
+			/*
+			 * All the servers can sign their requests to each other with a public
+			 * key. If this server doesn't happen to have one, it will generate one
+			 * to ensure that the communication between servers is not compromised.
+			 */
+			$keygen = new KeyHelper();
+			list($private, $public) = $keygen->generate();
+			
+			$this->settings->set('uniqid',  uniqid());
+			$this->settings->set('privkey', $private);
+			$this->settings->set('pubkey',  $public);
+		}
 	}
-
+	
 }

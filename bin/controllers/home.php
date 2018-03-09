@@ -1,13 +1,62 @@
 <?php
 
-/**
- * Prebuilt test controller. Use this to test all the components built into
- * for right operation. This should be deleted whe using Spitfire.
- */
+use cloudy\Role;
+use spitfire\core\Environment;
 
-class HomeController extends Controller
+/**
+ * 
+ * @author César de la Cal Bretschneider <cesar@magic3w.com>
+ */
+class HomeController extends BaseController
 {
 	public function index() {
-		$this->view->set('message', 'Hi! I\'m spitfire');
+		
+		/*
+		 * Check whether the server is a pool, and if it is not... Either redirect
+		 * the server to the known pool owner, or ask the user whether they wish
+		 * to escalate this server to pool.
+		 */
+		if (!($this->settings->read('role') & Role::ROLE_POOL)) {
+			
+			/*
+			 * Look for a pool manager. Usually, the pool setting contains the uniqid
+			 * or hostname of the server. When this is empty we need to attach it 
+			 * to a pool.
+			 */
+			if ($this->settings->read('pool') || Environment::get('pool')) {
+				#Connect to the pool, start receiving tasks
+			}
+			
+			/*
+			 * The server does not know which pool it belongs to. It should offer 
+			 * the owner the option to automatically attach it to a pool or to 
+			 * upgrade this server to a pool.
+			 */
+			else {
+				#Redirect to system set-up
+			}
+		}
+		
+		/*
+		 * If this server is the pool server, then we allow it to present the 
+		 * dashboard which allows monitoring of the system and data usage analysis.
+		 * 
+		 * The dashboard should also allow managing clusters, creating buckets, 
+		 * and assigning servers and buckets to clusters.
+		 */
+		#Collect system information, show dashboard
+	}
+	
+	public function test() {
+		
+		$private = $this->settings->read('privkey');
+		$public  = $this->settings->read('pubkey');
+		
+		$source  = 'This is a test';
+		
+		openssl_seal($source, $sealed, $keys, [$public]);
+		openssl_open($sealed, $message, $keys[0], $private);
+		
+		$this->view->set('message', 'Message: '  . $message);
 	}
 }

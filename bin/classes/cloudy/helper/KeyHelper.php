@@ -1,4 +1,4 @@
-<?php
+<?php namespace cloudy\helper;
 
 /* 
  * The MIT License
@@ -24,17 +24,29 @@
  * THE SOFTWARE.
  */
 
-/**
- * This model allows the server to define different settings to be stored in the
- * database so that the values can quickly be retrieved.
- */
-class SettingModel extends \spitfire\Model
+class KeyHelper
 {
 	
+	private $res;
 	
-	public function definitions(\spitfire\storage\database\Schema $schema) {
-		$schema->key   = new StringField(255);
-		$schema->value = new TextField();
+	public function __construct() {
+		
 	}
 
+	public function generate() {
+		/*
+		 * Define the basic settings for the key being generated.
+		 */
+		$settings = openssl_pkey_new(array(
+			'private_key_bits' => 2048,
+			'private_key_type' => OPENSSL_KEYTYPE_RSA
+		));
+		
+		openssl_pkey_export($settings, $private);
+		
+		$details = openssl_pkey_get_details($settings);
+		$public  = $details['key'];
+		
+		return [$private, $public];
+	}
 }
