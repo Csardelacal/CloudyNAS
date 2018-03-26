@@ -16,6 +16,24 @@ use spitfire\storage\database\Schema;
 class ServerModel extends Model
 {
 	
+	/*
+	 * The status constants. These allow the server to determine whether a node
+	 * that requested being added to the network is allowed to participate in 
+	 * the network.
+	 * 
+	 * Please note, that a pool server is the only server inside the network that
+	 * should be permitted adding new servers to the network.
+	 * 
+	 * TODO: The pool server should sign all the servers which are part of the
+	 * network to ensure that no server can manipulate the hive.
+	 * 
+	 * The problem is that the pool server would require the existence of a pool
+	 * specific pair of keys, which the pool servers could share to sign the records.
+	 */
+	const STATUS_REJECTED = 0x000;
+	const STATUS_PENDING  = 0x001;
+	const STATUS_ACCEPTED = 0x002;
+	
 	/**
 	 * 
 	 * @param Schema $schema
@@ -33,8 +51,11 @@ class ServerModel extends Model
 		$schema->role     = new IntegerField(true);
 		$schema->lastSeen = new IntegerField(true);
 		
-		$schema->diskUse  = new FloatField(true);
-		$schema->diskSize = new FloatField(true);
+		$schema->cluster   = new StringField(100);
+		$schema->size      = new FloatField(true);
+		$schema->free      = new FloatField(true);
+		
+		$schema->status    = new IntegerField(true);
 	}
 
 }

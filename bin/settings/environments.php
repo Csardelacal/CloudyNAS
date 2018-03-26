@@ -10,3 +10,4 @@ $e = new Environment('test');
 $e->set('db', 'mysqlpdo://root:@localhost/cloudy');
 
 $e->set('debug_mode', true);
+$e->set('debugging_mode', $e->get('debug_mode'));

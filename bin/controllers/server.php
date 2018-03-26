@@ -1,5 +1,7 @@
 <?php
 
+use cloudy\Role;
+
 /* 
  * The MIT License
  *
@@ -24,11 +26,55 @@
  * THE SOFTWARE.
  */
 
-class ServerController
+class ServerController extends BaseController
 {
 	
 	public function info() {
-		die('OK');
+		
+		/**
+		 * The pool ID is a random string that the pool generates and that the 
+		 * servers maintain to ensure that they belong to the same pool. This is 
+		 * generated once, when the pool is set-up and then never changed.
+		 * 
+		 * If a master or slave receives instructions for a pool that it does not
+		 * belong to, it will ignore these.
+		 */
+		$poolid  = $this->settings->read('poolid');
+		$uniqid  = $this->settings->read('uniqid');
+		$pubkey  = $this->settings->read('pubkey');
+		$cluster = $this->settings->read('cluster');
+		
+		/*
+		 * Generate a server directory. This allows the servers to exchange each 
+		 * other and to create a topology of siblings. These directories are 
+		 * only meant to be kept by pools and masters, slaves are free to be 
+		 * unaware of the topology - reducing load on the network.
+		 */
+		$servers = db()->table('server')->getAll()->fetchAll()->each(function ($e) {
+			return [ 
+				'hostname' => $e->hostname, 
+				'uniqid' => $e->uniqid, 
+				'role' => $e->role, 
+				'size' => $e->size, 
+				'free' => $e->free, 
+				'cluster' => $e->cluster,
+				'updated' => $e->lastSeen]; 
+		});
+		
+		
+		#TODO: Provide info about the buckets the server hosts
+		#TODO: Provide info about the cluster / masters
+		
+		$total = disk_total_space(realpath('./bin/usr/uploads'));
+		$free  = disk_free_space(realpath('./bin/usr/uploads'));
+		
+		$this->view->set('uniqid',   $uniqid);
+		$this->view->set('poolid',   $poolid);
+		$this->view->set('pubkey',   $pubkey);
+		$this->view->set('cluster',  $cluster);
+		$this->view->set('servers',  $servers);
+		$this->view->set('size',     $total);
+		$this->view->set('free',     $free);
 	}
 	
 }

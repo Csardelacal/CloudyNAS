@@ -24,7 +24,7 @@ class HomeController extends BaseController
 			 * to a pool.
 			 */
 			if ($this->settings->read('pool') || Environment::get('pool')) {
-				#Connect to the pool, start receiving tasks
+				#TODO: Connect to the pool, start receiving tasks
 			}
 			
 			/*
@@ -33,7 +33,7 @@ class HomeController extends BaseController
 			 * upgrade this server to a pool.
 			 */
 			else {
-				#Redirect to system set-up
+				#TODO: Redirect to system set-up
 			}
 		}
 		
@@ -44,7 +44,13 @@ class HomeController extends BaseController
 		 * The dashboard should also allow managing clusters, creating buckets, 
 		 * and assigning servers and buckets to clusters.
 		 */
-		#Collect system information, show dashboard
+		#TODO: Collect system information, show dashboard
+	}
+	
+	public function cron() {
+		$cron = new \cron\DiscoveryCron();
+		$cron->run();
+		die();
 	}
 	
 	public function test() {

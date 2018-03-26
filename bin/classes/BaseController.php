@@ -64,6 +64,8 @@ class BaseController extends Controller
 			$this->settings->set('uniqid',  uniqid());
 			$this->settings->set('privkey', $private);
 			$this->settings->set('pubkey',  $public);
+			
+			die($this->settings->read('privkey'));
 		}
 	}
 	

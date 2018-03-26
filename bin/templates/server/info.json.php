@@ -1,6 +1,4 @@
-<?php namespace cloudy\helper;
-
-use spitfire\storage\database\Table;
+<?php
 
 /* 
  * The MIT License
@@ -26,60 +24,14 @@ use spitfire\storage\database\Table;
  * THE SOFTWARE.
  */
 
-/**
- * This class should make it easy and straightforward to access and write the 
- * app's settings.
- * 
- * Data read from this class may be cached throughout the lifespan of the request,
- * if your application relies on the data being fresh from the database it will
- * be required to read it itself.
- * 
- * @author César de la Cal Bretschneider <cesar@magic3w.com>
- */
-class SettingsHelper
-{
-	
-	/**
-	 * This model will be used to read the data from the database.
-	 *
-	 * @var Table
-	 */
-	private $table;
-	
-	/**
-	 * 
-	 * @param Table $table
-	 */
-	public function __construct($table) {
-		$this->table = $table;
-	}
-	
-	/**
-	 * 
-	 * @param string $key
-	 * @return string
-	 */
-	public function read($key) {
-		$query = $this->table->get('key', $key);
-		$res   = $query->fetch();
-		
-		return $res? $res->value : null;
-	}
-	
-	public function set($key, $value) {
-		
-		$query = $this->table->get('key', $key);
-		$model = $query->fetch();
-		
-		if (!$model) {
-			$model = $this->table->newRecord();
-			$model->key = $key;
-		}
-		
-		$model->value = $value;
-		$model->store();
-		
-		return true;
-	}
-	
-}
+echo json_encode([
+	'status'  => 'OK',
+	'payload' => [ 
+		'poolid'   => $poolid, 
+		'uniqid'   => $uniqid, 
+		'pubkey'   => $pubkey, 
+		'cluster'  => $cluster, 
+		'servers'  => $servers->toArray(),
+		'disk'     => [ 'size' => $size, 'free' => $free ]
+	]
+]);
