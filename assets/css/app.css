@@ -1,0 +1,1164 @@
+@charset "UTF-8";
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 02-jun-2015, 21:46:57
+    Author     : cesaradelacalbretschneider
+*/
+* {
+  box-sizing: border-box; }
+
+html {
+  height: 100%; }
+
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background-color: #F3F3F3; }
+
+.wrapper {
+  max-width: 500px;
+  margin: 0 auto; }
+
+.hidden {
+  display: none !important; }
+
+:disabled, .disabled, [disabled] {
+  pointer-events: none;
+  opacity: .5; }
+
+a {
+  color: #555;
+  text-decoration: none; }
+  a:hover {
+    color: #333; }
+
+a img {
+  border: none; }
+
+h1 {
+  font-size: 22px;
+  color: #222; }
+
+form.condensed {
+  margin: 0 auto;
+  	/*
+      * Textareas do have specific styles, including smaller text to make them more
+      * useful for users typing in bigger segments of text
+  	 */ }
+  form.condensed .field {
+    margin: 0; }
+  form.condensed label {
+    display: none; }
+  form.condensed input,
+  form.condensed textarea {
+    /*
+     * These remove the annoyng styles from the iOS layout that will style
+     * input for you.
+     */
+    -webkit-appearance: none;
+    -moz-appearance: none; }
+  form.condensed input[type="email"],
+  form.condensed input[type="password"],
+  form.condensed input[type="text"],
+  form.condensed textarea {
+    border: none;
+    border-top: none;
+    border-bottom: none;
+    border-radius: 0;
+    margin: 0;
+    font-size: 17px;
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    /*Make the splitter lines. We don't use border to avoid them invading the border */
+    background-image: linear-gradient(180deg, #DDD 1px, #FFF 1px); }
+  form.condensed textarea {
+    font-size: .9em;
+    height: 8em; }
+  form.condensed .field:first-child input[type="email"],
+  form.condensed .field:first-child input[type="text"],
+  form.condensed .field:first-child input[type="password"],
+  form.condensed .field:first-child textarea {
+    border-top: solid 1px #999;
+    background-image: linear-gradient(180deg, #ccc 0%, #fff 8%); }
+  form.condensed input[type="submit"] {
+    border: solid 1px #529EBB;
+    border-top: none;
+    font-family: sans-serif;
+    background-color: #25A9F8;
+    color: #FFF;
+    margin: 0;
+    font-size: 20px;
+    width: 100%;
+    padding: 10px;
+    cursor: pointer;
+    box-sizing: border-box;
+    background-image: linear-gradient(0deg, #0571B1 0%, #25A9F8 6%); }
+    form.condensed input[type="submit"]:disabled {
+      color: #b3b3b3;
+      background: #045280 !important;
+      cursor: not-allowed; }
+  form.condensed .message {
+    position: relative;
+    padding: 10px 10px;
+    font-size: 13px;
+    border-width: 0 1px;
+    border-style: solid; }
+    form.condensed .message.success {
+      border-color: #3C7619;
+      background: #84D950;
+      color: #3C7619; }
+      form.condensed .message.success:after {
+        border-color: transparent transparent #84D950 transparent; }
+    form.condensed .message.error {
+      border-color: #590C0E;
+      background: #F2B5B7;
+      color: #490C0E; }
+      form.condensed .message.error:after {
+        border-color: transparent transparent #F2B5B7 transparent; }
+    form.condensed .message:after {
+      position: absolute;
+      bottom: 100%;
+      right: 20px;
+      display: block;
+      width: 0;
+      height: 0;
+      content: '';
+      border-style: none solid solid solid;
+      border-color: transparent transparent #CCC transparent;
+      border-width: 7px; }
+  form.condensed .description {
+    background: #FFF;
+    padding: 10px;
+    color: #333;
+    font-size: 13px; }
+  form.condensed.standalone {
+    max-width: 350px;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.7); }
+    form.condensed.standalone input:first-child,
+    form.condensed.standalone input:last-child {
+      background-image: none;
+      border-top: none; }
+    form.condensed.standalone input[type="submit"] {
+      transition: background-color .5s ease, background-size .5s ease;
+      background-size: 0 0;
+      background-repeat: no-repeat;
+      background-position: 50% 50%; }
+      form.condensed.standalone input[type="submit"]:hover {
+        background-color: #1599E8; }
+      form.condensed.standalone input[type="submit"]:active {
+        background-color: #35B9F8; }
+    form.condensed.standalone .message {
+      border-left: none;
+      border-right: none; }
+
+form.regular .field {
+  display: block;
+  margin-bottom: 15px;
+  box-sizing: border-box; }
+  form.regular .field label {
+    display: block;
+    font-size: .9em;
+    color: #555;
+    width: 100%; }
+  form.regular .field input[type=text],
+  form.regular .field input[type=email],
+  form.regular .field input[type=password],
+  form.regular .field textarea,
+  form.regular .field select {
+    width: 100%;
+    padding: 5px 10px;
+    font-size: 1.05em;
+    background: #FFF;
+    border: solid 1px #EEE;
+    box-sizing: border-box;
+    height: 2em;
+    box-shadow: 0 0 1px rgba(0, 0, 0, 0.2); }
+    form.regular .field input[type=text]:focus,
+    form.regular .field input[type=email]:focus,
+    form.regular .field input[type=password]:focus,
+    form.regular .field textarea:focus,
+    form.regular .field select:focus {
+      outline: none; }
+  form.regular .field textarea {
+    height: 150px; }
+form.regular .form-footer {
+  padding-top: 15px;
+  padding-right: 10px;
+  margin-top: 15px;
+  text-align: right; }
+form.regular input[type="submit"] {
+  margin-left: 5%;
+  font-family: sans-serif; }
+
+.material-form input[type="text"], .material-form .fake-field, .material-form .fake-field-ph {
+  display: inline-block;
+  padding: 3px 6px;
+  max-width: 95%;
+  overflow: hidden;
+  text-overflow: ellipsis; }
+.material-form .fake-field-ph {
+  border: 1px solid transparent; }
+.material-form input[type="text"], .material-form .fake-field {
+  border: 1px solid grey;
+  background: #fff;
+  font-size: 16px;
+  font-family: inherit;
+  vertical-align: baseline; }
+.material-form .fake-field {
+  user-select: all; }
+
+.no-selection {
+  user-select: none; }
+
+.button, form.regular input[type="submit"] {
+  background: #3191f1;
+  box-shadow: -2px -2px 1px #3167f1 inset;
+  border: none;
+  border-radius: 3px;
+  color: #ffffff;
+  font-weight: bold;
+  padding: .5em .7em;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block; }
+  .button:disabled, form.regular input[type="submit"]:disabled {
+    background-color: #094580;
+    box-shadow: -2px -2px 1px #092a80 inset;
+    cursor: not-allowed; }
+  .button.error, form.regular input.error[type="submit"] {
+    background: #f13131;
+    box-shadow: -2px -2px 1px #803709 inset; }
+  .button.success, form.regular input.success[type="submit"] {
+    background: #0cb027;
+    box-shadow: -2px -2px 1px #055116 inset; }
+  .button.small, form.regular input.small[type="submit"] {
+    padding: .35em .5em;
+    font-size: .8em; }
+  .button:hover, form.regular input[type="submit"]:hover {
+    color: #FFF; }
+
+h1 {
+  color: #282828;
+  margin: 3px 0; }
+
+h2 {
+  color: #353535;
+  font-size: 18px; }
+
+p {
+  color: #555;
+  line-height: 1.6em; }
+
+small {
+  color: #777; }
+
+blockquote {
+  margin-left: 0;
+  padding: 15px 5px 15px 15px;
+  border-left: solid 3px #AAA;
+  background: #F9F9F9;
+  color: #555;
+  font-size: .9em; }
+
+table {
+  width: 100%;
+  border: solid 1px #EEE;
+  border-radius: 3px;
+  border-collapse: collapse;
+  font-size: .85em; }
+  table thead tr {
+    background: #E4E4E4; }
+  table tr {
+    background: #FFF;
+    border-top: solid 1px #DDD; }
+  table tr:first-child {
+    border-top: none; }
+  table tr:nth-child(2n) {
+    background: #F5F5F5; }
+  table td, table th {
+    margin: 0;
+    padding: 8px 20px; }
+
+.menubar {
+  background: #FEFEFE;
+  vertical-align: top;
+  text-align: right;
+  box-shadow: 0 2px 2px #DDD;
+  border-bottom: solid 1px #CCC;
+  z-index: 5; }
+  .menubar a {
+    display: inline-block;
+    text-decoration: none;
+    color: #333;
+    padding: 10px 15px;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box; }
+  .menubar a:hover {
+    text-shadow: 0 0 4px #DDD; }
+  .menubar .logo {
+    display: inline-block;
+    float: left;
+    border: none; }
+
+.badge {
+  width: 100%;
+  padding: .5em;
+  box-shadow: -2px 2px 2px #EAEAEA inset;
+  background: #FAFAFA;
+  border: solid 1px #CCC;
+  display: block;
+  border-radius: 3px; }
+
+footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #FFF;
+  color: #555;
+  text-align: center;
+  padding: 20px;
+  line-height: 20px;
+  font-size: 12px;
+  border-top: solid 1px #999; }
+
+.material {
+  background: #FFF;
+  box-shadow: 1px 1px 1px #DDD;
+  border-radius: 2px;
+  border: solid 1px #CCC;
+  padding: 20px 15px 15px; }
+  .material.unpadded {
+    padding: 0; }
+  .material .padded {
+    padding: 20px 15px 15px; }
+
+.login-logo {
+  text-align: center; }
+  .login-logo img {
+    max-width: 500px; }
+
+.user-icon {
+  border-radius: 50%;
+  display: inline-block;
+  vertical-align: middle;
+  border: solid 2px #FFF; }
+  .user-icon.extra-small {
+    width: 24px;
+    height: 24px; }
+  .user-icon.small {
+    width: 32px;
+    height: 32px; }
+  .user-icon.medium {
+    width: 64px;
+    height: 64px; }
+  .user-icon.big {
+    width: 128px;
+    height: 128px; }
+  .user-icon.full-width {
+    max-width: 100%; }
+  .user-icon.square {
+    border-radius: 10px; }
+
+.user-name {
+  vertical-align: middle;
+  display: inline-block;
+  font-size: 1.2em;
+  color: #333; }
+
+.edit {
+  display: inline-block;
+  margin-left: 5px;
+  opacity: .7; }
+  .edit:hover {
+    opacity: 1; }
+  .edit img {
+    height: 15px; }
+
+.validation-errors {
+  color: #900;
+  list-style: none;
+  font-size: .9em;
+  margin: 10px 0;
+  padding: 0; }
+  .validation-errors li {
+    border-left: solid 2px #900;
+    padding-left: 10px;
+    margin-top: 8px; }
+  .validation-errors .error-message {
+    font-weight: bold;
+    display: block; }
+  .validation-errors .extended-message {
+    font-size: .9em; }
+
+.payment-provider input[type=radio] {
+  display: none; }
+.payment-provider img {
+  border: solid 2px #CCC;
+  border-radius: 5px;
+  max-width: 100%; }
+.payment-provider input[type=radio]:checked + img {
+  border: solid 2px #55C; }
+
+@media all and (min-width: 960px) {
+  /*
+  This are the functions (mixins) used to generate the basic scaffolding for our
+  website. Due to the inverted functionality of the grid we rewrote big parts to 
+  make them more usable.
+  */
+  /* 
+      Created on : Oct 26, 2013, 7:18:16 PM
+      Author     : cesar
+  */
+  div[class^="span"] {
+    display: inline-block;
+    vertical-align: top;
+    overflow-x: hidden;
+    margin-left: 2.08333%;
+    min-height: 1px;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box; }
+    div[class^="span"]:first-child {
+      margin-left: 1.04167%; }
+
+  div[class^="row"] {
+    display: block;
+    margin: 0 auto;
+    width: 960px; }
+    div[class^="row"].fluid {
+      width: 100%; }
+
+  /**
+   * This function creates fractions. It takes two parameters (the current row's fragmentation
+   * and the most fragmented row's) and calculates the different percentual widths.
+   * 
+   * For the parameters 3 and 10 it will create the following
+   * - %span-fr-1-3 -> 33% width
+   * - %span-fr-2-6 -> @extends %span-fr-1-3
+   * - %span-fr-3-9 -> @extends %span-fr-1-3
+   * - %span-fr-2-3 -> 66% width
+   * - %span-fr-4-6 -> @extends %span-fr-2-3
+   * - %span-fr-8-9 -> @extends %span-fr-2-3
+   * [...]
+   */
+  div.row2 > div.span2, div.row3 > div.span3, div.row4 > div.span4, div.row5 > div.span5, div.row6 > div.span6, div.row7 > div.span7, div.row8 > div.span8, div.row9 > div.span9, div.row10 > div.span10, div.row1 > div.span1, div.row1 > div.span {
+    width: 97.91667%; }
+
+  div.row4 > div.span2, div.row6 > div.span3, div.row8 > div.span4, div.row10 > div.span5, div.row2 > div.span1, div.row2 > div.span {
+    width: 47.91667%; }
+
+  div.row6 > div.span2, div.row9 > div.span3, div.row3 > div.span1, div.row3 > div.span {
+    width: 31.25%; }
+
+  div.row6 > div.span4, div.row9 > div.span6, div.row3 > div.span2 {
+    width: 64.58333%; }
+
+  div.row8 > div.span2, div.row4 > div.span1, div.row4 > div.span {
+    width: 22.91667%; }
+
+  div.row8 > div.span6, div.row4 > div.span3 {
+    width: 72.91667%; }
+
+  div.row10 > div.span2, div.row5 > div.span1, div.row5 > div.span {
+    width: 17.91667%; }
+
+  div.row10 > div.span4, div.row5 > div.span2 {
+    width: 37.91667%; }
+
+  div.row10 > div.span6, div.row5 > div.span3 {
+    width: 57.91667%; }
+
+  div.row10 > div.span8, div.row5 > div.span4 {
+    width: 77.91667%; }
+
+  div.row6 > div.span1, div.row6 > div.span {
+    width: 14.58333%; }
+
+  div.row6 > div.span5 {
+    width: 81.25%; }
+
+  div.row7 > div.span1, div.row7 > div.span {
+    width: 12.20238%; }
+
+  div.row7 > div.span2 {
+    width: 26.4881%; }
+
+  div.row7 > div.span3 {
+    width: 40.77381%; }
+
+  div.row7 > div.span4 {
+    width: 55.05952%; }
+
+  div.row7 > div.span5 {
+    width: 69.34524%; }
+
+  div.row7 > div.span6 {
+    width: 83.63095%; }
+
+  div.row8 > div.span1, div.row8 > div.span {
+    width: 10.41667%; }
+
+  div.row8 > div.span3 {
+    width: 35.41667%; }
+
+  div.row8 > div.span5 {
+    width: 60.41667%; }
+
+  div.row8 > div.span7 {
+    width: 85.41667%; }
+
+  div.row9 > div.span1, div.row9 > div.span {
+    width: 9.02778%; }
+
+  div.row9 > div.span2 {
+    width: 20.13889%; }
+
+  div.row9 > div.span4 {
+    width: 42.36111%; }
+
+  div.row9 > div.span5 {
+    width: 53.47222%; }
+
+  div.row9 > div.span7 {
+    width: 75.69444%; }
+
+  div.row9 > div.span8 {
+    width: 86.80556%; }
+
+  div.row10 > div.span1, div.row10 > div.span {
+    width: 7.91667%; }
+
+  div.row10 > div.span3 {
+    width: 27.91667%; }
+
+  div.row10 > div.span7 {
+    width: 67.91667%; }
+
+  div.row10 > div.span9 {
+    width: 87.91667%; }
+
+  .mobile-only {
+    display: none !important; } }
+@media all and (max-width: 960px) {
+  /*
+  This are the functions (mixins) used to generate the basic scaffolding for our
+  website. Due to the inverted functionality of the grid we rewrote big parts to 
+  make them more usable.
+  */
+  /* 
+      Created on : Oct 26, 2013, 7:18:16 PM
+      Author     : cesar
+  */
+  div[class^="span"] {
+    float: left;
+    margin-left: 1.04167%;
+    min-height: 1px;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    padding: 3px; }
+    div[class^="span"] img {
+      max-width: 100%; }
+
+  div.row, div.row1, div.row2, div.row3, div.row4, div.row5, div.row6, div.row7, div.row8, div.row9, div.row10 {
+    display: block;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box; }
+    div.row:after, div.row1:after, div.row2:after, div.row3:after, div.row4:after, div.row5:after, div.row6:after, div.row7:after, div.row8:after, div.row9:after, div.row10:after {
+      content: "";
+      display: table;
+      clear: both; }
+
+  div.row1 > div.span1 {
+    width: 95.83333%; }
+  div.row1 > div.span {
+    width: 95.83333%; }
+
+  div.row2 > div.span1 {
+    width: 95.83333%; }
+  div.row2 > div.span {
+    width: 95.83333%; }
+  div.row2 > div.span2 {
+    width: 95.83333%; }
+
+  div.row3 > div.span1 {
+    width: 95.83333%; }
+  div.row3 > div.span {
+    width: 95.83333%; }
+  div.row3 > div.span2 {
+    width: 95.83333%; }
+  div.row3 > div.span3 {
+    width: 95.83333%; }
+
+  div.row4 > div.span1 {
+    width: 95.83333%; }
+  div.row4 > div.span {
+    width: 95.83333%; }
+  div.row4 > div.span2 {
+    width: 95.83333%; }
+  div.row4 > div.span3 {
+    width: 95.83333%; }
+  div.row4 > div.span4 {
+    width: 95.83333%; }
+
+  div.row5 > div.span1 {
+    width: 95.83333%; }
+  div.row5 > div.span {
+    width: 95.83333%; }
+  div.row5 > div.span2 {
+    width: 95.83333%; }
+  div.row5 > div.span3 {
+    width: 95.83333%; }
+  div.row5 > div.span4 {
+    width: 95.83333%; }
+  div.row5 > div.span5 {
+    width: 95.83333%; }
+
+  div.row6 > div.span1 {
+    width: 95.83333%; }
+  div.row6 > div.span {
+    width: 95.83333%; }
+  div.row6 > div.span2 {
+    width: 95.83333%; }
+  div.row6 > div.span3 {
+    width: 95.83333%; }
+  div.row6 > div.span4 {
+    width: 95.83333%; }
+  div.row6 > div.span5 {
+    width: 95.83333%; }
+  div.row6 > div.span6 {
+    width: 95.83333%; }
+
+  div.row7 > div.span1 {
+    width: 95.83333%; }
+  div.row7 > div.span {
+    width: 95.83333%; }
+  div.row7 > div.span2 {
+    width: 95.83333%; }
+  div.row7 > div.span3 {
+    width: 95.83333%; }
+  div.row7 > div.span4 {
+    width: 95.83333%; }
+  div.row7 > div.span5 {
+    width: 95.83333%; }
+  div.row7 > div.span6 {
+    width: 95.83333%; }
+  div.row7 > div.span7 {
+    width: 95.83333%; }
+
+  div.row8 > div.span1 {
+    width: 95.83333%; }
+  div.row8 > div.span {
+    width: 95.83333%; }
+  div.row8 > div.span2 {
+    width: 95.83333%; }
+  div.row8 > div.span3 {
+    width: 95.83333%; }
+  div.row8 > div.span4 {
+    width: 95.83333%; }
+  div.row8 > div.span5 {
+    width: 95.83333%; }
+  div.row8 > div.span6 {
+    width: 95.83333%; }
+  div.row8 > div.span7 {
+    width: 95.83333%; }
+  div.row8 > div.span8 {
+    width: 95.83333%; }
+
+  div.row9 > div.span1 {
+    width: 95.83333%; }
+  div.row9 > div.span {
+    width: 95.83333%; }
+  div.row9 > div.span2 {
+    width: 95.83333%; }
+  div.row9 > div.span3 {
+    width: 95.83333%; }
+  div.row9 > div.span4 {
+    width: 95.83333%; }
+  div.row9 > div.span5 {
+    width: 95.83333%; }
+  div.row9 > div.span6 {
+    width: 95.83333%; }
+  div.row9 > div.span7 {
+    width: 95.83333%; }
+  div.row9 > div.span8 {
+    width: 95.83333%; }
+  div.row9 > div.span9 {
+    width: 95.83333%; }
+
+  div.row10 > div.span1 {
+    width: 95.83333%; }
+  div.row10 > div.span {
+    width: 95.83333%; }
+  div.row10 > div.span2 {
+    width: 95.83333%; }
+  div.row10 > div.span3 {
+    width: 95.83333%; }
+  div.row10 > div.span4 {
+    width: 95.83333%; }
+  div.row10 > div.span5 {
+    width: 95.83333%; }
+  div.row10 > div.span6 {
+    width: 95.83333%; }
+  div.row10 > div.span7 {
+    width: 95.83333%; }
+  div.row10 > div.span8 {
+    width: 95.83333%; }
+  div.row10 > div.span9 {
+    width: 95.83333%; }
+  div.row10 > div.span10 {
+    width: 95.83333%; }
+
+  .desktop-only {
+    display: none !important; } }
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Oct 10, 2017, 11:59:43 AM
+    Author     : César de la Cal Bretschneider <cesar@magic3w.com>
+*/
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Oct 10, 2017, 11:59:49 AM
+    Author     : César de la Cal Bretschneider <cesar@magic3w.com>
+*/
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Oct 10, 2017, 11:58:05 AM
+    Author     : César de la Cal Bretschneider <cesar@magic3w.com>
+*/
+input[type=checkbox].styled {
+  display: none; }
+  input[type=checkbox].styled + span.toggle {
+    display: inline-block;
+    position: relative;
+    width: 2em;
+    height: .7em;
+    background-color: #DDD;
+    border-radius: 5px;
+    vertical-align: middle;
+    margin: 0 .3em;
+    transition: background-color .3s linear; }
+    input[type=checkbox].styled + span.toggle:before {
+      display: block;
+      position: absolute;
+      top: -.15em;
+      left: 0;
+      height: .9em;
+      width: .9em;
+      border-radius: 50%;
+      background: #FFF;
+      border: solid 1px #777;
+      content: '';
+      transition: left .3s ease; }
+  input[type=checkbox].styled:checked + span.toggle {
+    background-color: #a1d49d; }
+    input[type=checkbox].styled:checked + span.toggle:before {
+      left: 60%; }
+
+/*
+The MIT License
+
+Copyright 2018 César de la Cal Bretschneider <cesar@magic3w.com>.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+/*
+    Created on : 21.03.2018, 15:18:50
+    Author     : César de la Cal Bretschneider <cesar@magic3w.com>
+*/
+.has-dropdown {
+  position: relative; }
+
+.dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: -20px;
+  width: 100%;
+  min-width: 300px;
+  margin-top: 20px;
+  background: #FFF;
+  border: solid 1px #CCC;
+  border-radius: 3px;
+  padding: 5px;
+  z-index: 99999999999;
+  padding: 10px; }
+  .dropdown:before, .dropdown:after {
+    content: '';
+    height: 10px;
+    width: 10px;
+    display: block;
+    position: absolute;
+    bottom: 100%; }
+  .dropdown:before {
+    left: 20px;
+    background-image: linear-gradient(-225deg, transparent 7px, #CCC 7px, #CCC 8px, #FFF 9px); }
+  .dropdown:after {
+    left: 30px;
+    background-image: linear-gradient(225deg, transparent 7px, #CCC 7px, #CCC 8px, #FFF 9px); }
+  .dropdown.right-bound {
+    right: -20px;
+    left: auto; }
+    .dropdown.right-bound:before {
+      left: auto;
+      right: 30px; }
+    .dropdown.right-bound:after {
+      left: auto;
+      right: 20px; }
+
+/*
+The MIT License
+
+Copyright 2018 César de la Cal Bretschneider <cesar@magic3w.com>.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+/*
+    Created on : 21.03.2018, 14:52:40
+    Author     : César de la Cal Bretschneider <cesar@magic3w.com>
+*/
+.app-switcher.toggle {
+  vertical-align: middle;
+  background-color: #777;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  background-image: linear-gradient(0deg, transparent 0px, transparent 5px, #EAEAEA 5px, #EAEAEA 7.5px, transparent 7.5px, transparent 12.5px, #EAEAEA 12.5px, #EAEAEA 15px, transparent 15px, transparent 20px), linear-gradient(90deg, transparent 0px, transparent 5px, #EAEAEA 5px, #EAEAEA 7.5px, transparent 7.5px, transparent 12.5px, #EAEAEA 12.5px, #EAEAEA 15px, transparent 15px, transparent 20px); }
+
+.app-drawer .app-entry {
+  padding: 10px;
+  border-radius: 3px;
+  border: solid 1px transparent;
+  background-color: transparent;
+  display: inline-block;
+  transition: border .15s ease-in, background-color .15s ease-in; }
+  .app-drawer .app-entry:hover {
+    background-color: #EAEAEA;
+    border: solid 1px #BBB;
+    box-shadow: 1px 1px 3px #DDD inset; }
+.app-drawer .app-icon {
+  margin: 0 auto;
+  width: 80%;
+  height: auto;
+  display: block; }
+.app-drawer .app-name {
+  text-align: center;
+  display: block;
+  font-size: .75em;
+  color: #777;
+  margin-top: .4em;
+  line-height: 1.2em; }
+
+.navbar {
+  background: #EEE;
+  box-shadow: 0 2px 2px #DDD;
+  border-bottom: 1px solid #CCC;
+  display: table;
+  width: 100%;
+  z-index: 5; }
+  .navbar .left,
+  .navbar .right {
+    display: table-cell;
+    padding: 15px 10px; }
+  .navbar .right {
+    text-align: right; }
+  .navbar a {
+    text-decoration: none;
+    color: #444;
+    font-weight: bold;
+    display: inline-block;
+    padding: 0 10px; }
+  .navbar .logo {
+    display: inline-block;
+    float: left;
+    border: none; }
+    .navbar .logo > * {
+      vertical-align: middle; }
+    .navbar .logo img {
+      height: 20px;
+      margin-right: 5px; }
+
+.admin-navigation {
+  background: #222;
+  color: #FFF;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); }
+  .admin-navigation .menu-item {
+    background: #222;
+    color: #FFF;
+    padding: 10px;
+    width: 100%;
+    display: inline-block; }
+    .admin-navigation .menu-item:hover {
+      background: #FFF;
+      color: #222; }
+
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Apr 17, 2016, 1:23:34 AM
+    Author     : cesar
+*/
+ul.pagination {
+  list-style: none;
+  text-align: center; }
+  ul.pagination li {
+    display: inline-block;
+    border: solid 1px #86b8e3;
+    border-left: none;
+    padding: 5px 12px; }
+    ul.pagination li:first-child {
+      border-left: solid 1px #86b8e3;
+      border-radius: 3px 0 0 3px; }
+    ul.pagination li:last-child {
+      border-radius: 0 3px 3px 0; }
+    ul.pagination li.disabled, ul.pagination li.disabled a {
+      color: #999; }
+    ul.pagination li.current, ul.pagination li.current a {
+      background: #25A9F8;
+      color: #FFF; }
+
+.separator {
+  border-top: solid 1px #CCC;
+  margin: 10px 0; }
+  .separator.large {
+    margin: 20px 0; }
+  .separator.light {
+    border-top: solid 1px #DDD; }
+
+.editable-property {
+  display: block; }
+  .editable-property > * {
+    vertical-align: top; }
+  .editable-property.mid-aligned > * {
+    vertical-align: middle; }
+  .editable-property .property-name {
+    display: inline-block;
+    width: 33%; }
+  .editable-property .property-value {
+    display: inline-block;
+    width: 50%; }
+  .editable-property .edit-link {
+    display: inline-block;
+    width: 17%; }
+    .editable-property .edit-link .cancel {
+      color: #a00; }
+
+.message {
+  padding: 10px 10px;
+  font-size: 13px;
+  border-color: #777;
+  border-width: 3px;
+  border-style: none none none solid;
+  border-radius: 2px; }
+  .message a {
+    font-weight: bold;
+    color: inherit; }
+  .message.success {
+    border-color: #3C7619;
+    background: #84D950;
+    color: #3C7619; }
+  .message.error {
+    border-color: #8c1013;
+    background: #F2B5B7;
+    color: #490C0E; }
+
+/*
+Contains the code needed to create a tabbed area to ease filtered navigation.
+*/
+/* 
+    Created on : May 3, 2016, 11:55:02 AM
+    Author     : cesar
+*/
+.tabs {
+  border-bottom: solid 1px #999; }
+  .tabs.centered {
+    text-align: center; }
+  .tabs .tab {
+    color: #242424;
+    padding: 5px 15px;
+    display: inline-block; }
+    .tabs .tab.active {
+      border-bottom: solid 3px #333; }
+
+#icon-upload-wrap {
+  position: relative;
+  width: 128px;
+  height: 128px;
+  border: 2px dashed rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+  background: url("../img/upload.svg") no-repeat center center;
+  background-size: 64px 64px; }
+  #icon-upload-wrap > input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: inherit;
+    height: inherit;
+    opacity: 0; }
+  #icon-upload-wrap.uploading {
+    background: none; }
+    #icon-upload-wrap.uploading:before {
+      content: '';
+      display: block;
+      width: 48px;
+      height: 48px;
+      margin: 40px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      border-radius: 50%;
+      border: 6px solid rgba(0, 0, 0, 0.3);
+      border-left-color: black;
+      box-sizing: border-box;
+      animation: spin .6s linear infinite; }
+  #icon-upload-wrap.uploaded {
+    background: no-repeat center center;
+    background-size: cover; }
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg); }
+  to {
+    transform: rotate(360deg); } }
+.dials {
+  border-left: solid 1px #CCC;
+  font-size: .8em; }
+  .dials ul {
+    margin: 2px;
+    padding-left: 10px;
+    list-style-type: none; }
+  .dials a {
+    display: inline-block;
+    padding: 2px; }
+  .dials a:hover {
+    background: #EEE; }
+
+@media all and (max-width: 960px) {
+  .has-dials {
+    position: relative; }
+
+  .dial-toggle {
+    padding: 20px;
+    position: absolute;
+    top: 0;
+    right: 10px; }
+    .dial-toggle .dots,
+    .dial-toggle .dots:before,
+    .dial-toggle .dots:after {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: #AAA;
+      width: 4px;
+      height: 4px; }
+    .dial-toggle .dots:before {
+      content: '';
+      top: 7px;
+      right: 0; }
+    .dial-toggle .dots:after {
+      content: '';
+      top: 14px;
+      right: 0; }
+
+  .dials {
+    border: solid 1px #CCC;
+    background: #FFF;
+    position: absolute;
+    top: 0;
+    right: 20px;
+    width: 200px !important;
+    display: none;
+    box-shadow: 0 0 3px #CCC; }
+    .dials a {
+      padding: 5px 20px;
+      color: #555;
+      font-weight: bold; } }
+.styled-select {
+  text-align: left;
+  background: none;
+  border: none;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  display: inline-block;
+  box-sizing: border-box;
+  border: solid 1px #CCC;
+  border-radius: 3px;
+  background: #F8F8F8;
+  background-repeat: no-repeat;
+  background-position: right 3px center;
+  background-size: 15px 15px;
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6MUYyOTM3NjU0ODJBMTFFNkJCQ0VBNkJGMjRDOUE2ODgiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MUYyOTM3NjY0ODJBMTFFNkJCQ0VBNkJGMjRDOUE2ODgiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDoxRjI5Mzc2MzQ4MkExMUU2QkJDRUE2QkYyNEM5QTY4OCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDoxRjI5Mzc2NDQ4MkExMUU2QkJDRUE2QkYyNEM5QTY4OCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PiVf3ucAAAFnSURBVHja7Ji9CsIwEMfbwzfSt3DokwhOguDqKnTtKrhKQcEH8AF8AFfBqVOhUCg1gQhV8nXJpTrk4Iba3PnrNXf5a9r3ffLPlkbACBgBkYBlWf4UKMuyj+sJcf6pR+yT+eP7QxXgifl8xMJ1zGcyQFAELJm3IwLumd9kN1SAd+a7keBq5hvVTdAEbmUlD2Da7wHDk60Cw3GwXLcADAkOzK8BAXkBGh9AbgvRZdR2FQVIfAF5dxUBANc2i8AyGe+yihDOeuvYAla6UYC0BtN8gEhcqIYp0nLM+MIAdqJhfMfKFhMAITrPsJfrkIDv2VU7xN3EmZuEBkS/Jp95Co6vaicEha0dXU8kV8BWSDLbtc5nOnhs+LNw6mqTAdoI28pxv5IBmoTtxrHjyQB1gpNEZFAAqoTtmkKmUQDK1AlvngtFYirA4SDGjCCjUf5wH+65+z8CJoSaMRhgRQ0Y/36LgBHQYC8BBgCdj3B0L5oNGwAAAABJRU5ErkJggg=="); }
+  .styled-select select {
+    text-align: inherit;
+    background: none;
+    border: none;
+    width: 100%;
+    width: calc(100% + 20px);
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding: 3px 40px 3px 5px;
+    outline: none; }
+  .styled-select option {
+    padding: 3px;
+    border: none; }
+
+/*# sourceMappingURL=app.css.map */

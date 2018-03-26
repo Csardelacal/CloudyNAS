@@ -33,7 +33,7 @@ class HomeController extends BaseController
 			 * upgrade this server to a pool.
 			 */
 			else {
-				#TODO: Redirect to system set-up
+				return $this->response->setBody('Redirection...')>getHeaders()->redirect(url('setup'));
 			}
 		}
 		
