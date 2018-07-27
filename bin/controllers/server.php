@@ -39,10 +39,13 @@ class ServerController extends BaseController
 		 * If a master or slave receives instructions for a pool that it does not
 		 * belong to, it will ignore these.
 		 */
-		$poolid  = $this->settings->read('poolid');
-		$uniqid  = $this->settings->read('uniqid');
-		$pubkey  = $this->settings->read('pubkey');
-		$cluster = $this->settings->read('cluster');
+		$poolid   = $this->settings->read('poolid');
+		$uniqid   = $this->settings->read('uniqid');
+		$pubkey   = $this->settings->read('pubkey');
+		$cluster  = $this->settings->read('cluster');
+		
+		$active   = $this->settings->read('active');
+		$disabled = $this->settings->read('disabled');
 		
 		/*
 		 * Generate a server directory. This allows the servers to exchange each 
@@ -64,15 +67,22 @@ class ServerController extends BaseController
 		
 		#TODO: Provide info about the buckets the server hosts
 		#TODO: Provide info about the cluster / masters
+		$dir = storage()->get(\spitfire\core\Environment::get('uploads.directory'));
 		
-		$total = disk_total_space(realpath('./bin/usr/uploads'));
-		$free  = disk_free_space(realpath('./bin/usr/uploads'));
+		if (!$dir->exists()) {
+			$dir->create();
+		}
+		
+		$total = disk_total_space($dir->getPath());
+		$free  = disk_free_space($dir->getPath());
 		
 		$this->view->set('uniqid',   $uniqid);
 		$this->view->set('poolid',   $poolid);
 		$this->view->set('pubkey',   $pubkey);
 		$this->view->set('cluster',  $cluster);
 		$this->view->set('servers',  $servers);
+		$this->view->set('active',   $active);
+		$this->view->set('disabled', $disabled);
 		$this->view->set('size',     $total);
 		$this->view->set('free',     $free);
 	}

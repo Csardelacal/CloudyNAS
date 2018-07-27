@@ -1,4 +1,6 @@
-<?php
+<?php namespace auth;
+
+use spitfire\exceptions\PrivateException;
 
 /* 
  * The MIT License
@@ -24,16 +26,17 @@
  * THE SOFTWARE.
  */
 
-echo json_encode([
-	'status'  => 'OK',
-	'payload' => [ 
-		'poolid'   => $poolid, 
-		'uniqid'   => $uniqid, 
-		'pubkey'   => $pubkey, 
-		'cluster'  => $cluster, 
-		'active'   => $active,
-		'disabled' => $disabled,
-		'disk'     => [ 'size' => $size, 'free' => $free ],
-		'servers'  => $servers->toArray()
-	]
-]);
+class JSON
+{
+	
+	public static function decode($string) {
+		
+		$data = json_decode($string);
+
+		if (json_last_error() !== JSON_ERROR_NONE) { 
+			throw new PrivateException('Invalid JSON - ' . json_last_error_msg(), 1806251459); 
+		}
+		
+		return $data;
+	}
+}

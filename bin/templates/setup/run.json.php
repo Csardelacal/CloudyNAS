@@ -25,15 +25,7 @@
  */
 
 echo json_encode([
-	'status'  => 'OK',
-	'payload' => [ 
-		'poolid'   => $poolid, 
-		'uniqid'   => $uniqid, 
-		'pubkey'   => $pubkey, 
-		'cluster'  => $cluster, 
-		'active'   => $active,
-		'disabled' => $disabled,
-		'disk'     => [ 'size' => $size, 'free' => $free ],
-		'servers'  => $servers->toArray()
-	]
+	'status' => 'success',
+	'uniqid' => $uniqid,
+	'pubkey' => $pubkey
 ]);

@@ -1,4 +1,4 @@
-<?php
+<?php namespace cloudy\task;
 
 /* 
  * The MIT License
@@ -24,16 +24,36 @@
  * THE SOFTWARE.
  */
 
-echo json_encode([
-	'status'  => 'OK',
-	'payload' => [ 
-		'poolid'   => $poolid, 
-		'uniqid'   => $uniqid, 
-		'pubkey'   => $pubkey, 
-		'cluster'  => $cluster, 
-		'active'   => $active,
-		'disabled' => $disabled,
-		'disk'     => [ 'size' => $size, 'free' => $free ],
-		'servers'  => $servers->toArray()
-	]
-]);
+class RoleSetTask extends Task
+{
+	
+	private $role;
+	
+	public function execute($db) {
+		$setting = $db->table('setting')->get('key', 'role')->first();
+		$setting->value = $this->role;
+		$setting->store();
+		$this->done();
+	}
+
+	public function load($settings) {
+		$this->role = $settings;
+	}
+
+	public function name() {
+		return 'server.role.set';
+	}
+
+	public function save() {
+		return $this->role;
+	}
+
+	public function version() {
+		return 1;
+	}
+	
+	public function accessLevel() {
+		return \cloudy\Role::ROLE_POOL;
+	}
+
+}

@@ -1,4 +1,4 @@
-<?php
+<?php namespace cloudy\task;
 
 /* 
  * The MIT License
@@ -24,16 +24,42 @@
  * THE SOFTWARE.
  */
 
-echo json_encode([
-	'status'  => 'OK',
-	'payload' => [ 
-		'poolid'   => $poolid, 
-		'uniqid'   => $uniqid, 
-		'pubkey'   => $pubkey, 
-		'cluster'  => $cluster, 
-		'active'   => $active,
-		'disabled' => $disabled,
-		'disk'     => [ 'size' => $size, 'free' => $free ],
-		'servers'  => $servers->toArray()
-	]
-]);
+class TaskDispatcher
+{
+	
+	private $known;
+	
+	public function __construct() {
+		$this->known = collect();
+		$this->known->push(new RoleSetTask());
+	}
+	
+	/**
+	 * 
+	 * @param type $name
+	 * @return Task
+	 */
+	public function get($name) {
+		foreach ($this->known as $known) {
+			if ($known->name() === $name) {
+				return clone $known;
+			}
+		}
+		
+		return null;
+	}
+	
+	public function send($from, \ServerModel$server, Task$task) {
+		$r = request(rtrim($server->hostname, '/') . '/task/queue.json');
+		$r->header('Content-type', 'application/json');
+		$r->post(json_encode([
+			'job' => $task->name(),
+			'version' => $task->version(),
+			'settings' => $task->save(),
+			'scheduled' => time(),
+			'from' => $from
+		]));
+		
+		$r->send()->expect(200);
+	}
+}

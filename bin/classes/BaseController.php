@@ -1,7 +1,9 @@
 <?php
 
+use auth\SSOCache;
 use cloudy\helper\KeyHelper;
 use cloudy\helper\SettingsHelper;
+use spitfire\core\Environment;
 
 /* 
  * The MIT License
@@ -37,6 +39,14 @@ class BaseController extends Controller
 	protected $settings;
 	
 	/**
+	 *
+	 * @var \auth\SSO
+	 */
+	protected $sso;
+	
+	protected $user;
+	
+	/**
 	 * Whenever the base controller is summoned, it will ensure that certain basic
 	 * requirements are available.
 	 */
@@ -65,7 +75,17 @@ class BaseController extends Controller
 			$this->settings->set('privkey', $private);
 			$this->settings->set('pubkey',  $public);
 			
-			die($this->settings->read('privkey'));
+		}
+		
+		if (Environment::get('SSO')) {
+			$this->sso = new SSOCache(Environment::get('SSO'));
+			$session   = \spitfire\io\session\Session::getInstance();
+			
+			$token = isset($_GET['token'])? $this->sso->makeToken($_GET['token']) : $session->getUser();
+			$this->user = $token? $token->getTokenInfo() : null;
+		}
+		else {
+			throw new \spitfire\exceptions\PublicException('SSO is not properly configured', 500);
 		}
 	}
 	

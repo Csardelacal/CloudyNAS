@@ -24,16 +24,4 @@
  * THE SOFTWARE.
  */
 
-echo json_encode([
-	'status'  => 'OK',
-	'payload' => [ 
-		'poolid'   => $poolid, 
-		'uniqid'   => $uniqid, 
-		'pubkey'   => $pubkey, 
-		'cluster'  => $cluster, 
-		'active'   => $active,
-		'disabled' => $disabled,
-		'disk'     => [ 'size' => $size, 'free' => $free ],
-		'servers'  => $servers->toArray()
-	]
-]);
+echo json_encode(['success' => true]);

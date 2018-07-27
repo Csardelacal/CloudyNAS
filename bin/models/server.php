@@ -55,6 +55,19 @@ class ServerModel extends Model
 		$schema->size      = new FloatField(true);
 		$schema->free      = new FloatField(true);
 		
+		/*
+		 * Record whether and when the server was decommissioned. This allows the 
+		 * netowrk to register servers that left it by broadcasting the fact that
+		 * they're gone and since when they are gone.
+		 */
+		$schema->disabled  = new IntegerField(true);
+		
+		/*
+		 * This flag determines whether the server is running. An administrator may
+		 * have requested the server to pause, in order to shut the server down,
+		 * perform maintenance or do something similar.
+		 */
+		$schema->active    = new BooleanField();
 		$schema->status    = new IntegerField(true);
 	}
 

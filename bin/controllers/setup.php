@@ -1,5 +1,8 @@
 <?php
 
+use cloudy\Role;
+use spitfire\exceptions\PublicException;
+
 /* 
  * The MIT License
  *
@@ -42,16 +45,103 @@ class SetupController extends BaseController
 	 */
 	public function index() {
 		
-		#TODO: Check whether the pool is already set up.
-		#TODO: Include authentication. Only sysadmins should be able to set the system up
+		if ($this->settings->read('poolid')) {
+			throw new PublicException('This server has already been set up.', 403);
+		}
+		
+		if (!$this->user) {
+			return $this->response->setBody('Redirect...')->getHeaders()->redirect(url('user', 'login', ['returnto' => (string)url('setup')]));
+		}
+		
+		return $this->response->setBody('Redirect...')->getHeaders()->redirect(url('setup', 'run'));
 	}
 	
 	public function run() {
 		
-		#TODO: Check whether the pool is already set up.
-		#TODO: Include authentication. Only sysadmins should be able to set the system up
-		#TODO: Create the pool ID. So servers know when they're receiving faulty commands
-		#TODO: Set the server role to pool and pool owner.
+		if ($this->settings->read('poolid')) {
+			throw new PublicException('This server has already been set up.', 403);
+		}
+		
+		if (!$this->user) {
+			return $this->response->setBody('Redirect...')->getHeaders()->redirect(url('user', 'login', ['returnto' => (string)url('setup')]));
+		}
+		
+		if ($this->request->isPost() && isset($_POST['init'])) {
+			/*
+			 * Set a random pool id. This pool id prevents the servers from accepting
+			 * commands from servers that were erroneously configured to access this
+			 * pool.
+			 * 
+			 * Please note that this is not a measure to prevent attacks, but to prevent
+			 * human error when managing servers that belong to different pools.
+			 * Moving a server from one pool to another could be catastrophic, specially
+			 * when moving a pool server.
+			 */
+			$this->settings->set('poolid', base64_encode(random_bytes(10)));
+			
+			/*
+			 * Since we sent the command to initialize the pool, it means that this
+			 * server is the first to this pool and therefore pool owner by default.
+			 */
+			$this->settings->set('role', Role::ROLE_POOL | Role::ROLE_OWNER);
+			
+			/*
+			 * Record the pool server that is acquiring this server. This is a handshake
+			 * that will cause the server to start accepting requests from this server
+			 * alone until it gets introduced to further servers.
+			 */
+			$e = db()->table('server')->newRecord();
+			$e->lastSeen = time();
+			$e->size     = null;
+			$e->free     = null;
+			$e->cluster  = null;
+			$e->hostname = url()->absolute();
+			$e->uniqid   = $this->settings->read('uniqid');
+			$e->pubKey   = $this->settings->read('poolid');
+			$e->role     = Role::ROLE_POOL | Role::ROLE_OWNER;
+			$e->active   = true;
+			$e->disabled = null;
+			$e->store();
+			
+			return $this->response->setBody('Redirect...')->getHeaders()->redirect(url());
+		}
+		
+		/*
+		 * A pool is trying to acquire this server, it will provide this server
+		 * with the necessary information to discover the pool on it's own.
+		 */
+		elseif ($this->request->isPost()) {
+			
+			$this->settings->set('poolid', $_POST['poolid']);
+			$this->settings->set('role', Role::ROLE_SLAVE);
+			
+			/*
+			 * Record the pool server that is acquiring this server. This is a handshake
+			 * that will cause the server to start accepting requests from this server
+			 * alone until it gets introduced to further servers.
+			 */
+			$e = db()->table('server')->newRecord();
+			$e->lastSeen = time();
+			$e->size     = null;
+			$e->free     = null;
+			$e->cluster  = null;
+			$e->hostname = $_POST['hostname'];
+			$e->uniqid   = $_POST['uniqid'];
+			$e->pubKey   = $_POST['pubkey'];
+			$e->role     = Role::ROLE_POOL;
+			$e->active   = true;
+			$e->disabled = null;
+			$e->store();
+			
+			/*
+			 * Let the view respond with a success message to the other server,
+			 * informing it that the request was a success and that this one is 
+			 * now accepting tasks from it.
+			 */
+			$this->view->set('owner', $e);
+			$this->view->set('uniqid', $this->settings->read('uniqid'));
+			$this->view->set('pubkey', $this->settings->read('pubkey'));
+		}
 		
 		/*
 		 * This should be all. Once the server has been set up to be a pool owner we

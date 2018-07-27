@@ -1,5 +1,8 @@
 <?php
 
+use cloudy\task\TaskDispatcher;
+use spitfire\mvc\Director;
+
 /* 
  * The MIT License
  *
@@ -24,16 +27,36 @@
  * THE SOFTWARE.
  */
 
-echo json_encode([
-	'status'  => 'OK',
-	'payload' => [ 
-		'poolid'   => $poolid, 
-		'uniqid'   => $uniqid, 
-		'pubkey'   => $pubkey, 
-		'cluster'  => $cluster, 
-		'active'   => $active,
-		'disabled' => $disabled,
-		'disk'     => [ 'size' => $size, 'free' => $free ],
-		'servers'  => $servers->toArray()
-	]
-]);
+class QueueDirector extends Director
+{
+	
+	public function process() {
+		$tasks = db()->table('task\queue')->getAll()->setOrder('scheduled', 'ASC')->range(0, 10);
+		$dispatcher = new TaskDispatcher();
+		
+		foreach ($tasks as $task) {
+			$p = $dispatcher->get($task->job);
+			
+			if ($task->version > $p->version() + 1) {
+				$task->scheduled = $task->scheduled + 3600;
+				$task->store();
+				continue;
+			}
+			
+			$p->load($task->settings);
+			$p->setProgress($task->progress);
+			
+			$p->execute(db());
+			
+			if ($p->isDone()) {
+				$task->delete();
+			}
+			else {
+				$task->progress = $p->getProgress();
+				$task->scheduled = time(); #Defer long running tasks so they don't clog up the system
+				$task->store();
+			}
+		}
+	}
+	
+}

@@ -1,5 +1,7 @@
 <?php
 
+use spitfire\io\session\Session;
+
 /* 
  * The MIT License
  *
@@ -24,16 +26,37 @@
  * THE SOFTWARE.
  */
 
-echo json_encode([
-	'status'  => 'OK',
-	'payload' => [ 
-		'poolid'   => $poolid, 
-		'uniqid'   => $uniqid, 
-		'pubkey'   => $pubkey, 
-		'cluster'  => $cluster, 
-		'active'   => $active,
-		'disabled' => $disabled,
-		'disk'     => [ 'size' => $size, 'free' => $free ],
-		'servers'  => $servers->toArray()
-	]
-]);
+class UserController extends BaseController
+{
+	
+	public function login() {
+		
+		/*
+		 * Check whether the user is already logged in, if this is the case, then
+		 * it's safe to redirect the user back to the rest of the application.
+		 */
+		if ($this->user) {
+			return $this->response->setBody('Redirecting...')->getHeaders()->redirect(isset($_GET['returnto'])? $_GET['returnto'] : url());
+		}
+		
+		$session = Session::getInstance();
+		$sso     = $this->sso;
+		
+		$token   = $sso->createToken();
+		$session->lock($token);
+		
+		if (!$token->isAuthenticated()) {
+			return $this->response->setBody('Redirecting...')
+				->getHeaders()->redirect($token->getRedirect(url('user', 'login', $_GET->getRaw())->absolute(), url('user', 'failure')->absolute()));
+		}
+		else {
+			return $this->response->setBody('Redirecting...')->getHeaders()->redirect(isset($_GET['returnto'])? $_GET['returnto'] : url());
+		}
+		
+	}
+	
+	public function failure() {
+		
+	}
+	
+}

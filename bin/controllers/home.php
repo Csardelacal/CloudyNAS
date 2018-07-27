@@ -23,8 +23,9 @@ class HomeController extends BaseController
 			 * or hostname of the server. When this is empty we need to attach it 
 			 * to a pool.
 			 */
-			if ($this->settings->read('pool') || Environment::get('pool')) {
-				#TODO: Connect to the pool, start receiving tasks
+			if ($this->settings->read('poolid')) {
+				$poolowner = db()->table('server')->get('role', Role::ROLE_OWNER | Role::ROLE_POOL)->first(true);
+				$this->response->setBody('Redirect...')->getHeaders()->redirect($poolowner->url);
 			}
 			
 			/*
@@ -50,7 +51,7 @@ class HomeController extends BaseController
 	public function cron() {
 		$cron = new \cron\DiscoveryCron();
 		$cron->run();
-		die();
+		die('Ok');
 	}
 	
 	public function test() {
@@ -60,8 +61,10 @@ class HomeController extends BaseController
 		
 		$source  = 'This is a test';
 		
-		openssl_seal($source, $sealed, $keys, [$public]);
-		openssl_open($sealed, $message, $keys[0], $private);
+		//openssl_private_encrypt($source, $crypted, $private);
+		//openssl_public_decrypt($crypted, $message, $public);
+		openssl_public_encrypt($source, $crypted, $public);
+		openssl_private_decrypt($crypted, $message, $private);
 		
 		$this->view->set('message', 'Message: '  . $message);
 	}

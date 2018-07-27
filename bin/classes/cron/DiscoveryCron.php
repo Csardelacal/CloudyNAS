@@ -1,5 +1,8 @@
 <?php namespace cron;
 
+use cloudy\Role;
+use function db;
+
 /* 
  * The MIT License
  *
@@ -58,7 +61,7 @@ class DiscoveryCron extends Cron
 		 * Get the list of servers that this one is familiar with.
 		 */
 		$table   = db()->table('server');
-		$refresh = $table->get('lastSeen', time() - 7200, '<')->fetchAll();
+		$refresh = $table->get('lastSeen', time() - 1200, '<')->fetchAll();
 		
 		$refresh->each(function ($e) use ($uniqid, $cluster) {
 			
@@ -68,14 +71,6 @@ class DiscoveryCron extends Cron
 			 */
 			if ($e->uniqid === $uniqid) {
 				return true;
-			}
-			
-			/*
-			 * In the event of the server being a slave (meaning, that it's not 
-			 * relevant to the network topology and just hosts files)
-			 */
-			if (!($e->role & (Role::ROLE_POOL | Role::ROLE_MASTER)) || $e->cluster === $cluster) {
-				return false;
 			}
 			
 			/*
@@ -105,14 +100,20 @@ class DiscoveryCron extends Cron
 			 * If the server is responding properly, then we report the server as
 			 * properly running and remove the reminder to automatically check after
 			 * it.
+			 * 
+			 * The server is always considered an authority on it's own status (only
+			 * to be overriden by a pool server)
 			 */
+			var_dump($raw); die();
 			if ($status === 200) {
 				$e->lastSeen = time();
-				$e->size     = $response->disk->size;
-				$e->free     = $response->disk->free;
+				$e->size     = $response->disk->size?? null;
+				$e->free     = $response->disk->free?? null;
 				$e->cluster  = $response->cluster;
-				$e->pubkey   = $response->pubkey;
+				$e->pubKey   = $response->pubkey;
 				$e->role     = $response->role;
+				$e->active   = $response->active;
+				$e->disabled = $response->disabled;
 				$e->store();
 				
 				//TODO: The server is going to broadcast a set of siblings over the
@@ -135,7 +136,7 @@ class DiscoveryCron extends Cron
 	}
 
 	public function getInterval() {
-		return 2400;
+		return 600;
 	}
 
 	public function getName() {

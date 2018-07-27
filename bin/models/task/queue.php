@@ -1,4 +1,7 @@
-<?php
+<?php namespace task;
+
+use spitfire\Model;
+use spitfire\storage\database\Schema;
 
 /* 
  * The MIT License
@@ -24,16 +27,19 @@
  * THE SOFTWARE.
  */
 
-echo json_encode([
-	'status'  => 'OK',
-	'payload' => [ 
-		'poolid'   => $poolid, 
-		'uniqid'   => $uniqid, 
-		'pubkey'   => $pubkey, 
-		'cluster'  => $cluster, 
-		'active'   => $active,
-		'disabled' => $disabled,
-		'disk'     => [ 'size' => $size, 'free' => $free ],
-		'servers'  => $servers->toArray()
-	]
-]);
+class QueueModel extends Model
+{
+	
+	/**
+	 * 
+	 * @param Schema $schema
+	 */
+	public function definitions(Schema $schema) {
+		$schema->job       = new \StringField(200);
+		$schema->version   = new \IntegerField(true);
+		$schema->settings  = new \TextField();
+		$schema->scheduled = new \IntegerField(true);
+		$schema->progress  = new \StringField(100);
+	}
+
+}

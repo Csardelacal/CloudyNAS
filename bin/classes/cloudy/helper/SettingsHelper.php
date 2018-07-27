@@ -82,4 +82,15 @@ class SettingsHelper
 		return true;
 	}
 	
+	public function makeFrom() {
+		$uuid = $this->read('uniqid');
+		$priv = $this->read('privkey');
+		$expires = time() + 600;
+		
+		$msg = "{$uuid},{$expires}";
+		openssl_private_encrypt($msg, $sig, $priv);
+		
+		return sprintf('%s:%s', $msg, base64_encode($sig));
+	}
+	
 }
