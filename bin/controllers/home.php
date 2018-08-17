@@ -24,8 +24,12 @@ class HomeController extends BaseController
 			 * to a pool.
 			 */
 			if ($this->settings->read('poolid')) {
-				$poolowner = db()->table('server')->get('role', Role::ROLE_OWNER | Role::ROLE_POOL)->first(true);
-				$this->response->setBody('Redirect...')->getHeaders()->redirect($poolowner->url);
+				$servers   = db()->table('server')->getAll()->all();
+				$servers->each(function($e) {
+					if ($e->role & Role::ROLE_OWNER) {
+						return $this->response->setBody('Redirect...')->getHeaders()->redirect($poolowner->url);
+					}
+				});
 			}
 			
 			/*
