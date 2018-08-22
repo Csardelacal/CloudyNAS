@@ -1,7 +1,9 @@
 <?php namespace cron;
 
+use cloudy\helper\KeyHelper;
 use cloudy\Role;
 use function db;
+use function request;
 
 /* 
  * The MIT License
@@ -60,10 +62,12 @@ class DiscoveryCron extends Cron
 		/*
 		 * Get the list of servers that this one is familiar with.
 		 */
-		$table   = db()->table('server');
-		$refresh = $table->get('lastSeen', time() - 1200, '<')->fetchAll();
+		$refresh = db()->table('server')->getAll()->all();
+		$keys = new KeyHelper(db()->setting->get('key', 'pubkey')->fetch()->value, db()->setting->get('key', 'privkey')->fetch()->value);
 		
-		$refresh->each(function ($e) use ($uniqid, $cluster) {
+		$refresh->filter(function ($e) {
+			return $e->role & Role::ROLE_LEADER;
+		})->each(function ($e) use ($uniqid, $cluster, $keys) {
 			
 			/*
 			 * If the server is the same server as we are managing, then skip it. We
@@ -82,19 +86,20 @@ class DiscoveryCron extends Cron
 			//TODO: The remote server is signing this request. And the local server
 			//should verify that the signature is acknowledgeable.
 			
-			//TODO: The local server should authorize the request, so network topology
-			//is not leaked.
-			$url = $e->hostname . '/server/info.json';
-			
 			/*
 			 * Launch a request to retrieve the remote server's status and 
 			 */
-			$ch  = curl_init($url);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			$raw = curl_exec($ch);
+			$salt = str_replace(['/', '-', '='], '', base64_encode(random_bytes(20)));
+			$r = request($e->hostname . '/server/info.json');
+			$r->get('s', $uniqid . ':' . $salt . ':' . time() . ':' . base64_encode($keys->encodeWithPrivate($uniqid . ':' . $salt . ':' . time())));
+			$response = $r->send()->expect(200)->json();
 			
-			$status   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-			$response = json_decode($raw)->payload;
+			if (!isset($response->payload->role)) {
+				var_dump($response);
+				die();
+			}
+			
+			$response = $response->payload;
 			
 			/*
 			 * If the server is responding properly, then we report the server as
@@ -104,39 +109,34 @@ class DiscoveryCron extends Cron
 			 * The server is always considered an authority on it's own status (only
 			 * to be overriden by a pool server)
 			 */
-			var_dump($raw); die();
-			if ($status === 200) {
-				$e->lastSeen = time();
-				$e->size     = $response->disk->size?? null;
-				$e->free     = $response->disk->free?? null;
-				$e->cluster  = $response->cluster;
-				$e->pubKey   = $response->pubkey;
-				$e->role     = $response->role;
-				$e->active   = $response->active;
-				$e->disabled = $response->disabled;
+			$e->lastSeen = time();
+			$e->size     = $response->disk->size?? null;
+			$e->free     = $response->disk->free?? null;
+			$e->cluster  = $response->cluster;
+			$e->pubKey   = $response->pubkey;
+			$e->role     = $response->role;
+			$e->active   = $response->active;
+			$e->disabled = $response->disabled;
+			$e->store();
+			
+			foreach ($response->servers as $server) {
+				$e = db()->table('server')->get('uniqid', $server->uniqid)->first()?: db()->table('server')->newRecord();
+				$e->size     = $server->disk->size?? null;
+				$e->free     = $server->disk->free?? null;
+				$e->hostname = $server->hostname;
+				$e->uniqid   = $server->uniqid;
+				$e->cluster  = $server->cluster;
+				$e->pubKey   = $server->pubkey;
+				$e->role     = $server->role;
+				$e->active   = $server->active;
+				$e->disabled = $server->disabled;
 				$e->store();
-				
-				//TODO: The server is going to broadcast a set of siblings over the
-				//network, these should be acknowledged
-			}
-			
-			/*
-			 * If the server has not been seen in the last month, then we just 
-			 * ignore it ever existed.
-			 */
-			elseif ($e->lastSeen < time() - 86400 * 30) {
-				$e->delete();
-			}
-			
-			else {
-				//TODO: If the server is not reachable and has not yet been abandoned, 
-				//the system should raise an alert.
 			}
 		});
 	}
 
 	public function getInterval() {
-		return 600;
+		return 1;
 	}
 
 	public function getName() {

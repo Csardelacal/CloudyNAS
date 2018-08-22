@@ -53,7 +53,7 @@ class RoleSetTask extends Task
 	}
 	
 	public function accessLevel() {
-		return \cloudy\Role::ROLE_POOL;
+		return \cloudy\Role::ROLE_LEADER;
 	}
 
 }

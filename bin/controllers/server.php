@@ -31,6 +31,30 @@ class ServerController extends BaseController
 	
 	public function info() {
 		
+		if (!isset($_GET['s'])) {
+			throw new \spitfire\exceptions\PublicException('Not authorized', 403);
+		}
+		
+		$pieces = explode(':', $_GET['s']);
+		
+		if (!isset($pieces[3])) {
+			throw new \spitfire\exceptions\PublicException('Malformed signature', 400);
+		}
+		
+		list($uniqid, $salt, $time, $cypher) = $pieces;
+		
+		if ($time < time() - 60) {
+			throw new \spitfire\exceptions\PublicException('Expired signature', 403);
+		}
+		
+		
+		$keys = new \cloudy\helper\KeyHelper(db()->table('server')->get('uniqid', $uniqid)->first()->pubKey);
+		spitfire()->log(print_r($keys, true));
+		
+		if ($keys->decodeWithPublic(base64_decode($cypher)) !== sprintf('%s:%s:%s', $uniqid, $salt, $time)) {
+			throw new \spitfire\exceptions\PublicException('Invalid signature', 401);
+		}
+		
 		/**
 		 * The pool ID is a random string that the pool generates and that the 
 		 * servers maintain to ensure that they belong to the same pool. This is 
@@ -53,15 +77,21 @@ class ServerController extends BaseController
 		 * only meant to be kept by pools and masters, slaves are free to be 
 		 * unaware of the topology - reducing load on the network.
 		 */
-		$servers = db()->table('server')->getAll()->fetchAll()->each(function ($e) {
+		$servers = db()->table('server')->get('uniqid', $uniqid, '!=')->fetchAll()->each(function ($e) {
 			return [ 
 				'hostname' => $e->hostname, 
 				'uniqid' => $e->uniqid, 
+				'pubkey' => $e->pubKey,
 				'role' => $e->role, 
-				'size' => $e->size, 
-				'free' => $e->free, 
+				'disk' => [
+					'size' => $e->size, 
+					'free' => $e->free
+				], 
 				'cluster' => $e->cluster,
-				'updated' => $e->lastSeen]; 
+				'updated' => $e->lastSeen,
+				'active'  => $e->active,
+				'disabled' => $e->disabled
+			]; 
 		});
 		
 		
@@ -77,6 +107,7 @@ class ServerController extends BaseController
 		$free  = disk_free_space($dir->getPath());
 		
 		$this->view->set('uniqid',   $uniqid);
+		$this->view->set('role',     db()->table('server')->get('uniqid', $uniqid)->first()->role);
 		$this->view->set('poolid',   $poolid);
 		$this->view->set('pubkey',   $pubkey);
 		$this->view->set('cluster',  $cluster);

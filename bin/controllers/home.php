@@ -16,7 +16,7 @@ class HomeController extends BaseController
 		 * the server to the known pool owner, or ask the user whether they wish
 		 * to escalate this server to pool.
 		 */
-		if (!($this->settings->read('role') & Role::ROLE_POOL)) {
+		if (!($this->settings->read('role') & Role::ROLE_LEADER)) {
 			
 			/*
 			 * Look for a pool manager. Usually, the pool setting contains the uniqid
@@ -38,7 +38,7 @@ class HomeController extends BaseController
 			 * upgrade this server to a pool.
 			 */
 			else {
-				return $this->response->setBody('Redirection...')>getHeaders()->redirect(url('setup'));
+				return $this->response->setBody('Redirection...')->getHeaders()->redirect(url('setup'));
 			}
 		}
 		

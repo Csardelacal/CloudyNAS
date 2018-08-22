@@ -83,7 +83,7 @@ class SetupController extends BaseController
 			 * Since we sent the command to initialize the pool, it means that this
 			 * server is the first to this pool and therefore pool owner by default.
 			 */
-			$this->settings->set('role', Role::ROLE_POOL | Role::ROLE_OWNER);
+			$this->settings->set('role', Role::ROLE_LEADER);
 			
 			/*
 			 * Record the pool server that is acquiring this server. This is a handshake
@@ -97,8 +97,8 @@ class SetupController extends BaseController
 			$e->cluster  = null;
 			$e->hostname = url()->absolute();
 			$e->uniqid   = $this->settings->read('uniqid');
-			$e->pubKey   = $this->settings->read('poolid');
-			$e->role     = Role::ROLE_POOL | Role::ROLE_OWNER;
+			$e->pubKey   = $this->settings->read('pubkey');
+			$e->role     = Role::ROLE_LEADER;
 			$e->active   = true;
 			$e->disabled = null;
 			$e->store();
@@ -128,7 +128,7 @@ class SetupController extends BaseController
 			$e->hostname = $_POST['hostname'];
 			$e->uniqid   = $_POST['uniqid'];
 			$e->pubKey   = $_POST['pubkey'];
-			$e->role     = Role::ROLE_POOL;
+			$e->role     = Role::ROLE_LEADER;
 			$e->active   = true;
 			$e->disabled = null;
 			$e->store();

@@ -97,7 +97,7 @@ abstract class Task
 	}
 	
 	public function accessLevel() {
-		return \cloudy\Role::ROLE_MASTER | \cloudy\Role::ROLE_POOL | \cloudy\Role::ROLE_SLAVE;
+		return \cloudy\Role::ROLE_MASTER | \cloudy\Role::ROLE_LEADER | \cloudy\Role::ROLE_SLAVE;
 	}
 		
 	/**

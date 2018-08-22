@@ -24,19 +24,9 @@
  * THE SOFTWARE.
  */
 
-current_context()->response->getHeaders()->contentType('json');
-
-echo json_encode([
-	'status'  => 'OK',
-	'payload' => [ 
-		'role'     => $role, 
-		'poolid'   => $poolid, 
-		'uniqid'   => $uniqid, 
-		'pubkey'   => $pubkey, 
-		'cluster'  => $cluster, 
-		'active'   => $active,
-		'disabled' => $disabled,
-		'disk'     => [ 'size' => $size, 'free' => $free ],
-		'servers'  => $servers->toArray()
-	]
-]);
+if (\spitfire\core\Environment::get('debug_mode')) {
+	echo json_encode(['error' => $code, 'msg' => $message, 'trace' => $exception->getTraceAsString(), 'debug' => spitfire()->getMessages()]);
+} 
+else {
+	echo json_encode(['error' => $code, 'msg' => $message]);
+}

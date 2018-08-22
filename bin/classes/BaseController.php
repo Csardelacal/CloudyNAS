@@ -76,6 +76,9 @@ class BaseController extends Controller
 			$this->settings->set('pubkey',  $public);
 			
 		}
+		else {
+			$this->keys = new KeyHelper($this->settings->read('pubkey'), $this->settings->read('privkey'));
+		}
 		
 		if (Environment::get('SSO')) {
 			$this->sso = new SSOCache(Environment::get('SSO'));
