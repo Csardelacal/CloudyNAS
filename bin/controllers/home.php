@@ -1,7 +1,8 @@
 <?php
 
 use cloudy\Role;
-use spitfire\core\Environment;
+use cron\DiscoveryCron;
+use cron\LeaderDiscoveryCron;
 
 /**
  * 
@@ -26,8 +27,8 @@ class HomeController extends BaseController
 			if ($this->settings->read('poolid')) {
 				$servers   = db()->table('server')->getAll()->all();
 				$servers->each(function($e) {
-					if ($e->role & Role::ROLE_OWNER) {
-						return $this->response->setBody('Redirect...')->getHeaders()->redirect($poolowner->url);
+					if ($e->role & Role::ROLE_LEADER) {
+						return $this->response->setBody('Redirect...')->getHeaders()->redirect($e->hostname);
 					}
 				});
 			}
@@ -50,10 +51,13 @@ class HomeController extends BaseController
 		 * and assigning servers and buckets to clusters.
 		 */
 		#TODO: Collect system information, show dashboard
+		$this->view->set('servers', db()->table('server')->getAll()->all());
 	}
 	
 	public function cron() {
-		$cron = new \cron\DiscoveryCron();
+		$cron = new DiscoveryCron();
+		$cron->run();
+		$cron = new LeaderDiscoveryCron();
 		$cron->run();
 		die('Ok');
 	}

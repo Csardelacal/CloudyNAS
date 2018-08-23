@@ -51,7 +51,7 @@ class ServerModel extends Model
 		$schema->role     = new IntegerField(true);
 		$schema->lastSeen = new IntegerField(true);
 		
-		$schema->cluster   = new StringField(100);
+		$schema->cluster   = new Reference('cluster');
 		$schema->size      = new FloatField(true);
 		$schema->free      = new FloatField(true);
 		

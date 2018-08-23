@@ -45,7 +45,7 @@ use function request;
  * 
  * @author César de la Cal Bretschneider <cesar@magic3w.com>
  */
-class DiscoveryCron extends Cron
+class LeaderDiscoveryCron extends Cron
 {
 	
 	public function execute($state) {
@@ -76,14 +76,14 @@ class DiscoveryCron extends Cron
 				return false;
 			}
 			
-			return $e->role & Role::ROLE_LEADER;
+			return !($e->role & Role::ROLE_LEADER);
+			
 		})->each(function ($e) use ($signature) {
 			
 			
 			/*
 			 * Launch a request to retrieve the remote server's status and 
 			 */
-			
 			$r = request($e->hostname . '/server/info.json');
 			$r->get('s', $signature);
 			
@@ -106,29 +106,15 @@ class DiscoveryCron extends Cron
 			$e->active   = $response->active;
 			$e->disabled = $response->disabled;
 			$e->store();
-			
-			foreach ($response->servers as $server) {
-				$e = db()->table('server')->get('uniqid', $server->uniqid)->first()?: db()->table('server')->newRecord();
-				$e->size     = $server->disk->size?? null;
-				$e->free     = $server->disk->free?? null;
-				$e->hostname = $server->hostname;
-				$e->uniqid   = $server->uniqid;
-				$e->cluster  = $server->cluster;
-				$e->pubKey   = $server->pubkey;
-				$e->role     = $server->role;
-				$e->active   = $server->active;
-				$e->disabled = $server->disabled;
-				$e->store();
-			}
 		});
 	}
 
 	public function getInterval() {
-		return 600;
+		return 1200;
 	}
 
 	public function getName() {
-		return 'discovery';
+		return 'leaderdiscovery';
 	}
 
 }
