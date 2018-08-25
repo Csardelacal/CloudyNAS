@@ -45,7 +45,7 @@ use function request;
  * 
  * @author César de la Cal Bretschneider <cesar@magic3w.com>
  */
-class LeaderDiscoveryCron extends Cron
+class TopographyCron extends Cron
 {
 	
 	public function execute($state) {
@@ -57,11 +57,6 @@ class LeaderDiscoveryCron extends Cron
 		 */
 		$refresh = db()->table('server')->getAll()->all();
 		
-		
-		/*
-		 * Generate a signature that is used to sign this request against the receiving
-		 * servers.
-		 */
 		$keys = new KeyHelper(db(), $uniqid, db()->setting->get('key', 'pubkey')->fetch()->value, db()->setting->get('key', 'privkey')->fetch()->value);
 		
 		$refresh->filter(function ($e) use ($uniqid) {
@@ -74,45 +69,48 @@ class LeaderDiscoveryCron extends Cron
 				return false;
 			}
 			
-			return !($e->role & Role::ROLE_LEADER);
-			
+			return $e->role & Role::ROLE_LEADER;
 		})->each(function ($e) use ($keys) {
 			
 			
 			/*
 			 * Launch a request to retrieve the remote server's status and 
 			 */
-			$r = request($e->hostname . '/server/info.json');
-			$r->get('s', base64_encode($keys->pack($e->uniqid, base64_encode(random_bytes(150)))));
 			
-			$response = $r->send()->expect(200)->json()->payload;
+			$r = request($e->hostname . '/pool/info.json');
 			
-			/*
-			 * If the server is responding properly, then we report the server as
-			 * properly running and remove the reminder to automatically check after
-			 * it.
-			 * 
-			 * The server is always considered an authority on it's own status (only
-			 * to be overriden by a pool server)
-			 */
-			$e->lastSeen = time();
-			$e->size     = $response->disk->size?? null;
-			$e->free     = $response->disk->free?? null;
-			$e->cluster  = $response->cluster;
-			$e->pubKey   = $response->pubkey;
-			$e->role     = $response->role;
-			$e->active   = $response->active;
-			$e->disabled = $response->disabled;
-			$e->store();
+			$response = $r
+				->header('Content-type', 'application/json')
+				->post($keys->pack($e->uniqid, base64_encode(random_bytes(150))))
+				->send()
+				->expect(200)
+				->json()->payload;
+			
+			
+			foreach ($response->clusters as $cluster) {
+				$e = db()->table('cluster')->get('uniqid', $cluster->uniqid)->first()?: db()->table('cluster')->newRecord();
+				$e->uniqid = $cluster->uniqid;
+				$e->name = $cluster->name;
+				$e->store();
+			}
+			
+			foreach ($response->buckets as $bucket) {
+				$e = db()->table('bucket')->get('uniqid', $bucket->uniqid)->first()?: db()->table('bucket')->newRecord();
+				$e->uniqid = $bucket->uniqid;
+				$e->name = $bucket->name;
+				$e->cluster = db()->table('cluster')->get('uniqid', $bucket->cluster)->first();
+				$e->secondaryCluster = db()->table('cluster')->get('uniqid', $bucket->backup)->first();
+				$e->store();
+			}
 		});
 	}
 
 	public function getInterval() {
-		return 1200;
+		return 600;
 	}
 
 	public function getName() {
-		return 'leaderdiscovery';
+		return 'topography';
 	}
 
 }

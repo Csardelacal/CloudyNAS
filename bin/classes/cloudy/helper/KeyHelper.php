@@ -29,52 +29,62 @@ use spitfire\exceptions\PrivateException;
 class KeyHelper
 {
 	
+	private $db;
+	private $uniqid;
 	private $pub;
 	private $priv;
 	
-	public function __construct($public = null, $private = null) {
-		$this->priv = $private;
-		$this->pub = $public;
+	public function __construct($db, $uniqid = null, $public = null, $private = null) {
+		$this->db = $db;
+		$this->uniqid = $uniqid;
+		$this->priv = new \cloudy\encryption\PrivateKey($private);
+		$this->pub = new \cloudy\encryption\PublicKey($public);
 	}
 	
-	public function encodeWithPublic($msg) {
-		$success = openssl_public_encrypt($msg, $result, $this->pub);
-		
-		if (!$success) {
-			throw new PrivateException('Error creating cyphered message', 1808172004);
-		}
-		
-		return $result;
+	public function priv() {
+		return $this->priv;
 	}
 	
-	public function decodeWithPublic($msg) {
-		$success = openssl_public_decrypt($msg, $result, $this->pub);
-		
-		if (!$success) {
-			throw new PrivateException('Error creating cyphered message: ' . openssl_error_string(), 1808172005);
-		}
-		
-		return $result;
+	public function pub() {
+		return $this->pub;
 	}
 	
-	public function encodeWithPrivate($msg) {
-		$success = openssl_private_encrypt($msg, $result, $this->priv);
-		
-		if (!$success) {
-			throw new PrivateException('Error creating cyphered message', 1808172006);
-		}
-		
-		return $result;
+	public function server($uniqid) {
+		$s = $this->db->table('server')->get('uniqid', $uniqid)->first(true);
+		return new \cloudy\encryption\Server($uniqid, $s->pubKey);
 	}
 	
-	public function decodeWithPrivate($msg) {
-		$success = openssl_private_decrypt($msg, $result, $this->priv);
+	public function pack($target, $msg) {
 		
-		if (!$success) {
-			throw new PrivateException('Error creating cyphered message', 1808172007);
+		$body = [
+			'source'    => $this->uniqid,
+			'target'    => $target,
+			'time'      => time(),
+			'msg'       => $msg,
+			'signature' => base64_encode($this->priv->sign(sprintf('%s:%s:%s:%s', $this->uniqid, $target, time(), $msg)))
+		];
+		
+		return json_encode($body);
+	}
+	
+	public function unpack($msg) {
+		$body = is_string($msg)? json_decode($msg) : $msg;
+		
+		if ($body->target !== $this->uniqid) {
+			throw new PrivateException('This message was not intended for this server' . $body->target .  ' - ' . $this->uniqid, 1808241101);
 		}
 		
-		return $result;
+		if ($body->time < time() - 3600) {
+			throw new PrivateException('Received expired message', 1808241102);
+		}
+		
+		$remote = $this->server($body->source);
+		
+		if (!$remote->verify(sprintf('%s:%s:%s:%s', $body->source, $this->uniqid, time(), $body->msg), base64_decode($body->signature))) {
+			throw new PrivateException('Invalid signature received', 1808241103);
+		}
+		
+		return $body->msg;
 	}
 
 	public function generate() {
@@ -82,7 +92,7 @@ class KeyHelper
 		 * Define the basic settings for the key being generated.
 		 */
 		$settings = openssl_pkey_new(array(
-			'private_key_bits' => 2048,
+			'private_key_bits' => 4096,
 			'private_key_type' => OPENSSL_KEYTYPE_RSA
 		));
 		

@@ -56,6 +56,20 @@ class BucketModel extends Model
 		$schema->uniqid = new StringField('30');
 		$schema->name   = new StringField('100');
 		
+		/*
+		 * Every bucket can have up to two clusters assigned. This allows for moving
+		 * buckets across clusters. Once a pool disavows a cluster for a certain
+		 * bucket, it will be placed as secondary until all the files in it have 
+		 * been moved to a new home.
+		 * 
+		 * While this _could_ have been a m-n relation, it's pretty clear that the
+		 * performance hit the system takes from having even a secondary cluster 
+		 * that provides reads while the new one is assimilating it's contents seems
+		 * too big to warrant the possibility of them being spread even further.
+		 */
+		$schema->cluster = new Reference('cluster');
+		$schema->secondaryCluster = new Reference('cluster');
+		
 		$schema->index($schema->uniqid);
 	}
 

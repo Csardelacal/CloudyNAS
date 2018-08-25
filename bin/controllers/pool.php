@@ -78,6 +78,34 @@ class PoolController extends BaseController
 		}
 	}
 	
+	public function info() {
+		
+		
+		$uniqid = $this->settings->read('uniqid');
+		
+		if (!(db()->table('server')->get('uniqid', $uniqid)->first()->role & Role::ROLE_LEADER)) {
+			throw new PublicException('This server is not an authority on the pool', 403);
+		}
+		
+		$body = file_get_contents('php://input');
+		
+		if (empty($body)) {
+			throw new PublicException('Requests to this endpoint must be authorized.', 403);
+		}
+		
+		/*
+		 * Requests to this endpoint come empty. So we do not need to use the data
+		 * the user sent, just make sure it's valid.
+		 */
+		$this->keys->unpack($body);
+		
+		$buckets  = db()->table('bucket')->getAll()->all();
+		$clusters = db()->table('cluster')->getAll()->all();
+		
+		$this->view->set('buckets', $buckets);
+		$this->view->set('clusters', $clusters);
+	}
+	
 	public function setRole(ServerModel$server, $role) {
 		
 		$dispatcher = new cloudy\task\TaskDispatcher();

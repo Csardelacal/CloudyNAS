@@ -35,25 +35,7 @@ class ServerController extends BaseController
 			throw new \spitfire\exceptions\PublicException('Not authorized', 403);
 		}
 		
-		$pieces = explode(':', $_GET['s']);
-		
-		if (!isset($pieces[3])) {
-			throw new \spitfire\exceptions\PublicException('Malformed signature', 400);
-		}
-		
-		list($uniqid, $salt, $time, $cypher) = $pieces;
-		
-		if ($time < time() - 60) {
-			throw new \spitfire\exceptions\PublicException('Expired signature', 403);
-		}
-		
-		
-		$keys = new \cloudy\helper\KeyHelper(db()->table('server')->get('uniqid', $uniqid)->first()->pubKey);
-		spitfire()->log(print_r($keys, true));
-		
-		if ($keys->decodeWithPublic(base64_decode($cypher)) !== sprintf('%s:%s:%s', $uniqid, $salt, $time)) {
-			throw new \spitfire\exceptions\PublicException('Invalid signature', 401);
-		}
+		$this->keys->unpack(base64_decode($_GET['s']));
 		
 		/**
 		 * The pool ID is a random string that the pool generates and that the 

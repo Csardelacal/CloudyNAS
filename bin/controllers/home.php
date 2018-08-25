@@ -55,10 +55,13 @@ class HomeController extends BaseController
 	}
 	
 	public function cron() {
+		$cron = new \cron\TopographyCron();
+		$cron->run();
 		$cron = new DiscoveryCron();
 		$cron->run();
 		$cron = new LeaderDiscoveryCron();
 		$cron->run();
+		var_dump(spitfire()->getMessages());
 		die('Ok');
 	}
 	

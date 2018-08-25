@@ -47,6 +47,12 @@ class BaseController extends Controller
 	protected $user;
 	
 	/**
+	 *
+	 * @var KeyHelper
+	 */
+	protected $keys;
+	
+	/**
 	 * Whenever the base controller is summoned, it will ensure that certain basic
 	 * requirements are available.
 	 */
@@ -68,7 +74,7 @@ class BaseController extends Controller
 			 * key. If this server doesn't happen to have one, it will generate one
 			 * to ensure that the communication between servers is not compromised.
 			 */
-			$keygen = new KeyHelper();
+			$keygen = new KeyHelper(db());
 			list($private, $public) = $keygen->generate();
 			
 			$this->settings->set('uniqid',  uniqid());
@@ -77,7 +83,7 @@ class BaseController extends Controller
 			
 		}
 		else {
-			$this->keys = new KeyHelper($this->settings->read('pubkey'), $this->settings->read('privkey'));
+			$this->keys = new KeyHelper(db(), $this->settings->read('uniqid'), $this->settings->read('pubkey'), $this->settings->read('privkey'));
 		}
 		
 		if (Environment::get('SSO')) {

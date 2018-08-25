@@ -57,14 +57,7 @@ class DiscoveryCron extends Cron
 		 */
 		$refresh = db()->table('server')->getAll()->all();
 		
-		$keys = new KeyHelper(db()->setting->get('key', 'pubkey')->fetch()->value, db()->setting->get('key', 'privkey')->fetch()->value);
-		
-		/*
-		 * Generate a signature that is used to sign this request against the receiving
-		 * servers.
-		 */
-		$salt = str_replace(['/', '-', '='], '', base64_encode(random_bytes(20)));
-		$signature = $uniqid . ':' . $salt . ':' . time() . ':' . base64_encode($keys->encodeWithPrivate($uniqid . ':' . $salt . ':' . time()));
+		$keys = new KeyHelper(db(), $uniqid, db()->setting->get('key', 'pubkey')->fetch()->value, db()->setting->get('key', 'privkey')->fetch()->value);
 		
 		$refresh->filter(function ($e) use ($uniqid) {
 			
@@ -77,7 +70,7 @@ class DiscoveryCron extends Cron
 			}
 			
 			return $e->role & Role::ROLE_LEADER;
-		})->each(function ($e) use ($signature) {
+		})->each(function ($e) use ($keys) {
 			
 			
 			/*
@@ -85,7 +78,7 @@ class DiscoveryCron extends Cron
 			 */
 			
 			$r = request($e->hostname . '/server/info.json');
-			$r->get('s', $signature);
+			$r->get('s', base64_encode($keys->pack($e->uniqid, base64_encode(random_bytes(150)))));
 			
 			$response = $r->send()->expect(200)->json()->payload;
 			
