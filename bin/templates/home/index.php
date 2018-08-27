@@ -11,3 +11,20 @@
 	</li>
 	<?php endforeach; ?>
 </ul>
+
+
+<ul>
+	<?php foreach ($clusters as $cluster): ?>
+	<li>
+		<span><?= $cluster->name ?> (<?= new spitfire\io\Filesize($cluster->available())  ?>)</span>
+	</li>
+	<?php endforeach; ?>
+</ul>
+
+<ul>
+	<?php foreach ($buckets as $bucket): ?>
+	<li>
+		<span><?= $bucket->name ?> (<?= new \spitfire\io\Filesize($bucket->size()) ?>)</span>
+	</li>
+	<?php endforeach; ?>
+</ul>

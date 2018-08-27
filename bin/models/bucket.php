@@ -56,6 +56,8 @@ class BucketModel extends Model
 		$schema->uniqid = new StringField('30');
 		$schema->name   = new StringField('100');
 		
+		$schema->replicas = new IntegerField(true);
+		
 		/*
 		 * Every bucket can have up to two clusters assigned. This allows for moving
 		 * buckets across clusters. Once a pool disavows a cluster for a certain
@@ -71,6 +73,24 @@ class BucketModel extends Model
 		$schema->secondaryCluster = new Reference('cluster');
 		
 		$schema->index($schema->uniqid);
+	}
+	
+	public function size() {
+		/*@var $servers \spitfire\core\Collection*/
+		$servers = $this->cluster->servers->getQuery()->all();
+		$count   = $servers->count();
+		
+		$sorted = $servers->sort(function ($a, $b) {
+			return $a->size - $b->size;
+		})->extract('size');
+		
+		if ($count > $this->replicas) {
+			for ($i = 0; $i < $count; $i++) {
+				$sorted->shift();
+			}
+		}
+		
+		return $count == 0? 0 : $sorted->avg() / $count * ($count + $this->replicas);
 	}
 
 }

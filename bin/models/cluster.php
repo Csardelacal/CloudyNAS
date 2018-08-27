@@ -52,6 +52,16 @@ class ClusterModel extends Model
 	public function definitions(Schema $schema) {
 		$schema->uniqid = new StringField(20);
 		$schema->name   = new StringField(100);
+		
+		$schema->servers = new ChildrenField('server', 'cluster');
+	}
+	
+	public function available() {
+		/*@var $servers \spitfire\core\Collection*/
+		$servers = $this->servers->getQuery()->all();
+		
+		if ($servers->isEmpty()) { return 0; }
+		else                     { return $servers->extract('free')->sum(); }
 	}
 
 }

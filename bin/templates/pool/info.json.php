@@ -40,6 +40,7 @@ foreach ($buckets as $bucket) {
 	$payload['buckets'][] = [
 		'uniqid' => $bucket->uniqid,
 		'name' => $bucket->name,
+		'replicas' => $bucket->replicas,
 		'cluster' => $bucket->cluster->uniqid,
 		'backup' => $bucket->secondaryCluster? $bucket->secondaryCluster->uniqid : null
 	];

@@ -59,6 +59,12 @@ class ServerModel extends Model
 		 * Record whether and when the server was decommissioned. This allows the 
 		 * netowrk to register servers that left it by broadcasting the fact that
 		 * they're gone and since when they are gone.
+		 * 
+		 * This also allows the server to stay around during a migration. While 
+		 * disabled servers provide no read capacity, they can be used to read data.
+		 * 
+		 * Please note that, a disabled server should never be considered an 
+		 * authoritative source. The intention is for them to be dismantled.
 		 */
 		$schema->disabled  = new IntegerField(true);
 		
@@ -68,7 +74,6 @@ class ServerModel extends Model
 		 * perform maintenance or do something similar.
 		 */
 		$schema->active    = new BooleanField();
-		$schema->status    = new IntegerField(true);
 	}
 
 }

@@ -98,6 +98,7 @@ class TopographyCron extends Cron
 				$e = db()->table('bucket')->get('uniqid', $bucket->uniqid)->first()?: db()->table('bucket')->newRecord();
 				$e->uniqid = $bucket->uniqid;
 				$e->name = $bucket->name;
+				$e->replicas = $bucket->replicas;
 				$e->cluster = db()->table('cluster')->get('uniqid', $bucket->cluster)->first();
 				$e->secondaryCluster = db()->table('cluster')->get('uniqid', $bucket->backup)->first();
 				$e->store();

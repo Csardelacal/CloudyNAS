@@ -48,7 +48,6 @@ class ServerController extends BaseController
 		$poolid   = $this->settings->read('poolid');
 		$uniqid   = $this->settings->read('uniqid');
 		$pubkey   = $this->settings->read('pubkey');
-		$cluster  = $this->settings->read('cluster');
 		
 		$active   = $this->settings->read('active');
 		$disabled = $this->settings->read('disabled');
@@ -69,7 +68,7 @@ class ServerController extends BaseController
 					'size' => $e->size, 
 					'free' => $e->free
 				], 
-				'cluster' => $e->cluster,
+				'cluster' => $e->cluster? $e->cluster->uniqid : null,
 				'updated' => $e->lastSeen,
 				'active'  => $e->active,
 				'disabled' => $e->disabled
@@ -79,20 +78,18 @@ class ServerController extends BaseController
 		
 		#TODO: Provide info about the buckets the server hosts
 		#TODO: Provide info about the cluster / masters
-		$dir = storage()->get(\spitfire\core\Environment::get('uploads.directory'));
-		
-		if (!$dir->exists()) {
-			$dir->create();
-		}
+		$dir = storage()->dir(\spitfire\core\Environment::get('uploads.directory'));
 		
 		$total = disk_total_space($dir->getPath());
 		$free  = disk_free_space($dir->getPath());
 		
+		$self = db()->table('server')->get('uniqid', $uniqid)->first();
+		
 		$this->view->set('uniqid',   $uniqid);
-		$this->view->set('role',     db()->table('server')->get('uniqid', $uniqid)->first()->role);
+		$this->view->set('role',     $self->role);
 		$this->view->set('poolid',   $poolid);
 		$this->view->set('pubkey',   $pubkey);
-		$this->view->set('cluster',  $cluster);
+		$this->view->set('cluster',  $self->cluster? $self->cluster->uniqid : null);
 		$this->view->set('servers',  $servers);
 		$this->view->set('active',   $active);
 		$this->view->set('disabled', $disabled);

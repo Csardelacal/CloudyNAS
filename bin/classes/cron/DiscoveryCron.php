@@ -80,7 +80,13 @@ class DiscoveryCron extends Cron
 			$r = request($e->hostname . '/server/info.json');
 			$r->get('s', base64_encode($keys->pack($e->uniqid, base64_encode(random_bytes(150)))));
 			
-			$response = $r->send()->expect(200)->json()->payload;
+			$response = $r->send()->expect(200)->json();
+			
+			if (!isset($response->payload)) {
+				throw new \spitfire\exceptions\PrivateException('Leader returned an invalid response', 1808261635);
+			}
+			
+			$payload  = $response->payload;
 			
 			/*
 			 * If the server is responding properly, then we report the server as
@@ -91,22 +97,22 @@ class DiscoveryCron extends Cron
 			 * to be overriden by a pool server)
 			 */
 			$e->lastSeen = time();
-			$e->size     = $response->disk->size?? null;
-			$e->free     = $response->disk->free?? null;
-			$e->cluster  = $response->cluster;
-			$e->pubKey   = $response->pubkey;
-			$e->role     = $response->role;
-			$e->active   = $response->active;
-			$e->disabled = $response->disabled;
+			$e->size     = $payload->disk->size?? null;
+			$e->free     = $payload->disk->free?? null;
+			$e->cluster  = $payload->cluster? db()->table('cluster')->get('uniqid', $payload->cluster)->first(true) : null;
+			$e->pubKey   = $payload->pubkey;
+			$e->role     = $payload->role;
+			$e->active   = $payload->active;
+			$e->disabled = $payload->disabled;
 			$e->store();
 			
-			foreach ($response->servers as $server) {
+			foreach ($payload->servers as $server) {
 				$e = db()->table('server')->get('uniqid', $server->uniqid)->first()?: db()->table('server')->newRecord();
 				$e->size     = $server->disk->size?? null;
 				$e->free     = $server->disk->free?? null;
 				$e->hostname = $server->hostname;
 				$e->uniqid   = $server->uniqid;
-				$e->cluster  = $server->cluster;
+				$e->cluster  = $server->cluster? db()->table('cluster')->get('uniqid', $server->cluster)->first(true) : null;
 				$e->pubKey   = $server->pubkey;
 				$e->role     = $server->role;
 				$e->active   = $server->active;

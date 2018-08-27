@@ -51,6 +51,20 @@ class LeaderDiscoveryCron extends Cron
 	public function execute($state) {
 		
 		$uniqid  = db()->setting->get('key', 'uniqid')->fetch()->value;
+		$self = db()->table('server')->get('uniqid', $uniqid)->first();
+		
+		if (!($self->role & Role::ROLE_LEADER)) {
+			/*
+			 * This server does not need to execute this cron. Only leaders will have
+			 * the ability to do so.
+			 */
+			return;
+		}
+		
+		$dir = storage()->dir(\spitfire\core\Environment::get('uploads.directory'));
+		$self->size = disk_total_space($dir->getPath());
+		$self->free = disk_free_space($dir->getPath());
+		$self->store();
 		
 		/*
 		 * Get the list of servers that this one is familiar with.
@@ -98,11 +112,7 @@ class LeaderDiscoveryCron extends Cron
 			$e->lastSeen = time();
 			$e->size     = $response->disk->size?? null;
 			$e->free     = $response->disk->free?? null;
-			$e->cluster  = $response->cluster;
 			$e->pubKey   = $response->pubkey;
-			$e->role     = $response->role;
-			$e->active   = $response->active;
-			$e->disabled = $response->disabled;
 			$e->store();
 		});
 	}

@@ -51,7 +51,9 @@ class HomeController extends BaseController
 		 * and assigning servers and buckets to clusters.
 		 */
 		#TODO: Collect system information, show dashboard
-		$this->view->set('servers', db()->table('server')->getAll()->all());
+		$this->view->set('servers',  db()->table('server')->getAll()->all());
+		$this->view->set('buckets',  db()->table('bucket')->getAll()->all());
+		$this->view->set('clusters', db()->table('cluster')->getAll()->all());
 	}
 	
 	public function cron() {
