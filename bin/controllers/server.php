@@ -29,6 +29,19 @@ use cloudy\Role;
 class ServerController extends BaseController
 {
 	
+	public function setRole(ServerModel$server, $role) {
+		
+		$dispatcher = new cloudy\task\TaskDispatcher();
+		$task = $dispatcher->get('server.role.set');
+		
+		$task->load($role);
+		
+		$dispatcher->send($this->keys, $server, $task);
+		
+		$server->role = $role;
+		$server->store();
+	}
+	
 	public function info() {
 		
 		if (!isset($_GET['s'])) {

@@ -105,17 +105,4 @@ class PoolController extends BaseController
 		$this->view->set('buckets', $buckets);
 		$this->view->set('clusters', $clusters);
 	}
-	
-	public function setRole(ServerModel$server, $role) {
-		
-		$dispatcher = new cloudy\task\TaskDispatcher();
-		$task = $dispatcher->get('server.role.set');
-		
-		$task->load($role);
-		
-		$dispatcher->send($this->settings->makeFrom(), $server, $task);
-		
-		$server->role = $role;
-		$server->store();
-	}
 }

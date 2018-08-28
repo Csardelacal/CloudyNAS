@@ -86,6 +86,9 @@ class BaseController extends Controller
 			$this->keys = new KeyHelper(db(), $this->settings->read('uniqid'), $this->settings->read('pubkey'), $this->settings->read('privkey'));
 		}
 		
+		/*
+		 * Check whether the server can provide authentication for remote applications
+		 */
 		if (Environment::get('SSO')) {
 			$this->sso = new SSOCache(Environment::get('SSO'));
 			$session   = \spitfire\io\session\Session::getInstance();

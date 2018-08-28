@@ -1,4 +1,4 @@
-<?php namespace cloudy\task;
+<?php namespace cloudy;
 
 /* 
  * The MIT License
@@ -24,41 +24,16 @@
  * THE SOFTWARE.
  */
 
-class TaskDispatcher
+class UUID
 {
 	
-	private $known;
-	
-	public function __construct() {
-		$this->known = collect();
-		$this->known->push(new RoleSetTask());
-	}
-	
-	/**
-	 * 
-	 * @param type $name
-	 * @return Task
-	 */
-	public function get($name) {
-		foreach ($this->known as $known) {
-			if ($known->name() === $name) {
-				return clone $known;
-			}
-		}
+	public static function v4() {
+		$data    = random_bytes(16);
+		$data[6] = chr((ord($data[6]) | 0xC0) & 0x4F);
+		$data[8] = chr((ord($data[8]) | 0xC0) & 0xBF);
 		
-		return null;
+		$str = bin2hex($str);
+		return sprintf('%s-%s-%s-%s-%s', substr($str, 0, 8), substr($str, 8, 4), substr($str, 12, 4), substr($str, 16, 4), substr($str, 20));
 	}
 	
-	public function send(\cloudy\helper\KeyHelper$keys, \ServerModel$server, Task$task) {
-		$r = request(rtrim($server->hostname, '/') . '/task/queue.json');
-		$r->header('Content-type', 'application/json');
-		$r->post($keys->pack($server->uniqid, [
-			'job' => $task->name(),
-			'version' => $task->version(),
-			'settings' => $task->save(),
-			'scheduled' => time()
-		]));
-		
-		$r->send()->expect(200);
-	}
 }

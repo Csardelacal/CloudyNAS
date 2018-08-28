@@ -53,8 +53,8 @@ class BucketModel extends Model
 		 * an easier time discerning combinations of alphanumeric strings than a 
 		 * series of similar looking numbers.
 		 */
-		$schema->uniqid = new StringField('30');
-		$schema->name   = new StringField('100');
+		$schema->uniqid = new StringField(36);
+		$schema->name   = new StringField(100);
 		
 		$schema->replicas = new IntegerField(true);
 		

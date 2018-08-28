@@ -51,6 +51,12 @@ class ServerModel extends Model
 		$schema->role     = new IntegerField(true);
 		$schema->lastSeen = new IntegerField(true);
 		
+		/**
+		 * Stores the cluster this server is assigned to. Please note that this does
+		 * not allow for a master in one cluster to be a slave on another.
+		 * 
+		 * Generally servers should not have more than one role.
+		 */
 		$schema->cluster   = new Reference('cluster');
 		$schema->size      = new FloatField(true);
 		$schema->free      = new FloatField(true);

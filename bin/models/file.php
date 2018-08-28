@@ -1,4 +1,7 @@
-<?php namespace cloudy\task;
+<?php
+
+use spitfire\Model;
+use spitfire\storage\database\Schema;
 
 /* 
  * The MIT License
@@ -24,41 +27,23 @@
  * THE SOFTWARE.
  */
 
-class TaskDispatcher
+class FileModel extends Model
 {
-	
-	private $known;
-	
-	public function __construct() {
-		$this->known = collect();
-		$this->known->push(new RoleSetTask());
-	}
 	
 	/**
 	 * 
-	 * @param type $name
-	 * @return Task
+	 * @param Schema $schema
 	 */
-	public function get($name) {
-		foreach ($this->known as $known) {
-			if ($known->name() === $name) {
-				return clone $known;
-			}
-		}
+	public function definitions(Schema $schema) {
+		$schema->uniqid   = new StringField(36);
+		$schema->revision = new Reference('revision');
+		$schema->server   = new Reference('server');
 		
-		return null;
+		/*
+		 * This field is obviously only populated if the server is hosting the file
+		 * itself.
+		 */
+		$schema->file     = new FileField();
 	}
-	
-	public function send(\cloudy\helper\KeyHelper$keys, \ServerModel$server, Task$task) {
-		$r = request(rtrim($server->hostname, '/') . '/task/queue.json');
-		$r->header('Content-type', 'application/json');
-		$r->post($keys->pack($server->uniqid, [
-			'job' => $task->name(),
-			'version' => $task->version(),
-			'settings' => $task->save(),
-			'scheduled' => time()
-		]));
-		
-		$r->send()->expect(200);
-	}
+
 }

@@ -33,38 +33,12 @@ class TaskController extends BaseController
 	public function queue() {
 		$dispatcher = new TaskDispatcher();
 		
-		$task = $dispatcher->get($_POST['job']);
+		$payload = $this->keys->unpack(file_get_contents('php://input'));
+		
+		$task = $dispatcher->get($payload['job']);
 		
 		if (!$task) {
 			throw new PublicException('No such task', 404);
-		}
-		
-		$from = explode(':', $_POST['from']);
-		
-		if (!isset($from[1])) {
-			throw new PublicException('Invalid from header', 400);
-		}
-		
-		$payload = explode(',', $from[0]);
-		
-		if (!isset($payload[1])) {
-			throw new PublicException('Invalid from payload', 400);
-		}
-		
-		$remote = db()->table('server')->get('uniqid', $payload[0])->first();
-		
-		if (!$remote) {
-			throw new PublicException('Unknown remote', 404);
-		}
-		
-		if ($payload[1] < time()) {
-			throw new PublicException('Expired from header', 403);
-		}
-		
-		openssl_public_decrypt(base64_decode($from[1]), $clear, $remote->pubKey);
-		
-		if ($clear !== $from[0]) {
-			throw new PublicException('Invalid signature', 403);
 		}
 		
 		$queue = db()->table('task\queue')->newRecord();

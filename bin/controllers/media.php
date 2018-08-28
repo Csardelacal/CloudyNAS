@@ -1,4 +1,4 @@
-<?php namespace cloudy\task;
+<?php
 
 /* 
  * The MIT License
@@ -24,41 +24,25 @@
  * THE SOFTWARE.
  */
 
-class TaskDispatcher
+class MediaController extends BaseController
 {
 	
-	private $known;
-	
-	public function __construct() {
-		$this->known = collect();
-		$this->known->push(new RoleSetTask());
+	public function create() {
+		//TODO: Implement
 	}
 	
-	/**
-	 * 
-	 * @param type $name
-	 * @return Task
-	 */
-	public function get($name) {
-		foreach ($this->known as $known) {
-			if ($known->name() === $name) {
-				return clone $known;
-			}
-		}
+	public function read($id) {
+		//TODO: Implement
+	}
+	
+	public function update($id) {
+		//TODO: Implement
 		
-		return null;
 	}
 	
-	public function send(\cloudy\helper\KeyHelper$keys, \ServerModel$server, Task$task) {
-		$r = request(rtrim($server->hostname, '/') . '/task/queue.json');
-		$r->header('Content-type', 'application/json');
-		$r->post($keys->pack($server->uniqid, [
-			'job' => $task->name(),
-			'version' => $task->version(),
-			'settings' => $task->save(),
-			'scheduled' => time()
-		]));
+	public function delete($id) {
+		//TODO: Implement
 		
-		$r->send()->expect(200);
 	}
+	
 }
