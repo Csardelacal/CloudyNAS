@@ -36,10 +36,16 @@ class MediaModel extends Model
 	public function definitions(Schema $schema) {
 		$schema->bucket = new Reference('bucket');
 		$schema->uniqid = new StringField(36);
-		$schema->id     = new StringField(4096);
+		$schema->name   = new StringField(4096);
 		
 		$schema->created  = new IntegerField(true);
 		$schema->expires  = new IntegerField(true);
+	}
+	
+	public function onbeforesave() {
+		if ($this->uniqid === null) {
+			$this->uniqid = \cloudy\UUID::v4();
+		}
 	}
 
 }

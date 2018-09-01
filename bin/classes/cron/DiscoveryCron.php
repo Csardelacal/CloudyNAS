@@ -78,9 +78,12 @@ class DiscoveryCron extends Cron
 			 */
 			
 			$r = request($e->hostname . '/server/info.json');
-			$r->get('s', base64_encode($keys->pack($e->uniqid, base64_encode(random_bytes(150)))));
 			
-			$response = $r->send()->expect(200)->json();
+			$response = $r
+				->header('Content-type', 'application/json')
+				->post($keys->pack($e->uniqid, base64_encode(random_bytes(150))))
+				->send()
+				->expect(200)->json();
 			
 			if (!isset($response->payload)) {
 				throw new \spitfire\exceptions\PrivateException('Leader returned an invalid response', 1808261635);
@@ -117,6 +120,7 @@ class DiscoveryCron extends Cron
 				$e->role     = $server->role;
 				$e->active   = $server->active;
 				$e->disabled = $server->disabled;
+				$e->lastSeen = $server->updated;
 				$e->store();
 			}
 		});

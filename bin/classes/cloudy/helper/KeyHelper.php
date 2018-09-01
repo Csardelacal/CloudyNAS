@@ -55,36 +55,37 @@ class KeyHelper
 	}
 	
 	public function pack($target, $msg) {
+		$send = json_encode($msg);
 		
 		$body = [
 			'source'    => $this->uniqid,
 			'target'    => $target,
 			'time'      => time(),
-			'msg'       => $msg,
-			'signature' => base64_encode($this->priv->sign(sprintf('%s:%s:%s:%s', $this->uniqid, $target, time(), $msg)))
+			'msg'       => $send,
+			'signature' => base64_encode($this->priv->sign(sprintf('%s:%s:%s:%s', $this->uniqid, $target, time(), $send)))
 		];
 		
 		return json_encode($body);
 	}
 	
 	public function unpack($msg) {
-		$body = is_string($msg)? json_decode($msg) : $msg;
+		$body = is_string($msg)? json_decode($msg, true) : $msg;
 		
-		if ($body->target !== $this->uniqid) {
-			throw new PrivateException('This message was not intended for this server' . $body->target .  ' - ' . $this->uniqid, 1808241101);
+		if ($body['target'] !== $this->uniqid) {
+			throw new PrivateException('This message was not intended for this server' . $body['target'] .  ' - ' . $this->uniqid, 1808241101);
 		}
 		
-		if ($body->time < time() - 3600) {
+		if ($body['time'] < time() - 3600) {
 			throw new PrivateException('Received expired message', 1808241102);
 		}
 		
-		$remote = $this->server($body->source);
+		$remote = $this->server($body['source']);
 		
-		if (!$remote->verify(sprintf('%s:%s:%s:%s', $body->source, $this->uniqid, time(), $body->msg), base64_decode($body->signature))) {
+		if (!$remote->verify(sprintf('%s:%s:%s:%s', $body['source'], $this->uniqid, time(), $body['msg']), base64_decode($body['signature']))) {
 			throw new PrivateException('Invalid signature received', 1808241103);
 		}
 		
-		return $body->msg;
+		return json_decode($body['msg'], true);
 	}
 
 	public function generate() {

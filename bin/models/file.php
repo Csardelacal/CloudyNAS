@@ -40,10 +40,33 @@ class FileModel extends Model
 		$schema->server   = new Reference('server');
 		
 		/*
+		 * Indicates when the file expires (aka is no longer expected to be found
+		 * on the server). When a client deletes a file, or overwrites it with a
+		 * later version, this file is set to expire and will then be collected
+		 * by the farbage collector at some later point. 
+		 */
+		$schema->expires  = new IntegerField(true);
+		
+		/*
+		 * This flag indicates whether the remote server has properly accepted the
+		 * file and tested whether it' works properly.'s checksum matches.
+		 * 
+		 * It's also set to 0 whenever a master writes changes that need to be
+		 * commited back to the slaves.
+		 */
+		$schema->commited = new BooleanField();
+		
+		/*
 		 * This field is obviously only populated if the server is hosting the file
 		 * itself.
 		 */
 		$schema->file     = new FileField();
+	}
+	
+	public function onbeforesave() {
+		if ($this->uniqid === null) {
+			$this->uniqid = \cloudy\UUID::v4();
+		}
 	}
 
 }

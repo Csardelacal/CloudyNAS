@@ -1,6 +1,7 @@
 <?php
 
-use spitfire\exceptions\PublicException;
+use spitfire\Model;
+use spitfire\storage\database\Schema;
 
 /* 
  * The MIT License
@@ -26,48 +27,24 @@ use spitfire\exceptions\PublicException;
  * THE SOFTWARE.
  */
 
-class BucketController extends AuthenticatedController
+class LinkModel extends Model
 {
 	
-	public function all() {
-		//TODO: Implement
+	/**
+	 * 
+	 * @param Schema $schema
+	 */
+	public function definitions(Schema $schema) {
+		$schema->uniqid  = new StringField(200);
+		$schema->media   = new Reference('media');
+		$schema->expires = new IntegerField(true);
 	}
 	
-	public function create() {
-		//TODO: Implement
-	}
 	
-	public function read(BucketModel$bucket) {
-		
-		/*
-		 * If the client consuming this endpoint has provided no authentication at
-		 * all, the server will immediately reject the request.
-		 */
-		if ($this->_auth === AuthenticatedController::AUTH_NONE) {
-			throw new PublicException('Authentication is required to access this endpoint', 403);
+	public function onbeforesave() {
+		if ($this->uniqid === null) {
+			$this->uniqid = substr(str_replace('/', '', base64_encode(random_bytes(250))), 0, 200);
 		}
-		
-		/*
-		 * If it is an application, we need to make sure that the application was 
-		 * granted r/w access on the data in the first place.
-		 */
-		elseif ($this->_auth === AuthenticatedController::AUTH_APP) {
-			$grant = $this->sso->authApp($_GET['signature'], null, ['bucket.' . $bucket->uniqid]);
-			
-			if (!$grant->getContext('bucket.' . $bucket->uniqid)->isGranted()) {
-				throw new PublicException('Authentication is required to access this endpoint', 403);
-			}
-		}
-		
-		$this->view->set('bucket', $bucket);
 	}
-	
-	public function update(BucketModel$bucket) {
-		//TODO: Implement
-	}
-	
-	public function delete(BucketModel$bucket) {
-		//TODO: Implement
-	}
-	
+
 }

@@ -40,6 +40,13 @@ class RevisionModel extends Model
 		$schema->mime     = new StringField(50);
 		$schema->created  = new IntegerField(true);
 		$schema->expires  = new IntegerField(true);
+		$schema->checksum = new StringField(40);
+	}
+	
+	public function onbeforesave() {
+		if ($this->uniqid === null) {
+			$this->uniqid = \cloudy\UUID::v4();
+		}
 	}
 
 }

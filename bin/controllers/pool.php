@@ -29,7 +29,7 @@ use spitfire\io\session\Session;
  * THE SOFTWARE.
  */
 
-class PoolController extends BaseController
+class PoolController extends AuthenticatedController
 {
 	
 	/**
@@ -37,7 +37,7 @@ class PoolController extends BaseController
 	 */
 	public function acquire() {
 		
-		if (!$this->user) {
+		if ($this->_auth !== AuthenticatedController::AUTH_USER) {
 			throw new PublicException('Not permitted', 403);
 		}
 		
@@ -46,6 +46,11 @@ class PoolController extends BaseController
 			
 			$self = db()->table('server')->get('uniqid', $this->settings->read('uniqid'))->first();
 			
+			/*
+			 * Prepare the request to acquire the new server. This contains basic
+			 * information about the pool being managed and the leader of the 
+			 * cluster.
+			 */
 			$request = request(rtrim($_POST['hostname'], '/') . '/setup/run.json');
 			$request->get('token', Session::getInstance()->getUser()->getId());
 			$request->post('pubkey',   $this->settings->read('pubkey'));
@@ -87,17 +92,13 @@ class PoolController extends BaseController
 			throw new PublicException('This server is not an authority on the pool', 403);
 		}
 		
-		$body = file_get_contents('php://input');
-		
-		if (empty($body)) {
-			throw new PublicException('Requests to this endpoint must be authorized.', 403);
-		}
-		
 		/*
 		 * Requests to this endpoint come empty. So we do not need to use the data
 		 * the user sent, just make sure it's valid.
 		 */
-		$this->keys->unpack($body);
+		if ($this->_auth !== AuthenticatedController::AUTH_INT) {
+			throw new PublicException('Requests to this endpoint must be authorized.', 403);
+		}
 		
 		$buckets  = db()->table('bucket')->getAll()->all();
 		$clusters = db()->table('cluster')->getAll()->all();

@@ -26,7 +26,7 @@ use cloudy\Role;
  * THE SOFTWARE.
  */
 
-class ServerController extends BaseController
+class ServerController extends AuthenticatedController
 {
 	
 	public function setRole(ServerModel$server, $role) {
@@ -44,11 +44,9 @@ class ServerController extends BaseController
 	
 	public function info() {
 		
-		if (!isset($_GET['s'])) {
+		if ($this->_auth !== AuthenticatedController::AUTH_INT) {
 			throw new \spitfire\exceptions\PublicException('Not authorized', 403);
 		}
-		
-		$this->keys->unpack(base64_decode($_GET['s']));
 		
 		/**
 		 * The pool ID is a random string that the pool generates and that the 

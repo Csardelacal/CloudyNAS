@@ -40,14 +40,6 @@ class BaseController extends Controller
 	
 	/**
 	 *
-	 * @var \auth\SSO
-	 */
-	protected $sso;
-	
-	protected $user;
-	
-	/**
-	 *
 	 * @var KeyHelper
 	 */
 	protected $keys;
@@ -82,23 +74,12 @@ class BaseController extends Controller
 			$this->settings->set('pubkey',  $public);
 			
 		}
-		else {
-			$this->keys = new KeyHelper(db(), $this->settings->read('uniqid'), $this->settings->read('pubkey'), $this->settings->read('privkey'));
-		}
 		
 		/*
-		 * Check whether the server can provide authentication for remote applications
+		 * Initialize the keys object to allow for the system to create and sign
+		 * requests to other servers.
 		 */
-		if (Environment::get('SSO')) {
-			$this->sso = new SSOCache(Environment::get('SSO'));
-			$session   = \spitfire\io\session\Session::getInstance();
-			
-			$token = isset($_GET['token'])? $this->sso->makeToken($_GET['token']) : $session->getUser();
-			$this->user = $token? $token->getTokenInfo() : null;
-		}
-		else {
-			throw new \spitfire\exceptions\PublicException('SSO is not properly configured', 500);
-		}
+		$this->keys = new KeyHelper(db(), $this->settings->read('uniqid'), $this->settings->read('pubkey'), $this->settings->read('privkey'));
 	}
 	
 }
