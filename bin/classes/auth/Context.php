@@ -77,11 +77,11 @@ class Context
 	}
 	
 	public function isGranted() {
-		return $this->granted === 1;
+		return ((int)$this->granted) === 2;
 	}
 	
 	public function isDenied() {
-		return $this->granted === 2;
+		return ((int)$this->granted) === 1;
 	}
 
 	public function create($name, $description) {

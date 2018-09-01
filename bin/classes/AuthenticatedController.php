@@ -97,7 +97,7 @@ class AuthenticatedController extends BaseController
 		 */
 		elseif (isset($_GET['signature'])) {
 			$this->_app = $this->sso->authApp($_GET['signature']);
-			$this->_auth = $this->_app->getAuthenticated()? self::AUTH_APP : self::AUTH_NONE;
+			$this->_auth = self::AUTH_APP;
 		}
 		
 		/**

@@ -54,8 +54,12 @@ class BucketController extends AuthenticatedController
 		elseif ($this->_auth === AuthenticatedController::AUTH_APP) {
 			$grant = $this->sso->authApp($_GET['signature'], null, ['bucket.' . $bucket->uniqid]);
 			
+			if (!$grant->getContext('bucket.' . $bucket->uniqid)->exists()) {
+				$grant->getContext('bucket.' . $bucket->uniqid)->create(sprintf('Bucket %s (%s)', $bucket->name, $bucket->uniqid), 'Allows for read / write access to the bucket');
+			}
+			
 			if (!$grant->getContext('bucket.' . $bucket->uniqid)->isGranted()) {
-				throw new PublicException('Authentication is required to access this endpoint', 403);
+				throw new PublicException('Context level insufficient.', 403);
 			}
 		}
 		
