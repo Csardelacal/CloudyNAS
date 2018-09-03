@@ -1,8 +1,5 @@
 <?php
 
-use spitfire\Model;
-use spitfire\storage\database\Schema;
-
 /* 
  * The MIT License
  *
@@ -27,24 +24,4 @@ use spitfire\storage\database\Schema;
  * THE SOFTWARE.
  */
 
-class LinkModel extends Model
-{
-	
-	/**
-	 * 
-	 * @param Schema $schema
-	 */
-	public function definitions(Schema $schema) {
-		$schema->uniqid   = new StringField(200);
-		$schema->media    = new Reference('media');
-		$schema->expires  = new IntegerField(true);
-	}
-	
-	
-	public function onbeforesave() {
-		if ($this->uniqid === null) {
-			$this->uniqid = substr(str_replace(['/', '+'], '', base64_encode(random_bytes(250))), 0, 200);
-		}
-	}
-
-}
+echo json_encode(['success' => true]);

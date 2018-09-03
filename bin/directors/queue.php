@@ -1,5 +1,7 @@
 <?php
 
+use cloudy\helper\KeyHelper;
+use cloudy\helper\SettingsHelper;
 use cloudy\task\TaskDispatcher;
 use spitfire\mvc\Director;
 
@@ -31,32 +33,83 @@ class QueueDirector extends Director
 {
 	
 	public function process() {
-		$tasks = db()->table('task\queue')->getAll()->setOrder('scheduled', 'ASC')->range(0, 10);
-		$dispatcher = new TaskDispatcher();
+		$flipflop = new \cron\FlipFlop(realpath(spitfire()->getCWD() . '/bin/usr/.cron.lock'));
+		$start    = time();
 		
-		foreach ($tasks as $task) {
-			$p = $dispatcher->get($task->job);
-			
-			if ($task->version > $p->version() + 1) {
-				$task->scheduled = $task->scheduled + 3600;
-				$task->store();
-				continue;
+		console()->info('Started queue')->ln();
+		
+		do {
+		
+			/*
+			 * Load the tasks the server is supposed to be processing. We limit it at
+			 * 10, since it's unlikely that the server will be able to handle many heavy
+			 * tasks within one cycle of the cron.
+			 */
+			$tasks = db()->table('task\queue')->getAll()->setOrder('scheduled', 'ASC')->range(0, 10);
+
+			/*
+			 * Assemble the settings helper so we can quickly read the data from the 
+			 * server's configuration.
+			 */
+			$settings = new SettingsHelper(db()->setting);
+
+			/*
+			 * Prepare the keys. This allows the tasks to defer behavior to another 
+			 * server when needed.
+			 */
+			$keys = new KeyHelper(db(), $settings->read('uniqid'), $settings->read('pubkey'), $settings->read('privkey'));
+
+			/*
+			 * Initialize the task dispatcher. This object is in charge of fetching the
+			 * tasks.
+			 */
+			$dispatcher = new TaskDispatcher($keys);
+
+			/*
+			 * Loop over the pending tasks.
+			 */
+			foreach ($tasks as $task) {
+				$p = $dispatcher->get($task->job);
+
+				/*
+				 * If the task cannot be executed at all, we will assume that the system
+				 * is being upgraded and a different server on the network received the
+				 * upgrade first.
+				 */
+				if (!$p || $task->version > $p->version() + 1) {
+					$task->scheduled = $task->scheduled + 3600;
+					$task->store();
+					continue;
+				}
+
+				/*
+				 * Restore the state the task had before being stopped. This means, pushing
+				 * the settings and the progress back to the task.
+				 */
+				$p->load($task->settings);
+				$p->setProgress($task->progress);
+
+				$p->execute(db());
+
+				if ($p->isDone()) {
+					$task->delete();
+				}
+				else {
+					$task->progress = $p->getProgress();
+					$task->scheduled = time(); #Defer long running tasks so they don't clog up the system
+					$task->store();
+				}
+				
+				
+				console()->success('Processed task ' . $task->job)->ln();
 			}
 			
-			$p->load($task->settings);
-			$p->setProgress($task->progress);
-			
-			$p->execute(db());
-			
-			if ($p->isDone()) {
-				$task->delete();
-			}
-			else {
-				$task->progress = $p->getProgress();
-				$task->scheduled = time(); #Defer long running tasks so they don't clog up the system
-				$task->store();
-			}
-		}
+			/*
+			 * If the loop has been running for more than 20 minutes. Snap out of it.
+			 */
+			if (time() - $start > 1200) { break; }
+		} 
+		while ($flipflop->wait());
 	}
 	
 }

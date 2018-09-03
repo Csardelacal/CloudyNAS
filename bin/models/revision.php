@@ -47,6 +47,10 @@ class RevisionModel extends Model
 		if ($this->uniqid === null) {
 			$this->uniqid = \cloudy\UUID::v4();
 		}
+		
+		if ($this->created === null) {
+			$this->created = time();
+		}
 	}
 
 }

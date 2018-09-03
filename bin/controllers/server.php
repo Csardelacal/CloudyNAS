@@ -31,12 +31,11 @@ class ServerController extends AuthenticatedController
 	
 	public function setRole(ServerModel$server, $role) {
 		
-		$dispatcher = new cloudy\task\TaskDispatcher();
-		$task = $dispatcher->get('server.role.set');
+		$task = $this->tasks->get('server.role.set');
 		
 		$task->load($role);
 		
-		$dispatcher->send($this->keys, $server, $task);
+		$this->tasks->send($server, $task);
 		
 		$server->role = $role;
 		$server->store();

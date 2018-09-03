@@ -1,6 +1,7 @@
 <?php
 
 use cloudy\task\TaskDispatcher;
+use spitfire\exceptions\PrivateException;
 use spitfire\exceptions\PublicException;
 
 /* 
@@ -27,15 +28,17 @@ use spitfire\exceptions\PublicException;
  * THE SOFTWARE.
  */
 
-class TaskController extends BaseController
+class TaskController extends AuthenticatedController
 {
 	
 	public function queue() {
+		if ($this->_auth !== AuthenticatedController::AUTH_INT) {
+			throw new PrivateException('Authentication of the remote application failed', 403);
+		}
+		
 		$dispatcher = new TaskDispatcher();
 		
-		$payload = $this->keys->unpack(file_get_contents('php://input'));
-		
-		$task = $dispatcher->get($payload['job']);
+		$task = $dispatcher->get($_POST['job']);
 		
 		if (!$task) {
 			throw new PublicException('No such task', 404);
@@ -48,5 +51,8 @@ class TaskController extends BaseController
 		$queue->scheduled = $_POST['scheduled']?? time();
 		$queue->progress = null;
 		$queue->store();
+		
+		$flipflop = new \cron\FlipFlop(realpath(spitfire()->getCWD() . '/bin/usr/.cron.lock'));
+		$flipflop->notify();
 	}
 }

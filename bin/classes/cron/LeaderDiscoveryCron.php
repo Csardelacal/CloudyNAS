@@ -97,9 +97,11 @@ class LeaderDiscoveryCron extends Cron
 			 * Launch a request to retrieve the remote server's status and 
 			 */
 			$r = request($e->hostname . '/server/info.json');
-			$r->get('s', base64_encode($keys->pack($e->uniqid, base64_encode(random_bytes(150)))));
 			
-			$response = $r->send()->expect(200)->json()->payload;
+			$response = $r
+				->header('Content-type', 'application/json')
+				->post($keys->pack($e->uniqid, base64_encode(random_bytes(150))))
+				->send()->expect(200)->json()->payload;
 			
 			/*
 			 * If the server is responding properly, then we report the server as

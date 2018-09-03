@@ -32,7 +32,7 @@ class UUID
 		$data[6] = chr((ord($data[6]) | 0xC0) & 0x4F);
 		$data[8] = chr((ord($data[8]) | 0xC0) & 0xBF);
 		
-		$str = bin2hex($str);
+		$str = bin2hex($data);
 		return sprintf('%s-%s-%s-%s-%s', substr($str, 0, 8), substr($str, 8, 4), substr($str, 12, 4), substr($str, 16, 4), substr($str, 20));
 	}
 	

@@ -1,7 +1,6 @@
-<?php
+<?php namespace cron;
 
-use spitfire\Model;
-use spitfire\storage\database\Schema;
+use spitfire\exceptions\PrivateException;
 
 /* 
  * The MIT License
@@ -27,24 +26,39 @@ use spitfire\storage\database\Schema;
  * THE SOFTWARE.
  */
 
-class LinkModel extends Model
+class FlipFlop
 {
 	
-	/**
-	 * 
-	 * @param Schema $schema
-	 */
-	public function definitions(Schema $schema) {
-		$schema->uniqid   = new StringField(200);
-		$schema->media    = new Reference('media');
-		$schema->expires  = new IntegerField(true);
-	}
+	private $queue;
 	
-	
-	public function onbeforesave() {
-		if ($this->uniqid === null) {
-			$this->uniqid = substr(str_replace(['/', '+'], '', base64_encode(random_bytes(250))), 0, 200);
+	public function __construct($filename) {
+		
+		if (!function_exists('msg_get_queue')) {
+			throw new PrivateException('Flip-flop requires SystemV Semaphores to work', 1806061928);
 		}
+		
+		if (!file_exists($filename)) {
+			fclose(fopen($filename, 'w'));
+		}
+		
+		$this->queue = msg_get_queue(ftok($filename, 1));
 	}
-
+	
+	public function notify() {
+		$type = 0;
+		$message = '';
+		
+		msg_receive($this->queue, 0, $type, 4096, $message, true, MSG_IPC_NOWAIT);
+		msg_send($this->queue, 1, time());
+	}
+	
+	public function wait() {
+		$type = 0;
+		$message = '';
+		
+		$success = msg_receive($this->queue, 0, $type, 4096, $message, true);
+		
+		return $success? $message : false;
+	}
+	
 }

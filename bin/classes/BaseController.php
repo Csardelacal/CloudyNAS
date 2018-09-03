@@ -45,6 +45,12 @@ class BaseController extends Controller
 	protected $keys;
 	
 	/**
+	 *
+	 * @var cloudy\task\TaskDispatcher
+	 */
+	protected $tasks;
+	
+	/**
 	 * Whenever the base controller is summoned, it will ensure that certain basic
 	 * requirements are available.
 	 */
@@ -80,6 +86,9 @@ class BaseController extends Controller
 		 * requests to other servers.
 		 */
 		$this->keys = new KeyHelper(db(), $this->settings->read('uniqid'), $this->settings->read('pubkey'), $this->settings->read('privkey'));
+		
+		
+		$this->tasks = new cloudy\task\TaskDispatcher($this->keys);
 	}
 	
 }

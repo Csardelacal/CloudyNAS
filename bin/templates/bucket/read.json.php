@@ -24,8 +24,22 @@
  * THE SOFTWARE.
  */
 
+$cluster = $bucket->cluster;
+$servers = db()->table('server')->get('cluster', $bucket->cluster)->all();
+$master  = null;
+
+foreach ($servers as $candidate) {
+	if ($candidate->role & \cloudy\Role::ROLE_MASTER && $candidate->active) {
+		$master = $candidate;
+	}
+}
+
 echo json_encode([
 	'payload' => [
-		'id' => $bucket->uniqid
+		'id'     => $bucket->uniqid,
+		'master' => $master? [
+			'uniqid'   => $master->uniqid,
+			'hostname' => $master->hostname
+		] : null
 	]
 ]);

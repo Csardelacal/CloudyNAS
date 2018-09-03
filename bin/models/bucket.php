@@ -78,19 +78,30 @@ class BucketModel extends Model
 	public function size() {
 		/*@var $servers \spitfire\core\Collection*/
 		$servers = $this->cluster->servers->getQuery()->all();
-		$count   = $servers->count();
 		
-		$sorted = $servers->sort(function ($a, $b) {
+		$sorted = $servers
+		->filter(function ($e) { return $e->role & cloudy\Role::ROLE_SLAVE; })
+		->sort(function ($a, $b) {
 			return $a->size - $b->size;
 		})->extract('size');
 		
-		if ($count > $this->replicas) {
-			for ($i = 0; $i < $count; $i++) {
-				$sorted->shift();
-			}
+		$count    = $sorted->count();
+		$replicas = $count > $this->replicas? $this->replicas : $count;
+		
+		for ($i = 1; $i < $replicas; $i++) {
+			$sorted->shift();
 		}
 		
-		return $count == 0? 0 : $sorted->avg() / $count * ($count + $this->replicas);
+		for ($i = 1; $i < $replicas; $i++) {
+			$sorted->push($sorted->rewind());
+		}
+		
+		try {
+			return $sorted->avg();
+		}
+		catch (\Exception$e) {
+			return 0;
+		}
 	}
 
 }

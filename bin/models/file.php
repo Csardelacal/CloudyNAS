@@ -36,6 +36,15 @@ class FileModel extends Model
 	 */
 	public function definitions(Schema $schema) {
 		$schema->uniqid   = new StringField(36);
+		
+		/*
+		 * Points to the revision of a piece of media that this file is hosting.
+		 * 
+		 * This field is only populated on masters, since slaves do not have any 
+		 * notion of the relations between files and media. Therefore, when a 
+		 * slave receives a request for a file it must either look up in a cache
+		 * whether the file is available or look the information up on the master.
+		 */
 		$schema->revision = new Reference('revision');
 		$schema->server   = new Reference('server');
 		
@@ -57,9 +66,11 @@ class FileModel extends Model
 		$schema->commited = new BooleanField();
 		
 		/*
-		 * This field is obviously only populated if the server is hosting the file
+		 * This fields are obviously only populated if the server is hosting the file
 		 * itself.
 		 */
+		$schema->mime     = new StringField(30);
+		$schema->checksum = new StringField(40);
 		$schema->file     = new FileField();
 	}
 	

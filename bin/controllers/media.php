@@ -1,5 +1,7 @@
 <?php
 
+use spitfire\exceptions\PublicException;
+
 /* 
  * The MIT License
  *
@@ -24,11 +26,59 @@
  * THE SOFTWARE.
  */
 
-class MediaController extends BaseController
+class MediaController extends AuthenticatedController
 {
 	
 	public function create() {
-		//TODO: Implement
+		$bucket   = db()->table('bucket')->get('uniqid', $_POST['bucket'])->first(true);
+		
+		if ($this->_auth === AuthenticatedController::AUTH_NONE) {
+			throw new PublicException('Authentication required', 403);
+		}
+		elseif ($this->_auth === AuthenticatedController::AUTH_APP) {
+			$grant = $this->sso->authApp($_GET['signature'], null, ['bucket.' . $bucket->uniqid]);
+			
+			if (!$grant->getContext('bucket.' . $bucket->uniqid)->exists()) {
+				$grant->getContext('bucket.' . $bucket->uniqid)->create(sprintf('Bucket %s (%s)', $bucket->name, $bucket->uniqid), 'Allows for read / write access to the bucket');
+			}
+			
+			if (!$grant->getContext('bucket.' . $bucket->uniqid)->isGranted()) {
+				throw new PublicException('Context level insufficient.', 403);
+			}
+		}
+		
+		
+		$media = db()->table('media')->newRecord();
+		$media->bucket = $bucket;
+		$media->name   = $_POST['name'];
+		$media->store();
+		
+		$revision = db()->table('revision')->newRecord();
+		$revision->media = $media;
+		$revision->mime  = $_POST['mime'];
+		$revision->checksum = md5_file($_POST['file']->store()->getPath());
+		$revision->store();
+		
+		$master = db()->table('server')->get('uniqid', $this->settings->read('uniqid'))->first(true);
+		
+		$file = db()->table('file')->newRecord();
+		$file->revision = $revision;
+		$file->server   = $master;
+		$file->file     = $_POST['file']->store()->uri();
+		$file->mime     = $_POST['mime'];
+		$file->expires  = time() + 86400 * 7;
+		$file->commited = 1;
+		$file->store();
+		
+		$link = db()->table('link')->newRecord();
+		$link->media = $media;
+		$link->expires = null;
+		$link->store();
+		
+		$task = $this->tasks->get(\cloudy\task\FileDistributeTask::class);
+		$task->load($revision->uniqid);
+		$this->tasks->send($master, $task);
+		
 	}
 	
 	public function read($id) {

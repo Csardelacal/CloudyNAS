@@ -59,6 +59,27 @@ abstract class Task
 	 */
 	private $done;
 	
+	/**
+	 *
+	 * @var TaskDispatcher
+	 */
+	private $dispatcher;
+	
+	public function __construct($dispatcher) {
+		$this->dispatcher = $dispatcher;
+	}
+	
+	/**
+	 * 
+	 * @return TaskDispatcher
+	 */
+	public function dispatcher() {
+		return $this->dispatcher;
+	}
+	
+	public function keys() {
+		return $this->dispatcher->getKeys();
+	}
 	
 	public function getTarget() {
 		return $this->target;
@@ -99,13 +120,6 @@ abstract class Task
 	public function accessLevel() {
 		return \cloudy\Role::ROLE_MASTER | \cloudy\Role::ROLE_LEADER | \cloudy\Role::ROLE_SLAVE;
 	}
-		
-	/**
-	 * Returns the name of the task. This allows cross-server identification of 
-	 * the tasks. This information is used to retrieve the proper tasks when the 
-	 * data is retrieved from the queue.
-	 */
-	public abstract function name();
 	
 	/**
 	 * Returns the version of the task. Every task must be backwards compatible one

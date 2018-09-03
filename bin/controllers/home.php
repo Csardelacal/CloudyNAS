@@ -8,7 +8,7 @@ use cron\LeaderDiscoveryCron;
  * 
  * @author César de la Cal Bretschneider <cesar@magic3w.com>
  */
-class HomeController extends BaseController
+class HomeController extends AuthenticatedController
 {
 	public function index() {
 		
@@ -41,6 +41,10 @@ class HomeController extends BaseController
 			else {
 				return $this->response->setBody('Redirection...')->getHeaders()->redirect(url('setup'));
 			}
+		}
+		
+		if (!$this->_user) {
+			return $this->response->setBody('Redirection...')->getHeaders()->redirect(url('user', 'login', ['returnto' => (string)(url())]));
 		}
 		
 		/*

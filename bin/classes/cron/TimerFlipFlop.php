@@ -1,7 +1,6 @@
-<?php
+<?php namespace cron;
 
-use spitfire\Model;
-use spitfire\storage\database\Schema;
+use spitfire\exceptions\PrivateException;
 
 /* 
  * The MIT License
@@ -27,24 +26,18 @@ use spitfire\storage\database\Schema;
  * THE SOFTWARE.
  */
 
-class LinkModel extends Model
+class TimerFlipFlop
 {
-	
-	/**
-	 * 
-	 * @param Schema $schema
-	 */
-	public function definitions(Schema $schema) {
-		$schema->uniqid   = new StringField(200);
-		$schema->media    = new Reference('media');
-		$schema->expires  = new IntegerField(true);
+	public function __construct($filename) {
 	}
 	
-	
-	public function onbeforesave() {
-		if ($this->uniqid === null) {
-			$this->uniqid = substr(str_replace(['/', '+'], '', base64_encode(random_bytes(250))), 0, 200);
-		}
+	public function notify() {
+		//Not applicable. This does not work here
 	}
-
+	
+	public function wait() {
+		sleep(30);
+		return true;
+	}
+	
 }

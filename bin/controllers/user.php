@@ -26,7 +26,7 @@ use spitfire\io\session\Session;
  * THE SOFTWARE.
  */
 
-class UserController extends BaseController
+class UserController extends AuthenticatedController
 {
 	
 	public function login() {
@@ -35,7 +35,7 @@ class UserController extends BaseController
 		 * Check whether the user is already logged in, if this is the case, then
 		 * it's safe to redirect the user back to the rest of the application.
 		 */
-		if ($this->user) {
+		if ($this->_user) {
 			return $this->response->setBody('Redirecting...')->getHeaders()->redirect(isset($_GET['returnto'])? $_GET['returnto'] : url());
 		}
 		

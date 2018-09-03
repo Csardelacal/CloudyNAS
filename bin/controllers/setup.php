@@ -37,7 +37,7 @@ use spitfire\exceptions\PublicException;
  * * Deletions
  * * Cron automated tasks (like discovery, health check, etc)
  */
-class SetupController extends BaseController
+class SetupController extends AuthenticatedController
 {
 	
 	/**
@@ -60,10 +60,6 @@ class SetupController extends BaseController
 		
 		if ($this->settings->read('poolid')) {
 			throw new PublicException('This server has already been set up.', 403);
-		}
-		
-		if (!$this->user) {
-			return $this->response->setBody('Redirect...')->getHeaders()->redirect(url('user', 'login', ['returnto' => (string)url('setup')]));
 		}
 		
 		if ($this->request->isPost() && isset($_POST['init'])) {

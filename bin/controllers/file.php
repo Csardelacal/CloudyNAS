@@ -1,5 +1,7 @@
 <?php
 
+use spitfire\exceptions\PublicException;
+
 /* 
  * The MIT License
  *
@@ -24,11 +26,50 @@
  * THE SOFTWARE.
  */
 
-class FileController extends BaseController
+class FileController extends AuthenticatedController
 {
 	
-	public function retrieve($id) {
-		//TODO: Implement
+	public function read() {
+		
+	}
+	
+	public function commit($uniqid) {
+		if ($this->_auth !== AuthenticatedController::AUTH_INT) {
+			throw new \spitfire\exceptions\PrivateException('Not authorized', 403);
+		}
+		
+		$file = db()->table('file')->get('uniqid', $uniqid)->first(true);
+		
+		$file->commited = true;
+		$file->store();
+	}
+	
+	public function retrieve($type, $id) {
+		$self = db()->table('server')->get('uniqid', $this->settings->read('uniqid'))->first(true);
+		
+		if ($type === 'uniqid' && $this->_auth === AuthenticatedController::AUTH_INT) {
+			
+			$file = db()->table('file')->get('uniqid', $id)->first();
+			
+			$revision = $file->revision;
+			$local    = db()->table('file')->get('revision', $revision)->where('server', $self)->first(true);
+			
+		}
+		else {
+			$link = db()->table('link')->get('uniqid', $id)->first(true);
+			$media = $link->media;
+			
+			$revision = db()->table('revision')->get('media', $media)->where('expires', null)->first(true);
+			$local = db()->table('file')->get('revision', $revision)->where('server', $self)->first(true);
+		}
+		
+		if ($local->file) {
+			$this->response->setBody(storage($local->file)->read())->getHeaders()
+				->set('Content-type', $local->mime);
+		}
+		else {
+			throw new PublicException('File is not here', 404);
+		}
 	}
 	
 }

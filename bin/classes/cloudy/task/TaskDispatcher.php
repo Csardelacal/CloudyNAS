@@ -27,11 +27,15 @@
 class TaskDispatcher
 {
 	
+	private $keys;
 	private $known;
 	
-	public function __construct() {
+	public function __construct($keys) {
+		$this->keys = $keys;
+		
 		$this->known = collect();
-		$this->known->push(new RoleSetTask());
+		$this->known->push(FilePullTask::class);
+		$this->known->push(FileDistributeTask::class);
 	}
 	
 	/**
@@ -41,19 +45,27 @@ class TaskDispatcher
 	 */
 	public function get($name) {
 		foreach ($this->known as $known) {
-			if ($known->name() === $name) {
-				return clone $known;
+			if ($known === $name) {
+				return new $known($this);
 			}
 		}
 		
 		return null;
 	}
 	
-	public function send(\cloudy\helper\KeyHelper$keys, \ServerModel$server, Task$task) {
+	/**
+	 * 
+	 * @return \cloudy\helper\KeyHelper
+	 */
+	public function getKeys() {
+		return $this->keys;
+	}
+		
+	public function send(\ServerModel$server, Task$task) {
 		$r = request(rtrim($server->hostname, '/') . '/task/queue.json');
 		$r->header('Content-type', 'application/json');
-		$r->post($keys->pack($server->uniqid, [
-			'job' => $task->name(),
+		$r->post($this->keys->pack($server->uniqid, [
+			'job' => get_class($task),
 			'version' => $task->version(),
 			'settings' => $task->save(),
 			'scheduled' => time()
