@@ -41,24 +41,24 @@ class FileDistributeTask extends Task
 		$cluster = $bucket->cluster;
 		
 		$servers = $db->table('server')->get('cluster', $cluster)->all()->filter(function ($e) { return $e->role & Role::ROLE_SLAVE; });
-		$weighted = [];
+		$replicas = min((int)$servers->count(), $bucket->replicas);
 		
 		$total    = 0;
-		$replicas = max($servers->count(), $bucket->replicas);
 		
-		foreach ($servers as $server) {
-			$weight = (int)(pow($server->free / $server->size, 2) * 100);
-			$weighted[$weight + $total] = $server;
-			$total+= $weight;
-		}
-		
-		$reverse = array_reverse($weighted);
 		
 		for ($i = 0; $i < $replicas; $i++) {
+			$weighted = [];
+			
+			foreach ($servers as $server) {
+				$weight = (int)(pow($server->free / $server->size, 2) * 100);
+				$weighted[$weight + $total] = $server;
+				$total+= $weight;
+			}
+
 			$rand = mt_rand(0, $total);
 			
-			foreach ($reverse as $weight => $server) {
-				if ($weight < $rand) {
+			foreach ($weighted as $weight => $server) {
+				if ($weight > $rand) {
 					$file = $db->table('file')->newRecord();
 					$file->revision = $media;
 					$file->server = $server;
@@ -74,7 +74,7 @@ class FileDistributeTask extends Task
 						$t
 					);
 						
-					unset($reverse[$weight]);
+					$servers->remove($server);
 						
 					break;
 				}

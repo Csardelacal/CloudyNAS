@@ -79,10 +79,41 @@ class MediaController extends AuthenticatedController
 		$task->load($revision->uniqid);
 		$this->tasks->send($master, $task);
 		
+		$this->view->set('media', $media);
+		$this->view->set('link',  $link);
+		
 	}
 	
 	public function read($id) {
-		//TODO: Implement
+		$media   = db()->table('media')->get('uniqid', $id)->first(true);
+		$bucket  = $media->bucket;
+		
+		if ($this->_auth === AuthenticatedController::AUTH_NONE) {
+			throw new PublicException('Authentication required', 403);
+		}
+		elseif ($this->_auth === AuthenticatedController::AUTH_APP) {
+			$grant = $this->sso->authApp($_GET['signature'], null, ['bucket.' . $bucket->uniqid]);
+			
+			if (!$grant->getContext('bucket.' . $bucket->uniqid)->exists()) {
+				$grant->getContext('bucket.' . $bucket->uniqid)->create(sprintf('Bucket %s (%s)', $bucket->name, $bucket->uniqid), 'Allows for read / write access to the bucket');
+			}
+			
+			if (!$grant->getContext('bucket.' . $bucket->uniqid)->isGranted()) {
+				throw new PublicException('Context level insufficient.', 403);
+			}
+		}
+		
+		$latest  = db()->table('revision')->get('media', $media)->where('expires', null)->first(true);
+		$revs    = db()->table('revision')->get('media', $media)->all();
+		$files   = db()->table('file')->get('revision', $latest)->all();
+		$links   = db()->table('link')->get('media', $media)->all();
+		
+		$this->view->set('latest', $latest);
+		$this->view->set('media', $media);
+		$this->view->set('bucket', $bucket);
+		$this->view->set('revs',   $revs);
+		$this->view->set('files',  $files);
+		$this->view->set('links',  $links);
 	}
 	
 	public function update($id) {

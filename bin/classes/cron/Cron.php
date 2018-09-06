@@ -29,7 +29,7 @@ abstract class Cron
 			
 			if ( $model->lastrun + $this->getInterval() < time() ) {
 				$model->state = $this->execute($model->state);
-				$model->lastrun = 0;
+				$model->lastrun = time();
 				$model->store();
 			}
 			

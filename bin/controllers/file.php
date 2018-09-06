@@ -55,12 +55,31 @@ class FileController extends AuthenticatedController
 			$local    = db()->table('file')->get('revision', $revision)->where('server', $self)->first(true);
 			
 		}
-		else {
+		elseif($self->role & cloudy\Role::ROLE_MASTER) {
 			$link = db()->table('link')->get('uniqid', $id)->first(true);
 			$media = $link->media;
 			
 			$revision = db()->table('revision')->get('media', $media)->where('expires', null)->first(true);
 			$local = db()->table('file')->get('revision', $revision)->where('server', $self)->first(true);
+		}
+		else {
+			$memcached = new \spitfire\cache\MemcachedAdapter();
+			$file = $memcached->get('link_' . $id, function () use ($self, $id) {
+				$master  = db()->table('server')->get('cluster', $self->cluster)->all()->filter(function ($e) { return $e->role & cloudy\Role::ROLE_MASTER; })->rewind();
+				
+				$request = request($master->hostname . '/link/read/' . $id . '.json');
+				$request->header('Content-type', 'application/json')
+				->post($this->keys->pack($master->uniqid, base64_encode(random_bytes(150))));
+				
+				$files = $request->send()->expect(200)->json()->files;
+				
+				foreach ($files as $file) {
+					if ($self->uniqid == $file->server) { return $file->uniqid; }
+				}
+				
+			});
+			
+			$local = db()->table('file')->get('uniqid', $file)->first(true);
 		}
 		
 		if ($local->file) {
