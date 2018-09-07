@@ -56,13 +56,14 @@ class KeyHelper
 	
 	public function pack($target, $msg) {
 		$send = json_encode($msg);
+		$time = time();
 		
 		$body = [
 			'source'    => $this->uniqid,
 			'target'    => $target,
-			'time'      => time(),
+			'time'      => $time,
 			'msg'       => $send,
-			'signature' => base64_encode($this->priv->sign(sprintf('%s:%s:%s:%s', $this->uniqid, $target, time(), $send)))
+			'signature' => base64_encode($this->priv->sign(sprintf('%s:%s:%s:%s', $this->uniqid, $target, $time, $send)))
 		];
 		
 		return json_encode($body);
@@ -81,7 +82,8 @@ class KeyHelper
 		
 		$remote = $this->server($body['source']);
 		
-		if (!$remote->verify(sprintf('%s:%s:%s:%s', $body['source'], $this->uniqid, time(), $body['msg']), base64_decode($body['signature']))) {
+		if (!$remote->verify(sprintf('%s:%s:%s:%s', $body['source'], $this->uniqid, $body['time'], $body['msg']), base64_decode($body['signature']))) {
+			file_put_contents(spitfire()->getCWD() . '/logs/key.error.dump', sprintf('GET => %s %sPOST => %s', print_r($_GET, true), PHP_EOL, print_r($_POST, true)));
 			throw new PrivateException('Invalid signature received', 1808241103);
 		}
 		

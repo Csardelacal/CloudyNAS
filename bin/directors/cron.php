@@ -1,9 +1,9 @@
-<?php namespace cloudy\task;
+<?php
 
 use cloudy\helper\KeyHelper;
-use ServerModel;
-use function collect;
-use function request;
+use cloudy\helper\SettingsHelper;
+use cloudy\task\TaskDispatcher;
+use spitfire\mvc\Director;
 
 /* 
  * The MIT License
@@ -29,57 +29,41 @@ use function request;
  * THE SOFTWARE.
  */
 
-class TaskDispatcher
+class CronDirector extends Director
 {
 	
-	private $keys;
-	private $known;
-	
-	public function __construct($keys) {
-		$this->keys = $keys;
+	public function run() {
 		
-		$this->known = collect();
-		$this->known->push(FilePullTask::class);
-		$this->known->push(FileDistributeTask::class);
+		/*
+		 * Assemble the settings helper so we can quickly read the data from the 
+		 * server's configuration.
+		 */
+		$settings = new SettingsHelper(db()->setting);
+
+		/*
+		 * Prepare the keys. This allows the tasks to defer behavior to another 
+		 * server when needed.
+		 */
+		$keys = new KeyHelper(db(), $settings->read('uniqid'), $settings->read('pubkey'), $settings->read('privkey'));
+
+		/*
+		 * Initialize the task dispatcher. This object is in charge of fetching the
+		 * tasks.
+		 */
+		$dispatcher = new TaskDispatcher($keys);
 		
-		$this->known->push(DiscoveryTask::class);
-		$this->known->push(TopographyTask::class);
-		$this->known->push(LeaderDiscoveryTask::class);
-	}
-	
-	/**
-	 * 
-	 * @param type $name
-	 * @return Task
-	 */
-	public function get($name) {
-		foreach ($this->known as $known) {
-			if ($known === $name) {
-				return new $known($this);
-			}
+		$run = [
+			 cloudy\task\DiscoveryTask::class,
+			 cloudy\task\LeaderDiscoveryTask::class,
+			 cloudy\task\TopographyTask::class
+		];
+		
+		foreach ($run as $t) {
+			$task = $dispatcher->get($t);
+			$dispatcher->send(db()->table('server')->get('uniqid', $settings->read('uniqid'))->first(true), $task);
+			sleep(30);
 		}
 		
-		return null;
 	}
 	
-	/**
-	 * 
-	 * @return KeyHelper
-	 */
-	public function getKeys() {
-		return $this->keys;
-	}
-		
-	public function send(ServerModel$server, Task$task) {
-		$r = request(rtrim($server->hostname, '/') . '/task/queue.json');
-		$r->header('Content-type', 'application/json');
-		$r->post($this->keys->pack($server->uniqid, [
-			'job' => get_class($task),
-			'version' => $task->version(),
-			'settings' => $task->save(),
-			'scheduled' => time()
-		]));
-		
-		$r->send()->expect(200);
-	}
 }

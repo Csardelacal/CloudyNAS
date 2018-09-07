@@ -50,7 +50,8 @@ class FileDistributeTask extends Task
 			$weighted = [];
 			
 			foreach ($servers as $server) {
-				$weight = (int)(pow($server->free / $server->size, 2) * 100);
+				$size = $server->size + 1;
+				$weight = (int)(pow($server->free / $size, 2) * 1000);
 				$weighted[$weight + $total] = $server;
 				$total+= $weight;
 			}

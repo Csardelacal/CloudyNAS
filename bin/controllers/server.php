@@ -30,13 +30,6 @@ class ServerController extends AuthenticatedController
 {
 	
 	public function setRole(ServerModel$server, $role) {
-		
-		$task = $this->tasks->get('server.role.set');
-		
-		$task->load($role);
-		
-		$this->tasks->send($server, $task);
-		
 		$server->role = $role;
 		$server->store();
 	}

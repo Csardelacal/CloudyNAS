@@ -33,8 +33,17 @@ class QueueDirector extends Director
 {
 	
 	public function process() {
-		$flipflop = new \cron\FlipFlop(realpath(spitfire()->getCWD() . '/bin/usr/.cron.lock'));
-		$start    = time();
+		$start = time();
+		
+		$file = spitfire()->getCWD() . '/bin/usr/.cron.lock';
+		$fh = fopen($file, file_exists($file)? 'r' : 'w+');
+		
+		if (!flock($fh, LOCK_EX)) { 
+			console()->error('Could not acquire lock')->ln();
+			return 1; 
+		}
+		
+		$flipflop = new \cron\FlipFlop(realpath($file));
 		
 		console()->info('Started queue')->ln();
 		
@@ -96,7 +105,7 @@ class QueueDirector extends Director
 				}
 				else {
 					$task->progress = $p->getProgress();
-					$task->scheduled = time(); #Defer long running tasks so they don't clog up the system
+					$task->scheduled = time() + 10; #Defer long running tasks so they don't clog up the system
 					$task->store();
 				}
 				
@@ -109,7 +118,9 @@ class QueueDirector extends Director
 			 */
 			if (time() - $start > 1200) { break; }
 		} 
-		while ($flipflop->wait());
+		while (db()->table('task\queue')->get('scheduled', time(), '<=')->count() > 0 || $flipflop->wait());
+		
+		console()->info('Queue ended')->ln();
 	}
 	
 }

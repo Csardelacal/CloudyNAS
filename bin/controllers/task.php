@@ -36,7 +36,7 @@ class TaskController extends AuthenticatedController
 			throw new PrivateException('Authentication of the remote application failed', 403);
 		}
 		
-		$dispatcher = new TaskDispatcher();
+		$dispatcher = $this->tasks;
 		
 		$task = $dispatcher->get($_POST['job']);
 		

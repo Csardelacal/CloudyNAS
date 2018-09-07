@@ -1,4 +1,4 @@
-<?php namespace cron;
+<?php namespace cloudy\task;
 
 use cloudy\helper\KeyHelper;
 use cloudy\Role;
@@ -45,18 +45,38 @@ use function request;
  * 
  * @author César de la Cal Bretschneider <cesar@magic3w.com>
  */
-class DiscoveryCron extends Cron
+class LeaderDiscoveryTask extends Task
 {
 	
 	public function execute($state) {
 		
 		$uniqid  = db()->setting->get('key', 'uniqid')->fetch()->value;
+		$self = db()->table('server')->get('uniqid', $uniqid)->first();
+		
+		if (!($self->role & Role::ROLE_LEADER)) {
+			/*
+			 * This server does not need to execute this cron. Only leaders will have
+			 * the ability to do so.
+			 */
+			$this->done();
+			return;
+		}
+		
+		$dir = storage()->dir(\spitfire\core\Environment::get('uploads.directory'));
+		$self->size = disk_total_space($dir->getPath());
+		$self->free = disk_free_space($dir->getPath());
+		$self->store();
 		
 		/*
 		 * Get the list of servers that this one is familiar with.
 		 */
 		$refresh = db()->table('server')->getAll()->all();
 		
+		
+		/*
+		 * Generate a signature that is used to sign this request against the receiving
+		 * servers.
+		 */
 		$keys = new KeyHelper(db(), $uniqid, db()->setting->get('key', 'pubkey')->fetch()->value, db()->setting->get('key', 'privkey')->fetch()->value);
 		
 		$refresh->filter(function ($e) use ($uniqid) {
@@ -69,27 +89,20 @@ class DiscoveryCron extends Cron
 				return false;
 			}
 			
-			return $e->role & Role::ROLE_LEADER;
+			return !($e->role & Role::ROLE_LEADER);
+			
 		})->each(function ($e) use ($keys) {
 			
 			
 			/*
 			 * Launch a request to retrieve the remote server's status and 
 			 */
-			
 			$r = request($e->hostname . '/server/info.json');
 			
 			$response = $r
 				->header('Content-type', 'application/json')
 				->post($keys->pack($e->uniqid, base64_encode(random_bytes(150))))
-				->send()
-				->expect(200)->json();
-			
-			if (!isset($response->payload)) {
-				throw new \spitfire\exceptions\PrivateException('Leader returned an invalid response', 1808261635);
-			}
-			
-			$payload  = $response->payload;
+				->send()->expect(200)->json()->payload;
 			
 			/*
 			 * If the server is responding properly, then we report the server as
@@ -100,38 +113,25 @@ class DiscoveryCron extends Cron
 			 * to be overriden by a pool server)
 			 */
 			$e->lastSeen = time();
-			$e->size     = $payload->disk->size?? null;
-			$e->free     = $payload->disk->free?? null;
-			$e->cluster  = $payload->cluster? db()->table('cluster')->get('uniqid', $payload->cluster)->first(true) : null;
-			$e->pubKey   = $payload->pubkey;
-			$e->role     = $payload->role;
-			$e->active   = $payload->active;
-			$e->disabled = $payload->disabled;
+			$e->size     = $response->disk->size?? null;
+			$e->free     = $response->disk->free?? null;
+			$e->pubKey   = $response->pubkey;
 			$e->store();
-			
-			foreach ($payload->servers as $server) {
-				$e = db()->table('server')->get('uniqid', $server->uniqid)->first()?: db()->table('server')->newRecord();
-				$e->size     = $server->disk->size?? null;
-				$e->free     = $server->disk->free?? null;
-				$e->hostname = $server->hostname;
-				$e->uniqid   = $server->uniqid;
-				$e->cluster  = $server->cluster? db()->table('cluster')->get('uniqid', $server->cluster)->first(true) : null;
-				$e->pubKey   = $server->pubkey;
-				$e->role     = $server->role;
-				$e->active   = $server->active;
-				$e->disabled = $server->disabled;
-				$e->lastSeen = $server->updated;
-				$e->store();
-			}
 		});
+		
+		$this->done();
 	}
 
-	public function getInterval() {
-		return 600;
+	public function load($settings) {
+		return;
 	}
 
-	public function getName() {
-		return 'discovery';
+	public function save() {
+		return;
+	}
+
+	public function version() {
+		return 1;
 	}
 
 }
