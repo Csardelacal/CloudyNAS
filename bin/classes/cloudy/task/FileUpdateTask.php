@@ -24,60 +24,58 @@
  * THE SOFTWARE.
  */
 
-class FilePullTask extends Task
+class FileUpdateTask extends Task
 {
 	
 	private $uniqid;
 	
 	public function execute($db) {
-		$file = db()->table('file')->get('uniqid', $this->uniqid)->first()? : db()->table('file')->newRecord();
+		$file = db()->table('file')->get('uniqid', $this->uniqid)->first();
 		$self = db()->table('server')->get('uniqid', db()->table('setting')->get('key', 'uniqid')->first()->value)->first(true);
 		
-		if ($file->file) {
-			try {	storage($file->file)->delete(); }
-			catch (\Exception$e) {}
-		}
-		
-		$dir = storage(\spitfire\core\Environment::get('uploads.directory'));
-		
-		if (!$dir instanceof \spitfire\storage\objectStorage\DirectoryInterface) {
-			throw new \spitfire\exceptions\PrivateException('Storage directory is not a directory', 1809031142);
+		if (!$file) {
+			console()->error('Tried updating non-existent file ' . $this->uniqid)->ln();
+			
+			$task = $this->dispatcher()->get(FilePullTask::class);
+			$task->load($this->uniqid);
+			
+			$this->dispatcher()->send($self, $task);
+			
+			return;
 		}
 		
 		$cluster = $self->cluster;
 		$server  = db()->table('server')->get('cluster', $cluster)->where('active', true)->all()->filter(function($e) { return $e->role & \cloudy\Role::ROLE_MASTER; })->rewind();
 
-		$request = request($server->hostname . '/file/retrieve/uniqid/' . $this->uniqid);
+		$request = request($server->hostname . '/file/read/' . $this->uniqid . '.json');
 		$request->header('Content-type', 'application/json');
 		$request->post($this->keys()->pack($server->uniqid, base64_encode(random_bytes(150))));
 
-		$response = $request->send();
-
-		try { $storage = $dir->open('uniqid_' . $this->uniqid); }
-		catch (\Exception$e) { $storage = $dir->make('uniqid_' . $this->uniqid); }
-
-		$storage->write($response->html());
-
-		$file->file = $storage->uri();
-		$file->mime = $response->mime();
+		$response = $request->send()->expect(200);
+		$json = $response->json();
 		
-		$file->uniqid = $this->uniqid;
-		$file->server = $self;
+		if (!$json->status === 'OK' || !$json->payload) {
+			throw new \spitfire\exceptions\PrivateException('Request failed', 1809080956);
+		}
+		
+		$payload = $json->payload;
+		$file->expires = $payload->expires;
+		$file->checksum = $payload->checksum;
 		$file->commited = true;
 		$file->store();
 		
-		try {
-			$request = request($server->hostname . '/file/commit/' . $this->uniqid . '.json');
-			$request->header('Content-type', 'application/json');
-			$request->post($this->keys()->pack($server->uniqid, base64_encode(random_bytes(150))));
-			$request->send()->expect(200);
-		}
-		catch (\Exception$e) {
-			console()->error('Could not commit file ' . $this->uniqid)->ln();
+		if (!md5_file(storage($file->file)->getPath())) {
+			#The file is corrupted on disk
+			$task = $this->dispatcher()->get(FilePullTask::class);
+			$task->load($this->uniqid);
 			
-			$file->expires = time();
-			$file->store();
+			$this->dispatcher()->send($self, $task);
 		}
+		
+		$request = request($server->hostname . '/file/commit/' . $this->uniqid . '.json');
+		$request->header('Content-type', 'application/json');
+		$request->post($this->keys()->pack($server->uniqid, base64_encode(random_bytes(150))));
+		$request->send()->expect(200);
 		
 		$this->done();
 	}

@@ -40,7 +40,11 @@ class TaskDispatcher
 		
 		$this->known = collect();
 		$this->known->push(FilePullTask::class);
+		$this->known->push(FileUpdateTask::class);
 		$this->known->push(FileDistributeTask::class);
+		
+		$this->known->push(FileChecksumTask::class);
+		$this->known->push(FileCountHealthCheckTask::class);
 		
 		$this->known->push(DiscoveryTask::class);
 		$this->known->push(TopographyTask::class);
@@ -59,7 +63,7 @@ class TaskDispatcher
 			}
 		}
 		
-		return null;
+		throw new \spitfire\exceptions\PrivateException('Unknown task ' . $name, 1809121639);
 	}
 	
 	/**

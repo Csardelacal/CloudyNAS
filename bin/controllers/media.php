@@ -121,9 +121,44 @@ class MediaController extends AuthenticatedController
 		
 	}
 	
-	public function delete($id) {
-		//TODO: Implement
+	public function delete($uniqid) {
+		$media   = db()->table('media')->get('uniqid', $uniqid)->first(true);
+		$bucket  = $media->bucket;
 		
+		if ($this->_auth === AuthenticatedController::AUTH_NONE) {
+			throw new PublicException('Authentication required', 403);
+		}
+		elseif ($this->_auth === AuthenticatedController::AUTH_APP) {
+			$grant = $this->sso->authApp($_GET['signature'], null, ['bucket.' . $bucket->uniqid]);
+			
+			if (!$grant->getContext('bucket.' . $bucket->uniqid)->exists()) {
+				$grant->getContext('bucket.' . $bucket->uniqid)->create(sprintf('Bucket %s (%s)', $bucket->name, $bucket->uniqid), 'Allows for read / write access to the bucket');
+			}
+			
+			if (!$grant->getContext('bucket.' . $bucket->uniqid)->isGranted()) {
+				throw new PublicException('Context level insufficient.', 403);
+			}
+		}
+		
+		$media->expires = time();
+		$media->store();
+		
+		$latest = db()->table('revision')->get('media', $media)->where('expires', null)->first(true);
+		$latest->expires = time();
+		
+		$files = db()->table('file')->get('revision', $latest)->all();
+		
+		foreach ($files as $file) {
+			$file->expires = time();
+			$file->commited = false;
+			$file->store();
+			
+			$task = $this->tasks->get(\cloudy\task\FileUpdateTask::class);
+			$task->load($file->uniqid);
+			$this->tasks->send($file->server, $task);
+		}
+		
+		die('OK');
 	}
 	
 }

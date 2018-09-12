@@ -1,5 +1,10 @@
 <?php namespace cloudy\task;
 
+use cloudy\helper\KeyHelper;
+use cloudy\helper\SettingsHelper;
+use cloudy\Role;
+use function db;
+
 /* 
  * The MIT License
  *
@@ -24,36 +29,51 @@
  * THE SOFTWARE.
  */
 
-class RoleSetTask extends Task
+class FileChecksumTask extends Task
 {
 	
-	private $role;
+	private $uniqid;
 	
 	public function execute($db) {
-		$setting = $db->table('setting')->get('key', 'role')->first();
-		$setting->value = $this->role;
-		$setting->store();
+		
+		$file     = $db->table('file')->get('uniqid', $this->uniqid)->first(true);
+		$revision = $file->revision;
+		$local    = db()->table('file')->get('revision', $revision)->where('file', '!=', null)->first(true);
+		$self = db()->table('server')->get('uniqid', db()->table('setting')->get('key', 'uniqid')->first()->value)->first(true);
+		
+		try {
+			if (!$local->checksum) {
+				$local->checksum = md5_file(storage($local->file)->getPath());
+				$local->store();
+			}
+		}
+		catch(\Exception$e) {
+			console()->error('Tried checksumming non-existent file ' . $this->uniqid)->ln();
+			
+			$task = $this->dispatcher()->get(FilePullTask::class);
+			$task->load($this->uniqid);
+			
+			$this->dispatcher()->send($self, $task);
+			
+			return;
+		}
+		
+		$file->checksum = $local->checksum;
+		$file->store();
+		
 		$this->done();
 	}
 
 	public function load($settings) {
-		$this->role = $settings;
-	}
-
-	public function name() {
-		return 'server.role.set';
+		$this->uniqid = $settings;
 	}
 
 	public function save() {
-		return $this->role;
+		return $this->uniqid;
 	}
 
 	public function version() {
 		return 1;
-	}
-	
-	public function accessLevel() {
-		return \cloudy\Role::ROLE_LEADER;
 	}
 
 }

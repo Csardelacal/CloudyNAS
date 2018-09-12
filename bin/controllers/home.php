@@ -60,17 +60,6 @@ class HomeController extends AuthenticatedController
 		$this->view->set('clusters', db()->table('cluster')->getAll()->all());
 	}
 	
-	public function cron() {
-		$cron = new \cron\TopographyCron();
-		$cron->run();
-		$cron = new DiscoveryCron();
-		$cron->run();
-		$cron = new LeaderDiscoveryCron();
-		$cron->run();
-		var_dump(spitfire()->getMessages());
-		die('Ok');
-	}
-	
 	public function test() {
 		
 		$private = $this->settings->read('privkey');

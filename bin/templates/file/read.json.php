@@ -1,6 +1,4 @@
-<?php namespace cron;
-
-use spitfire\exceptions\PrivateException;
+<?php
 
 /* 
  * The MIT License
@@ -26,18 +24,13 @@ use spitfire\exceptions\PrivateException;
  * THE SOFTWARE.
  */
 
-class TimerFlipFlop
-{
-	public function __construct($filename) {
-	}
-	
-	public function notify() {
-		//Not applicable. This does not work here
-	}
-	
-	public function wait() {
-		sleep(30);
-		return true;
-	}
-	
-}
+echo json_encode([
+	'status' => 'OK',
+	'payload' => [
+		'revision' => $file->revision,
+		'file' => $file->uniqid,
+		'server' => $file->server->uniqid,
+		'expires' => $file->expires,
+		'checksum' => $file->checksum
+	]
+]);

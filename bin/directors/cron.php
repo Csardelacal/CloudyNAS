@@ -66,4 +66,56 @@ class CronDirector extends Director
 		
 	}
 	
+	public function healthcheck() {
+		
+		/*
+		 * Assemble the settings helper so we can quickly read the data from the 
+		 * server's configuration.
+		 */
+		$settings = new SettingsHelper(db()->setting);
+
+		/*
+		 * Prepare the keys. This allows the tasks to defer behavior to another 
+		 * server when needed.
+		 */
+		$keys = new KeyHelper(db(), $settings->read('uniqid'), $settings->read('pubkey'), $settings->read('privkey'));
+
+		/*
+		 * Initialize the task dispatcher. This object is in charge of fetching the
+		 * tasks.
+		 */
+		$dispatcher = new TaskDispatcher($keys);
+		
+		$self = db()->table('server')->get('uniqid', $settings->read('uniqid'))->first();
+		
+		if(!$self->role & \cloudy\Role::ROLE_MASTER) {
+			console()->error('Not a master')->ln();
+			return -1;
+		}
+		
+		$servers = db()->table('server')->get('cluster', $self->cluster)->all()->filter(function ($e) {
+			return $e->role & \cloudy\Role::ROLE_SLAVE;
+		});
+		
+		$run = [
+			\cloudy\task\FileCountHealthCheckTask::class
+		];
+		
+		foreach ($run as $t) {
+			foreach ($servers as $server) {
+				$task = $dispatcher->get($t);
+				$task->load(implode(':', [
+					$server->uniqid,
+					null,
+					null,
+					1000,
+					null
+				]));
+
+				$dispatcher->send($self, $task);
+			}
+		}
+		
+	}
+	
 }

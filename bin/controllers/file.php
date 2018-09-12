@@ -29,8 +29,16 @@ use spitfire\exceptions\PublicException;
 class FileController extends AuthenticatedController
 {
 	
-	public function read() {
+	public function read($id) {
 		
+		if ($this->_auth === AuthenticatedController::AUTH_NONE) {
+			throw new \spitfire\exceptions\PrivateException('Not authorized', 403);
+		}
+		//TODO: Add condition for authenticated apps
+		
+		$file = db()->table('file')->get('uniqid', $id)->first();
+		
+		$this->view->set('file', $file);
 	}
 	
 	public function commit($uniqid) {

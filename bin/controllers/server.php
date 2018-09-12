@@ -1,6 +1,7 @@
 <?php
 
-use cloudy\Role;
+use spitfire\core\Environment;
+use spitfire\exceptions\PublicException;
 
 /* 
  * The MIT License
@@ -37,7 +38,7 @@ class ServerController extends AuthenticatedController
 	public function info() {
 		
 		if ($this->_auth !== AuthenticatedController::AUTH_INT) {
-			throw new \spitfire\exceptions\PublicException('Not authorized', 403);
+			throw new PublicException('Not authorized', 403);
 		}
 		
 		/**
@@ -81,7 +82,7 @@ class ServerController extends AuthenticatedController
 		
 		#TODO: Provide info about the buckets the server hosts
 		#TODO: Provide info about the cluster / masters
-		$dir = storage()->dir(\spitfire\core\Environment::get('uploads.directory'));
+		$dir = storage()->dir(Environment::get('uploads.directory'));
 		
 		$total = disk_total_space($dir->getPath());
 		$free  = disk_free_space($dir->getPath());
