@@ -72,11 +72,17 @@ class FileModel extends Model
 		$schema->mime     = new StringField(30);
 		$schema->checksum = new StringField(40);
 		$schema->file     = new FileField();
+		
+		$schema->created  = new IntegerField(true);
 	}
 	
 	public function onbeforesave() {
 		if ($this->uniqid === null) {
 			$this->uniqid = \cloudy\UUID::v4();
+		}
+		
+		if (!$this->created) {
+			$this->created = time();
 		}
 	}
 

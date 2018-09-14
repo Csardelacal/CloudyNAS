@@ -55,7 +55,7 @@ class FileController extends AuthenticatedController
 	public function retrieve($type, $id) {
 		$self = db()->table('server')->get('uniqid', $this->settings->read('uniqid'))->first(true);
 		
-		if ($type === 'uniqid' && $this->_auth === AuthenticatedController::AUTH_INT) {
+		if ($type === 'uniqid' && in_array($this->_auth, [AuthenticatedController::AUTH_INT, AuthenticatedController::AUTH_APP])) {
 			
 			$file = db()->table('file')->get('uniqid', $id)->first();
 			

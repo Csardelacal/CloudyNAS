@@ -45,7 +45,7 @@ class QueueDirector extends Director
 		
 		$flipflop = new \cron\FlipFlop(realpath($file));
 		
-		console()->info('Started queue')->ln();
+		console()->info('Queue started')->ln();
 		
 		do {
 		
@@ -105,7 +105,7 @@ class QueueDirector extends Director
 				}
 				else {
 					$task->progress = $p->getProgress();
-					$task->scheduled = time() + 10; #Defer long running tasks so they don't clog up the system
+					$task->scheduled = time(); #Defer long running tasks so they don't clog up the system
 					$task->store();
 				}
 				

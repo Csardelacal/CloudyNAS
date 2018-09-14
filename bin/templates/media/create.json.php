@@ -26,6 +26,7 @@
 
 echo json_encode([
 	 'status' => 'success',
+	 'name'   => $media->name,
 	 'uniqid' => $media->uniqid,
 	 'link'   => $link->uniqid
 ]);

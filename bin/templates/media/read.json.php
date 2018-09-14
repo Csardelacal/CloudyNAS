@@ -38,7 +38,9 @@ foreach ($files as $file) {
 echo json_encode([
 	'status' => $latest? 'OK' : 'GONE',
 	'servers' => $servers,
+	'uniqid'  => $media->uniqid,
 	'bucket'  => $bucket->uniqid,
+	'mime'    => db()->table('revision')->get('media', $media)->where('expires', null)->first()->mime,
 	'links'   => $links->each(function ($e) { return ['uniqid' => $e->uniqid, 'expires' => $e->expires]; })->toArray(),
 	'revisions' => $revs->each(function ($e) { return ['uniqid' => $e->uniqid, 'expires' => $e->expires]; })->toArray()
 ]);

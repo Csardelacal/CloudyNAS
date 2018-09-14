@@ -36,17 +36,27 @@ class FileDistributeTask extends Task
 	
 	public function execute($db) {
 		
-		$media   = $db->table('revision')->get('uniqid', $this->uniqid)->first(true);
-		$bucket  = $media->media->bucket;
-		$cluster = $bucket->cluster;
+		$revision = $db->table('revision')->get('uniqid', $this->uniqid)->first(true);
+		$bucket   = $revision->media->bucket;
+		$cluster  = $bucket->cluster;
 		
 		$servers = $db->table('server')->get('cluster', $cluster)->all()->filter(function ($e) { return $e->role & Role::ROLE_SLAVE; });
 		$replicas = min((int)$servers->count(), $bucket->replicas);
 		
 		$total    = 0;
 		
+		/*
+		 * Remove the servers that already contain copies of the files. This ensures 
+		 * that the application does not redistribute files to servers that already
+		 * contain a copy.
+		 */
+		$existing = db()->table('file')->get('revision', $revision)->where('expires', $revision->expires)->all();
 		
-		for ($i = 0; $i < $replicas; $i++) {
+		foreach ($existing as $s) {
+			$servers = $servers->filter(function ($e) use ($s) { return $e->unqiqid !== $s->uniqid; });
+		}
+		
+		for ($i = 0; $i < ($replicas - $existing->count()); $i++) {
 			$weighted = [];
 			
 			foreach ($servers as $server) {
@@ -61,7 +71,7 @@ class FileDistributeTask extends Task
 			foreach ($weighted as $weight => $server) {
 				if ($weight > $rand) {
 					$file = $db->table('file')->newRecord();
-					$file->revision = $media;
+					$file->revision = $revision;
 					$file->server = $server;
 					$file->commited = false;
 					$file->store();

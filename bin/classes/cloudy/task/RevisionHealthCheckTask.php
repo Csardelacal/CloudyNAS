@@ -1,10 +1,5 @@
 <?php namespace cloudy\task;
 
-use cloudy\task\FileHealthCheckTask;
-use cloudy\task\FilePullTask;
-use function console;
-use function db;
-
 /* 
  * The MIT License
  *
@@ -29,30 +24,56 @@ use function db;
  * THE SOFTWARE.
  */
 
-class FileCountHealthCheckTask extends FileHealthCheckTask
+class RevisionHealthCheckTask extends Task
 {
 	
-	public function master($records) {
-		return $records->count();
-	}
-
-	public function repair($uniqid) {
-		console()->info('Healthcheck found missing file, queued fetch task for file: ' . $uniqid)->ln();
+	private $chunk = 1000;
+	
+	public function execute($db) {
 		
-		$self = db()->table('server')->get('uniqid', db()->table('setting')->get('key', 'uniqid')->first()->value)->first(true);
-		$task = $this->dispatcher()->get(FilePullTask::class);
-		$task->load($uniqid);
-
-		$this->dispatcher()->send($self, $task);
-	}
-
-	public function target($records, $expected) {
-		$count = $records->count();
 		
-		if ($count !=  $expected) {
-			console()->error(sprintf('Expected %s files, got %s', $expected, $count))->ln();
+		$self = db()->table('server')->get('uniqid', $db->table('setting')->get('key', 'uniqid')->first()->value)->first();
+		
+		/*
+		 * Get all the records that matchs the given range
+		 */
+		$query = db()->table('revision')
+			->getAll()
+			->where('_id', '>', $this->getProgress())
+			->setOrder('uniqid', 'ASC');
+		
+		$records = $query->range(0, $this->chunk);
+		
+		foreach ($records as $record) {
+			
+			if ($record->media->expires !== null && $record->expires === null) {
+				$record->expires = $record->media->expires;
+				$record->store();
+				console()->info('Fixed expiration of revision.')->ln();
+			}
+			
+			/*
+			 * Check if the revision has enough replicas of itself
+			 */
+			$files = db()->table('file')->get('revision', $record)->where('expires', $record->expires)->all();
+			
+			if ($files < $record->media->bucket->replicas) {
+				$task = $this->dispatcher()->get(FileDistributeTask::class);
+				$task->load($record->uniqid);
+				
+				$this->dispatcher()->send($self, $task);
+			}
 		}
-		return $records->count() == $expected;
+		
+		$records->isEmpty()? $this->done() : $this->setProgress($record->_id);
+	}
+	
+	public function load($settings) {
+		return;
+	}
+	
+	public function save() {
+		return '';
 	}
 
 	public function version() {

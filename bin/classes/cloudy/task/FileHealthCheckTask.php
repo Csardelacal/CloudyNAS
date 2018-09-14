@@ -24,24 +24,18 @@
  * THE SOFTWARE.
  */
 
-abstract class FileHealthCheckTask extends Task
+class FileHealthCheckTask extends Task
 {
 	
 	private $server;
 	
-	private $from;
+	private $min;
 	
-	private $to;
+	private $max;
 	
-	private $chunk;
+	private $chunk = 1000;
 	
 	private $result;
-	
-	public abstract function master($records);
-	
-	public abstract function target($records, $expected);
-	
-	public abstract function repair($uniqid);
 	
 	public function execute($db) {
 		/*
@@ -62,79 +56,118 @@ abstract class FileHealthCheckTask extends Task
 			$max = $this->max;
 		}
 		
-		//console()->info(sprintf('Preparing healthcheck for files %s to %s from server %s', $min, $max, $target->uniqid))->ln();
-		sleep(1);
 		
 		/*
 		 * Get all the records that matchs the given range
 		 */
-		$records = db()->table('file')
+		$query = db()->table('file')
 			->get('server', $target)
 			->group()->where('expires', null)->where('expires', '>', time())->endGroup()
 			->where('uniqid', '>=', max($this->getProgress(), $min))
 			->where('uniqid', '<=', $max)
-			->setOrder('uniqid', 'ASC')
-			->range(0, $this->chunk);
+			->setOrder('uniqid', 'ASC');
+		
+		$records = $self->uniqid === $master->uniqid? $query->range(0, $this->chunk) : $query->all();
+		
+		if ($self->uniqid === $master->uniqid) {
+			return $this->master($target, $records);
+		}
+		
+		elseif($self->uniqid === $target->uniqid) {
+			return $this->slave($target, $records);
+		}
+		
+	}
+	
+	public function master($target, $records) {
 		
 		$nr = $records->isEmpty()? null : db()
 			->table('file')
 			->get('server', $target)
 			->group()->where('expires', null)->where('expires', '>', time())->endGroup()
-			->where('uniqid', '>=', max($this->getProgress(), $min))
 			->where('uniqid', '>', $records->last()->uniqid)
 			->setOrder('uniqid', 'ASC')->first();
-		 
-		  $next = $nr? $nr->uniqid : null;
-		
-		
-		/*
-		 * Runs if the process is a slave
-		 */
-		if ($self->uniqid === $target->uniqid) {
-			$success = $this->target($records, $this->result);
-			
-			if ($success) {
-				return $next? $this->setProgress($next) : $this->done();
-			}
-			elseif($this->chunk == 1) {
-				$this->repair($this->getProgress());
-				$this->done();
-				return;
-			}
-			else {
-				$task = clone($this);
-				$task->load(implode(':', [$target->uniqid, $min, $max, ceil($this->chunk / 10), null]));
 
-				$this->dispatcher()->send($master, $task);
-				return $next? $this->setProgress($next) : $this->done();
+		$next = $nr? $nr->uniqid : null;
+		
+		if ($records->isEmpty()) {
+			$this->done();
+			return;
+		}
+		
+		
+		$task = clone($this);
+		$task->load(json_encode([
+			$target->uniqid, 
+			$records->rewind()->uniqid, 
+			$records->last()->uniqid, 
+			$records->each(function ($e) { return $e->uniqid; })->toArray()
+		]));
+		
+		$this->dispatcher()->send($target, $task);
+		return $next? $this->setProgress($next) : $this->done();
+	}
+	
+	public function slave($target, $records) {
+		$remote = collect($this->result);
+		$local  = $records;
+
+		$left  = $local->shift();
+		$right = $remote->shift();
+
+		while ($left || $right) {
+			sleep(1);
+			/*
+			 * The records are equal, therefore nothing happens.
+			 */
+			if ($right && $left && $left->uniqid == $right) {
+				console()->success(sprintf('Health of file %s confirmed', $left->uniqid))->ln();
+				$left  = $local->shift();
+				$right = $remote->shift();
+			}
+
+			elseif ($right && (!$left || $left->uniqid > $right)) {
+				console()->info(sprintf('File %s is missing on slave. Requesting...', $right))->ln();
+				$task = $this->dispatcher()->get(FileUpdateTask::class);
+				$task->load($right);
+				$this->dispatcher()->send($target, $task);
+
+				$right = $remote->shift();
+			}
+
+			/*
+			 * If a file exists locally that does not exist remotely, we do need
+			 * to perform an additional check. The file may have been created while
+			 * performing the healthcheck.
+			 */
+			elseif ($left && (!$right || $right > $left->uniqid)) {
+
+				if ($left->created < time() - 3600) {
+					console()->info(sprintf('File %s is missing on master. Deleting', $left->uniqid))->ln();
+					$left->expires = time();
+					$left->store();
+				}
+				else {
+					console()->info(sprintf('Apparently recent file %s found. Skipping', $left->uniqid))->ln();
+				}
+
+				$left = $local->shift();
 			}
 		}
-		/*
-		 * Runs on the master
-		 */
-		else {
-			$result = $this->master($records);
-			
-			if ($records->isEmpty()) {
-				$this->done();
-				return;
-			}
-			
-			$task = clone($this);
-			$task->load(implode(':', [$target->uniqid, max($this->getProgress(), $min), $records->last()->uniqid, $this->chunk, $result]));
-			
-			$this->dispatcher()->send($target, $task);
-			
-			return $next? $this->setProgress($next) : $this->done();
-		}
+
+		$this->done();
 	}
 	
 	public function load($settings) {
-		list($this->server, $this->min, $this->max, $this->chunk, $this->result) = explode(':', $settings);
+		list($this->server, $this->min, $this->max, $this->result) = json_decode($settings);
 	}
 	
 	public function save() {
-		return implode(':', [$this->server, $this->min, $this->max, $this->chunk, $this->result]);
+		return json_encode([$this->server, $this->min, $this->max, $this->result]);
 	}
-	
+
+	public function version() {
+		return 1;
+	}
+
 }

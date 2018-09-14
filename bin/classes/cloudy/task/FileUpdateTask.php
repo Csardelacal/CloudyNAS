@@ -40,6 +40,7 @@ class FileUpdateTask extends Task
 			$task->load($this->uniqid);
 			
 			$this->dispatcher()->send($self, $task);
+			$this->done();
 			
 			return;
 		}

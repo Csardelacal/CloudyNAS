@@ -37,7 +37,9 @@ class BucketController extends AuthenticatedController
 		//TODO: Implement
 	}
 	
-	public function read(BucketModel$bucket) {
+	public function read($uniqid) {
+		
+		$bucket = db()->table('bucket')->get('uniqid', $uniqid)->first(true);
 		
 		/*
 		 * If the client consuming this endpoint has provided no authentication at

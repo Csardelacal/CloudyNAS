@@ -47,6 +47,10 @@ class MediaController extends AuthenticatedController
 			}
 		}
 		
+		if (db()->table('media')->get('bucket', $bucket)->where('name', $_POST['name'])->first()) {
+			throw new PublicException('File already exists. Please refer to the update() endpoint', 400);
+		}
+		
 		
 		$media = db()->table('media')->newRecord();
 		$media->bucket = $bucket;
@@ -66,6 +70,7 @@ class MediaController extends AuthenticatedController
 		$file->server   = $master;
 		$file->file     = $_POST['file']->store()->uri();
 		$file->mime     = $_POST['mime'];
+		$file->checksum = md5_file($_POST['file']->store()->getPath());
 		$file->expires  = time() + 86400 * 7;
 		$file->commited = 1;
 		$file->store();
@@ -84,9 +89,16 @@ class MediaController extends AuthenticatedController
 		
 	}
 	
-	public function read($id) {
-		$media   = db()->table('media')->get('uniqid', $id)->first(true);
-		$bucket  = $media->bucket;
+	public function read($id, $_ = null) {
+		
+		if ($_=== null) {
+			$media   = db()->table('media')->get('uniqid', $id)->first(true);
+			$bucket  = $media->bucket;
+		}
+		else {
+			$bucket = db()->table('bucket')->get('uniqid', $id)->first(true);
+			$media  = db()->table('media')->get('name', $_)->where('bucket', $bucket)->first(true);
+		}
 		
 		if ($this->_auth === AuthenticatedController::AUTH_NONE) {
 			throw new PublicException('Authentication required', 403);
@@ -145,6 +157,7 @@ class MediaController extends AuthenticatedController
 		
 		$latest = db()->table('revision')->get('media', $media)->where('expires', null)->first(true);
 		$latest->expires = time();
+		$latest->store();
 		
 		$files = db()->table('file')->get('revision', $latest)->all();
 		

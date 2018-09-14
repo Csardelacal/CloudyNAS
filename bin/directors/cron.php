@@ -97,24 +97,21 @@ class CronDirector extends Director
 			return $e->role & \cloudy\Role::ROLE_SLAVE;
 		});
 		
-		$run = [
-			\cloudy\task\FileCountHealthCheckTask::class
-		];
-		
-		foreach ($run as $t) {
-			foreach ($servers as $server) {
-				$task = $dispatcher->get($t);
-				$task->load(implode(':', [
-					$server->uniqid,
-					null,
-					null,
-					1000,
-					null
-				]));
+		foreach ($servers as $server) {
+			$task = $dispatcher->get(\cloudy\task\FileHealthCheckTask::class);
+			$task->load(json_encode([
+				$server->uniqid,
+				null,
+				null,
+				null
+			]));
 
-				$dispatcher->send($self, $task);
-			}
+			$dispatcher->send($self, $task);
 		}
+		
+		
+		$task = $dispatcher->get(cloudy\task\RevisionHealthCheckTask::class);
+		$dispatcher->send($self, $task);
 		
 	}
 	
