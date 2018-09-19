@@ -28,7 +28,7 @@ THE SOFTWARE.
 
 $app-switcher-fg-color  : #777;
 $app-switcher-bg-color  : #EAEAEA;
-$app-switcher-tile-size :  5px;
+$app-switcher-tile-size :  4px;
 
 .app-switcher.toggle {
 	vertical-align: middle;
@@ -63,36 +63,61 @@ $app-switcher-tile-size :  5px;
 .app-drawer
 {
 	
+	text-align: left;
+	
 	.app-entry {
-		padding: 10px;
-		border-radius: 3px;
+		padding: 10px 12px;
+		border-radius: 2px;
 		border: solid 1px transparent;
 		background-color: transparent;
 		display: inline-block;
+		width: 100%;
+		text-align: center;
+		text-decoration: none;
 		
-		transition: border .15s ease-in, background-color .15s ease-in;
+		transition: border .1s ease-in, background-color .1s ease-in;
 		
 		&:hover {
-			background-color: #EAEAEA;
-			border: solid 1px #BBB;
-			box-shadow: 1px 1px 3px #DDD inset;
+			background-color: #F9F9F9;
+			border: solid 1px #CCC;
 		}
 	}
 	
-	.app-icon {
+	.app-icon-drawer {
 		margin: 0 auto;
-		width: 80%;
+		width: 90%;
 		height: auto;
 		display: block;
 	}
 	
-	.app-name {
+	.app-name-drawer {
 		text-align: center;
 		display: block;
 		font-size: .75em;
-		color: #777;
-		margin-top: .4em;
-		line-height: 1.2em;
+		color: #242424;
+		margin-top: .75em;
+		margin-bottom: .25em;
+		width: 100%;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		font-weight: normal;
 	}
 	
+	.footer {
+		background: #EEE;
+		text-align: center;
+		display: block;
+		padding: 10px 15px;
+		color: #888;
+		font-weight: bold;
+		font-size: .8em;
+		
+		background-image: linear-gradient(180deg, #CCC 0px, transparent 3px);
+		
+		&:hover {
+			color: #777;
+			background-color: #D5D5D5;
+		}
+	}
 }

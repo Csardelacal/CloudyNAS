@@ -50,6 +50,7 @@ class ServerModel extends Model
 		
 		$schema->role     = new IntegerField(true);
 		$schema->lastSeen = new IntegerField(true);
+		$schema->queueLen = new IntegerField(true);
 		
 		/**
 		 * Stores the cluster this server is assigned to. Please note that this does

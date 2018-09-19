@@ -75,6 +75,35 @@ class BucketModel extends Model
 		$schema->index($schema->uniqid);
 	}
 	
+	public function available() {
+		/*@var $servers \spitfire\core\Collection*/
+		$servers = $this->cluster->servers->getQuery()->all();
+		
+		$sorted = $servers
+		->filter(function ($e) { return $e->role & cloudy\Role::ROLE_SLAVE; })
+		->sort(function ($a, $b) {
+			return $a->size - $b->size;
+		})->extract('free');
+		
+		$count    = $sorted->count();
+		$replicas = $count > $this->replicas? $this->replicas : $count;
+		
+		for ($i = 1; $i < $replicas; $i++) {
+			$sorted->shift();
+		}
+		
+		for ($i = 1; $i < $replicas; $i++) {
+			$sorted->push($sorted->rewind());
+		}
+		
+		try {
+			return $sorted->avg();
+		}
+		catch (\Exception$e) {
+			return 0;
+		}
+	}
+	
 	public function size() {
 		/*@var $servers \spitfire\core\Collection*/
 		$servers = $this->cluster->servers->getQuery()->all();

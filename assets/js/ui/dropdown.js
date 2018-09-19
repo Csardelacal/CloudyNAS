@@ -71,6 +71,8 @@ depend(function () {
 		};
 		
 		this.hide = function () {
+			var t;
+			
 			if (!target) {
 				t = showing;
 			}
@@ -78,11 +80,20 @@ depend(function () {
 				t = target;
 			}
 			
-			if (!t) { return }
+			if (!t) { return; }
 			
 			visible = false;
 			onscreen = null;
 			t.style.display = 'none';
+		};
+		
+		this.isShowing = function (el) {
+			do {
+				if (el === showing) { return true; }
+				el = el.parentNode;
+			} while (el !== document.body);
+			
+			return false;
 		};
 		
 		listening.push(this);
@@ -96,6 +107,7 @@ depend(function () {
 		for (var i = 0; i < listening.length; i++) {
 			if (id = listening[i].find(e.target)) {
 				found = listening[i];
+				break;
 			}
 		}
 		
@@ -108,7 +120,7 @@ depend(function () {
 			return;
 		}
 		
-		if (onscreen) {
+		if (onscreen && !onscreen.isShowing(e.target)) {
 			onscreen.hide();
 		}
 		

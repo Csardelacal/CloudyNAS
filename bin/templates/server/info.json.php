@@ -36,6 +36,7 @@ echo json_encode([
 		'cluster'  => $cluster, 
 		'active'   => $active,
 		'disabled' => $disabled,
+		'queue'    => ['length' => $queueLen],
 		'disk'     => [ 'size' => $size, 'free' => $free ],
 		'servers'  => $servers->toArray()
 	]

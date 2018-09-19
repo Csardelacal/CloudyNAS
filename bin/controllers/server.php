@@ -31,7 +31,22 @@ class ServerController extends AuthenticatedController
 {
 	
 	public function setRole(ServerModel$server, $role) {
+		
+		if ($server->active) {
+			throw new PublicException('Cannot change the server role while it is active.', 400);
+		}
+		
 		$server->role = $role;
+		$server->store();
+	}
+	
+	public function setCluster(ServerModel$server, ClusterModel$cluster) {
+		
+		if ($server->active) {
+			throw new PublicException('Cannot change the server role while it is active.', 400);
+		}
+		
+		$server->cluster = $cluster;
 		$server->store();
 	}
 	
@@ -97,6 +112,7 @@ class ServerController extends AuthenticatedController
 		$this->view->set('servers',  $servers);
 		$this->view->set('active',   $active);
 		$this->view->set('disabled', $disabled);
+		$this->view->set('queueLen', db()->table('task\queue')->getAll()->count());
 		$this->view->set('size',     $total);
 		$this->view->set('free',     $free);
 	}

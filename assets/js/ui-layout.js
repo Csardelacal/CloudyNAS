@@ -1,7 +1,7 @@
 (function () {
-	
 	var containerHTML = document.querySelector('.contains-sidebar');
 	var sidebarHTML   = containerHTML.querySelector('.sidebar');
+	var contentHTML   = document.querySelector('.content');
 
 	/*
 	 * Scroll listener for the sidebar______________________________________
@@ -9,66 +9,130 @@
 	 * This listener is in charge of making the scroll bar both stick to the
 	 * top of the viewport and the bottom of the viewport / container
 	 */
-	 var wh  = window.innerHeight;
-	 var ww  = window.innerWidth;
+	var wh  = window.innerHeight;
+	var ww  = window.innerWidth;
+	
+	/*
+	 * Collect the constraints from the parent element to consider where the 
+	 * application is required to redraw the child.
+	 * 
+	 * @type type
+	 */
+	var constraints;
+	
+	var sidebar = {
+		toggle : function () {
+			containerHTML.classList.toggle('collapsed');
+			scrollListener();
+		},
+		
+		hide: function () {
+			containerHTML.classList.add('collapsed');
+		},
+		
+		show : function () {
+			containerHTML.classList.remove('collapsed');
+		},
+		
+		float : function () {
+			containerHTML.classList.contains('floating') || containerHTML.classList.add('collapsed');
+			containerHTML.classList.add('floating');
+			containerHTML.classList.remove('persistent');
+		},
+		
+		persistent : function () {
+			containerHTML.classList.add('persistent');
+			containerHTML.classList.remove('floating');
+			containerHTML.classList.remove('collapsed');
+		}
+	};
 	 
-	 /*
-	  * This function quickly allows the application to check whether it should 
-	  * consider the browser it is running in as a mobile viewport.
-	  * 
-	  * @returns {Boolean}
-	  */
-	 var mobile = function () {
-		 return ww < 960;
-	 };
-	 
-	 /*
-	  * This helper allows the application to define listeners that will prevent
-	  * the application from hogging system resources when a lot of events are 
-	  * fired.
-	  * 
-	  * @param {type} fn
-	  * @returns {Function}
-	  */
-	 var debounce = function (fn, interval) {
-		var timeout = undefined;
+	/*
+	 * This function quickly allows the application to check whether it should 
+	 * consider the browser it is running in as a viewport to small to handle the
+	 * sidebar and the content simultaneously.
+	 * 
+	 * @returns {Boolean}
+	 */
+	var floating = function () { 
+		return ww < 1160;
+	};
+	
+	var listener = function (element, listeners) {
+		for (var i in listeners) {
+			if (!listeners.hasOwnProperty(i)) { continue; }
+			element.addEventListener(i, listeners[i], false);
+		}
+	};
 
-		return function () {
-			if (timeout) { return; }
-			var args = arguments;
-			
-			timeout = setTimeout(function () {
-				fn.apply(window, args);
-				timeout = undefined;
-			}, interval || 50);
-		};
-	 };
+	/*
+	 * This helper allows the application to define listeners that will prevent
+	 * the application from hogging system resources when a lot of events are 
+	 * fired.
+	 * 
+	 * @param {type} fn
+	 * @returns {Function}
+	 */
+	var debounce = function (fn, interval) {
+	  var timeout = undefined;
+
+	  return function () {
+		  if (timeout) { return; }
+		  var args = arguments;
+
+		  timeout = setTimeout(function () {
+			  timeout = undefined;
+			  fn.apply(window, args);
+		  }, interval || 50);
+	  };
+	};
+	
+	var pixels = function (n) {
+		return n + 'px';
+	};
+	
+	/**
+	 * This function returns the constraints that an element fits into. This allows
+	 * an application to determine whether an item is onscreen, or whether two items
+	 * intersect.
+	 * 
+	 * Note: this function provides only the vertical offset, which is most often
+	 * needed since web pages tend to grow into the vertical space more than the 
+	 * horizontal.
+	 * 
+	 * @param {type} el
+	 * @returns {ui-layoutL#1.getConstraints.ui-layoutAnonym$0}
+	 */
+	var getConstraints = function (el) {
+		var t = 0;
+		var l = 0;
+		var w = el.clientWidth;
+		var h = el.clientHeight;
+		
+		do {
+			t = t + el.offsetTop;
+			l = l + el.offsetLeft;
+		} while (null !== (el = el.offsetParent));
+		
+		return {top : t, bottom : document.body.clientHeight - t - h, left: l, width: w, height: h};
+	};
 	 
-	 /**
-	  * On Scroll, our sidebar is resized automatically to fill the screen within
-	  * the boundaries of the container.
-	  * 
-	  * @returns {undefined}
-	  */
+	/**
+	 * On Scroll, our sidebar is resized automatically to fill the screen within
+	 * the boundaries of the container.
+	 * 
+	 * @returns {undefined}
+	 */
 	var scrollListener  = function () { 
-		/*
-		 * Collect the constraints from the parent element to consider where the 
-		 * application is required to redraw the child.
-		 * 
-		 * @type type
-		 */
-		var constraints = containerHTML.parentNode.getBoundingClientRect();
 		
-		/*
-		 * There's a special scenario, in which the system may have enough space 
-		 * to extend the sidebar to the next sibling's starting point.
-		 * 
-		 * @type .document@call;querySelector.parentNode.nextSibling
-		 */
-		var nextSibling = containerHTML.parentNode.nextElementSibling;
-		var limit       = nextSibling? Math.max(nextSibling.getBoundingClientRect().top, constraints.bottom) : wh;
+		var pageY  = window.pageYOffset;
+		var maxY   = document.body.clientHeight;
 		
-		var height = mobile()? wh : Math.min(wh, limit) - Math.max(constraints.top, 0);
+		/**
+		 * 
+		 * @type Number|Window.innerHeight
+		 */
+		var height = floating()? wh : Math.min(wh, maxY - Math.max(pageY, constraints.top) - constraints.bottom);
 		
 		/*
 		 * This flag determines whether the scrolled element is past the viewport
@@ -77,129 +141,64 @@
 		 * 
 		 * @type Boolean
 		 */
-		var detached = constraints.top < 0;
+		var detached = constraints.top < pageY;
+		var collapsed = containerHTML.classList.contains('collapsed');
 		
-		containerHTML.style.height = Math.max(height, constraints.height) + 'px';
-		sidebarHTML.style.height   = height + 'px';
-		sidebarHTML.style.width    = mobile()? '240px' : containerHTML.scrollWidth + 'px';
+		sidebarHTML.style.height   = pixels(height);
+		sidebarHTML.style.width    = floating() && collapsed? 0 : pixels(200);
+		sidebarHTML.style.left     = floating()? 0 : pixels(Math.max(0, constraints.left ));
+		sidebarHTML.style.top      = floating()? 0 : pixels(Math.max(0, constraints.top - pageY ));
+		sidebarHTML.style.position = detached || floating()?   'fixed' : 'static';
 		
-		containerHTML.style.top    = mobile() || detached?   '0px' : Math.max(0, 0 - constraints.top) + 'px';
-		sidebarHTML.style.position = mobile() || detached? 'fixed' : 'static';
+		contentHTML.style.width    = floating() || collapsed? '100%' : pixels(constraints.width - 200);
+
+		containerHTML.style.top    = floating()? pixels(0) : null;
+		
 	};
 
-	document.addEventListener('scroll', debounce(scrollListener, 25), false);
-	scrollListener();
-
-	 var resizeListener  = function () {
+	var resizeListener  = function () {
+		
 		//Reset the size for window width and height that we collected
 		wh  = window.innerHeight;
 		ww  = window.innerWidth;
 		
-		//List the toggle buttons
-		var tb = document.querySelectorAll('.target-button');
-		
 		//For mobile devices we toggle to collapsable mode
-		if (ww < 960 + 200) {
-			containerHTML.classList.add('collapsed');
-			containerHTML.classList.remove('visible');
-			for (var i = 0; i < tb.length; i++) { tb[i].firstChild.classList.remove('hidden'); }
-			//Show the toggle button
-		} 
-		else {
-			containerHTML.classList.remove('collapsed');
-			containerHTML.classList.add('visible');
-			
-			for (var i = 0; i < tb.length; i++) { 
-				var method = containerHTML.classList.contains('collapsable')? 'remove' : 'add';
-				tb[i].classList[method]('hidden'); 
-			}
-		}
+		if (floating()) { sidebar.float(); } 
+		else            { sidebar.persistent(); }
 		
 		/**
 		 * We ping the scroll listener to redraw the the UI for it too.
 		 */
+		constraints = getConstraints(containerHTML.parentNode);
 		scrollListener();
+		
+		
+		containerHTML.parentNode.style.whiteSpace = 'nowrap';
 	 };
-
-	 window.addEventListener('resize', debounce(resizeListener), false);
-	 resizeListener();
-
+	
 	/*
-	 * Defer the listener for the toggles to the document.
+	 * Create listeners that allow the application to react to events happening 
+	 * in the browser.
 	 */
-	document.addEventListener('click', function(e) { 
-		if (!e.target.classList.contains('toggle-button')) { return; }
-		containerHTML.classList.toggle('collapsed');
-		containerHTML.classList.toggle('visible');
-	}, false);
-
-	containerHTML.addEventListener('click', function() { containerHTML.classList.add('collapsed'); containerHTML.classList.remove('visible'); }, false);
-	sidebarHTML.addEventListener('click', function(e) { e.stopPropagation(); }, false);
-
-}());
-
-(function () {
-	var stickies = Array.prototype.slice.call(document.querySelectorAll('.sticky'));
-	var current  = null;
-	var clone    = null;
-	var invAt    = [0, 0];
-
-
-	var listener = function () {
-		var candidate = null;
-		var next      = null;
-
-		if (window.pageYOffset >= invAt[0] && window.pageYOffset <= invAt[1]) {
-			return;
+	listener(window, {
+		resize: debounce(resizeListener),
+		load: resizeListener
+	});
+	
+	listener(document, {
+		scroll: debounce(scrollListener, 25),
+		click: function(e) { 
+			if (!e.target.classList.contains('toggle-button')) { return; }
+			sidebar.toggle();
 		}
-
-		if (current) {
-			clone.parentNode.removeChild(clone);
-			current = clone = null;
-			invAt = [0, 0];
-		}
-
-		for (var i = 0; i < stickies.length; i++) {
-			var sticky = stickies[i];
-			var rect   = sticky.getBoundingClientRect();
-
-			if (rect.top < 0) {
-				candidate = sticky;
-				next      = stickies[i+1];
-			}
-		}
-
-		if (candidate) {
-			if (current !== null) {
-				clone.parentNode.removeChild(clone);
-				clone = current = null;
-				invAt = [0, 0];
-			}
-
-			var parent = candidate.parentNode.getBoundingClientRect();
-			var rect   = candidate.getBoundingClientRect();
-			var nxtrect= next? next.getBoundingClientRect() : null;
-			var top    = Math.min(parent.top + parent.height - rect.height, next? nxtrect.top - rect.height : 0, 0);
-
-			invAt[0] = top? window.pageYOffset : window.pageYOffset + rect.top;
-			invAt[1] = next? window.pageYOffset + nxtrect.top - rect.height : window.pageYOffset + parent.top + parent.height - rect.height;
-
-			current  = candidate;
-			clone    = candidate.cloneNode(true);
-			clone.style.position = 'fixed';
-			clone.style.left     = rect.left + 'px';
-			clone.style.top      = top + 'px';
-			clone.style.width    = rect.width + 'px';
-
-			document.body.appendChild(clone);
-		}
-
-
-	};
-
-	var debounce = null;
-	document.addEventListener('scroll', function () {
-		if (debounce) { return; }
-		debounce = setTimeout(function () { debounce = null; listener(); }, 10);
-	}, false);
+	});
+	
+	listener(containerHTML, {
+		click: sidebar.hide
+	});
+	
+	listener(sidebarHTML, {
+		click: function(e) { e.stopPropagation(); }
+	});
+	
 }());

@@ -62,6 +62,7 @@ class AuthenticatedController extends BaseController
 		 */
 		if (Environment::get('SSO')) {
 			$this->sso = new SSOCache(Environment::get('SSO'));
+			$this->view->set('sso', $this->sso);
 		}
 		else {
 			//TODO: Replace with fallback "proxy" that authenticates this server against
@@ -114,6 +115,8 @@ class AuthenticatedController extends BaseController
 			$this->_user = $token? $token->getTokenInfo() : null;
 			
 			$this->_auth = $this->_user? self::AUTH_USER : self::AUTH_NONE;
+			
+			$this->view->set('authUser', $this->_user);
 		}
 	}
 	

@@ -68,7 +68,7 @@ class FileController extends AuthenticatedController
 			$media = $link->media;
 			
 			$revision = db()->table('revision')->get('media', $media)->where('expires', null)->first(true);
-			$local = db()->table('file')->get('revision', $revision)->where('server', $self)->first(true);
+			$local = db()->table('file')->get('revision', $revision)->where('server', $self)->first();
 		}
 		else {
 			$memcached = new \spitfire\cache\MemcachedAdapter();
@@ -87,12 +87,22 @@ class FileController extends AuthenticatedController
 				
 			});
 			
-			$local = db()->table('file')->get('uniqid', $file)->first(true);
+			$local = db()->table('file')->get('uniqid', $file)->first();
 		}
 		
-		if ($local->file) {
+		if ($local && $local->file) {
 			$this->response->setBody(storage($local->file)->read())->getHeaders()
 				->set('Content-type', $local->mime);
+		}
+		elseif($self->role & cloudy\Role::ROLE_MASTER) {
+			$files = db()->table('file')->get('revision', $revision)->group()->where('expires', null)->where('expires', '>', time())->endGroup()->where('commited', true)->first(true);
+			$server = $files[rand(0, $files->count() - 1)]->server->hostname;
+			
+			return $this->response->setBody('Redirect...')->getHeaders()->redirect($server . '/file/retrieve/link/' . $id);
+		}
+		elseif($self->role & cloudy\Role::ROLE_SLAVE) {
+			$server = db()->table('server')->get('cluster', $self->cluster)->all()->filter(function ($e) { return $e->role & cloudy\Role::ROLE_MASTER; })->rewind()->hostname;
+			return $this->response->setBody('Redirect...')->getHeaders()->redirect($server . '/file/retrieve/link/' . $id);
 		}
 		else {
 			throw new PublicException('File is not here', 404);

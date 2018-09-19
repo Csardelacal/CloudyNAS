@@ -74,7 +74,7 @@ class PoolController extends AuthenticatedController
 			$slave->pubKey = $response->pubkey;
 			$slave->lastSeen = time();
 			$slave->role     = Role::ROLE_SLAVE;
-			$slave->active   = true;
+			$slave->active   = false;
 			$slave->disabled = null;
 			$slave->store();
 		} 

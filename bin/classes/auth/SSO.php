@@ -164,6 +164,20 @@ class SSO
 		return $data;
 	}
 	
+	public function getAppDrawer() {
+		$url = $this->endpoint . '/appdrawer/index.json';
+		$request  = new Request($url, []);
+		
+		$response = $request->send();
+		$data     = JSON::decode($response);
+		
+		return $data;
+	}
+	
+	public function getAppDrawerJS() {
+		return $this->endpoint . '/appdrawer/index.js';
+	}
+	
 	public function getGroupList() {
 		$url  = $this->endpoint . '/group/index.json';
 		$resp = file_get_contents($url);

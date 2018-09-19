@@ -56,6 +56,14 @@ class ClusterModel extends Model
 		$schema->servers = new ChildrenField('server', 'cluster');
 	}
 	
+	public function size() {
+		/*@var $servers \spitfire\core\Collection*/
+		$servers = $this->servers->getQuery()->all();
+		
+		if ($servers->isEmpty()) { return 0; }
+		else                     { return $servers->extract('size')->sum(); }
+	}
+	
 	public function available() {
 		/*@var $servers \spitfire\core\Collection*/
 		$servers = $this->servers->getQuery()->all();

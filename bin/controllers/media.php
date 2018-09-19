@@ -117,7 +117,7 @@ class MediaController extends AuthenticatedController
 		
 		$latest  = db()->table('revision')->get('media', $media)->where('expires', null)->first(true);
 		$revs    = db()->table('revision')->get('media', $media)->all();
-		$files   = db()->table('file')->get('revision', $latest)->all();
+		$files   = db()->table('file')->get('revision', $latest)->where('commited', true)->all();
 		$links   = db()->table('link')->get('media', $media)->all();
 		
 		$this->view->set('latest', $latest);

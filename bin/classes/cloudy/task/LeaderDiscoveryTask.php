@@ -79,19 +79,7 @@ class LeaderDiscoveryTask extends Task
 		 */
 		$keys = new KeyHelper(db(), $uniqid, db()->setting->get('key', 'pubkey')->fetch()->value, db()->setting->get('key', 'privkey')->fetch()->value);
 		
-		$refresh->filter(function ($e) use ($uniqid) {
-			
-			/*
-			 * If the server is the same server as we are managing, then skip it. We
-			 * don't need to check whether the server can reach itself.
-			 */
-			if ($e->uniqid === $uniqid) {
-				return false;
-			}
-			
-			return !($e->role & Role::ROLE_LEADER);
-			
-		})->each(function ($e) use ($keys) {
+		$refresh->each(function ($e) use ($keys) {
 			
 			
 			/*
@@ -113,6 +101,7 @@ class LeaderDiscoveryTask extends Task
 			 * to be overriden by a pool server)
 			 */
 			$e->lastSeen = time();
+			$e->queueLen = $response->queue->length?? 0;
 			$e->size     = $response->disk->size?? null;
 			$e->free     = $response->disk->free?? null;
 			$e->pubKey   = $response->pubkey;
