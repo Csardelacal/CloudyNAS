@@ -50,6 +50,7 @@ class ServerModel extends Model
 		
 		$schema->role     = new IntegerField(true);
 		$schema->lastSeen = new IntegerField(true);
+		$schema->lastCron = new IntegerField(true);
 		$schema->queueLen = new IntegerField(true);
 		
 		/**
@@ -61,6 +62,7 @@ class ServerModel extends Model
 		$schema->cluster   = new Reference('cluster');
 		$schema->size      = new FloatField(true);
 		$schema->free      = new FloatField(true);
+		$schema->writable  = new BooleanField();
 		
 		/*
 		 * Record whether and when the server was decommissioned. This allows the 

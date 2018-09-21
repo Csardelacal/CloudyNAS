@@ -81,19 +81,19 @@ class FileHealthCheckTask extends Task
 	
 	public function master($target, $records) {
 		
-		$nr = $records->isEmpty()? null : db()
+		if ($records->isEmpty()) {
+			$this->done();
+			return;
+		}
+		
+		$nr = db()
 			->table('file')
 			->get('server', $target)
 			->group()->where('expires', null)->where('expires', '>', time())->endGroup()
 			->where('uniqid', '>', $records->last()->uniqid)
 			->setOrder('uniqid', 'ASC')->first();
-
-		$next = $nr? $nr->uniqid : null;
 		
-		if ($records->isEmpty()) {
-			$this->done();
-			return;
-		}
+		$next = $nr? $nr->uniqid : null;
 		
 		
 		$task = clone($this);

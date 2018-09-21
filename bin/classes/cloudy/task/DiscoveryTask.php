@@ -102,8 +102,10 @@ class DiscoveryTask extends Task
 			 * to be overriden by a pool server)
 			 */
 			$e->lastSeen = time();
+			$e->lastCron = $payload->lastCron;
 			$e->size     = $payload->disk->size?? null;
 			$e->free     = $payload->disk->free?? null;
+			$e->writable = $payload->disk->writable?? null;
 			$e->cluster  = $payload->cluster? db()->table('cluster')->get('uniqid', $payload->cluster)->first(true) : null;
 			$e->pubKey   = $payload->pubkey;
 			$e->role     = $payload->role;
@@ -115,6 +117,7 @@ class DiscoveryTask extends Task
 				$e = db()->table('server')->get('uniqid', $server->uniqid)->first()?: db()->table('server')->newRecord();
 				$e->size     = $server->disk->size?? null;
 				$e->free     = $server->disk->free?? null;
+				$e->writable = $server->disk->writable?? null;
 				$e->hostname = $server->hostname;
 				$e->uniqid   = $server->uniqid;
 				$e->cluster  = $server->cluster? db()->table('cluster')->get('uniqid', $server->cluster)->first(true) : null;
@@ -123,6 +126,7 @@ class DiscoveryTask extends Task
 				$e->active   = $server->active;
 				$e->disabled = $server->disabled;
 				$e->lastSeen = $server->updated;
+				$e->lastCron = $server->lastCron;
 				$e->store();
 			}
 		});

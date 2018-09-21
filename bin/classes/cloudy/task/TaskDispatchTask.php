@@ -1,4 +1,4 @@
-<?php
+<?php namespace cloudy\task;
 
 /* 
  * The MIT License
@@ -24,21 +24,46 @@
  * THE SOFTWARE.
  */
 
-current_context()->response->getHeaders()->contentType('json');
 
-echo json_encode([
-	'status'  => 'OK',
-	'payload' => [ 
-		'role'     => $role, 
-		'poolid'   => $poolid, 
-		'uniqid'   => $uniqid, 
-		'pubkey'   => $pubkey, 
-		'cluster'  => $cluster, 
-		'active'   => $active,
-		'disabled' => $disabled,
-		'lastCron' => $lastCron,
-		'queue'    => ['length' => $queueLen],
-		'disk'     => [ 'size' => $size, 'free' => $free, 'writable' => $writable ],
-		'servers'  => $servers->toArray()
-	]
-]);
+class TaskDispatchTask extends Task
+{
+	
+	private $task;
+	
+	public function execute($db) {
+		if (!$this->task->body) {
+			$this->done();
+			return;
+		}
+		
+		try {
+			
+			$r = request(rtrim($this->task->hostname, '/') . '/task/queue.json');
+			$r->header('Content-type', 'application/json');
+			$r->post($this->task->body);
+			
+			$response = $r->send();
+		   $body = $response->html();
+		  
+		   $response->expect(200);
+		} catch (\Exception $ex) {
+			console()->error($ex->getMessage())->ln();
+			console()->error($body)->ln();
+		}
+		
+		$this->done();
+	}
+
+	public function load($settings) {
+		$this->task = json_decode(is_array($settings)? json_encode($settings) : $settings);
+	}
+
+	public function save() {
+		return json_encode($this->task);
+	}
+
+	public function version() {
+		return 1;
+	}
+
+}

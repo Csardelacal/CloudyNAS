@@ -55,7 +55,11 @@ class CronDirector extends Director
 		$run = [
 			 cloudy\task\DiscoveryTask::class,
 			 cloudy\task\LeaderDiscoveryTask::class,
-			 cloudy\task\TopographyTask::class
+			 cloudy\task\TopographyTask::class,
+			 
+			 cloudy\task\CleanupFileTask::class,
+			 cloudy\task\CleanupRevisionTask::class,
+			 cloudy\task\CleanupMediaTask::class
 		];
 		
 		foreach ($run as $t) {
@@ -107,11 +111,18 @@ class CronDirector extends Director
 			]));
 
 			$dispatcher->send($self, $task);
+			
+			#Send the servers a command to check the health of their file system.
+			$checksum = $dispatcher->get(\cloudy\task\FileChecksumTask::class);
+			$dispatcher->send($server, $checksum);
 		}
 		
 		
 		$task = $dispatcher->get(cloudy\task\RevisionHealthCheckTask::class);
 		$dispatcher->send($self, $task);
+		
+		$checksum = $dispatcher->get(\cloudy\task\FileChecksumTask::class);
+		$dispatcher->send($self, $checksum);
 		
 	}
 	

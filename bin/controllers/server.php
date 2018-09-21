@@ -30,23 +30,28 @@ use spitfire\exceptions\PublicException;
 class ServerController extends AuthenticatedController
 {
 	
+	public function read(ServerModel$server) {
+		
+		$this->view->set('server', $server);
+	}
+	
 	public function setRole(ServerModel$server, $role) {
 		
 		if ($server->active) {
 			throw new PublicException('Cannot change the server role while it is active.', 400);
 		}
 		
-		$server->role = $role;
+		$server->role = $role?: $_POST['role'];
 		$server->store();
 	}
 	
-	public function setCluster(ServerModel$server, ClusterModel$cluster) {
+	public function setCluster(ServerModel$server, ClusterModel$cluster = null) {
 		
 		if ($server->active) {
 			throw new PublicException('Cannot change the server role while it is active.', 400);
 		}
 		
-		$server->cluster = $cluster;
+		$server->cluster = $cluster? : db()->table('cluster')->get('_id', $_POST['cluster'])->first(true);
 		$server->store();
 	}
 	
@@ -85,10 +90,12 @@ class ServerController extends AuthenticatedController
 				'role' => $e->role, 
 				'disk' => [
 					'size' => $e->size, 
-					'free' => $e->free
+					'free' => $e->free,
+					'writable' => !!$e->writable
 				], 
 				'cluster' => $e->cluster? $e->cluster->uniqid : null,
 				'updated' => $e->lastSeen,
+				'lastCron'=> $e->lastCron,
 				'active'  => $e->active,
 				'disabled' => $e->disabled
 			]; 
@@ -115,6 +122,8 @@ class ServerController extends AuthenticatedController
 		$this->view->set('queueLen', db()->table('task\queue')->getAll()->count());
 		$this->view->set('size',     $total);
 		$this->view->set('free',     $free);
+		$this->view->set('writable', !!storage()->dir(Environment::get('uploads.directory'))->isWritable());
+		$this->view->set('lastCron', $this->settings->read('lastCron'));
 	}
 	
 }

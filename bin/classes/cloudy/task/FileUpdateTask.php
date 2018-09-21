@@ -33,18 +33,6 @@ class FileUpdateTask extends Task
 		$file = db()->table('file')->get('uniqid', $this->uniqid)->first();
 		$self = db()->table('server')->get('uniqid', db()->table('setting')->get('key', 'uniqid')->first()->value)->first(true);
 		
-		if (!$file) {
-			console()->error('Tried updating non-existent file ' . $this->uniqid)->ln();
-			
-			$task = $this->dispatcher()->get(FilePullTask::class);
-			$task->load($this->uniqid);
-			
-			$this->dispatcher()->send($self, $task);
-			$this->done();
-			
-			return;
-		}
-		
 		$cluster = $self->cluster;
 		$server  = db()->table('server')->get('cluster', $cluster)->where('active', true)->all()->filter(function($e) { return $e->role & \cloudy\Role::ROLE_MASTER; })->rewind();
 
@@ -60,22 +48,44 @@ class FileUpdateTask extends Task
 		}
 		
 		$payload = $json->payload;
+		
+		if (!$file) {
+			console()->error('Tried updating non-existent file ' . $this->uniqid)->ln();
+			
+			$task = $this->dispatcher()->get(FilePullTask::class);
+			$task->load(sprintf('%s:%s', $this->uniqid, $payload->checksum));
+			
+			$this->dispatcher()->send($self, $task);
+			$this->done();
+			
+			return;
+		}
+		
 		$file->expires = $payload->expires;
 		$file->checksum = $payload->checksum;
 		$file->commited = true;
 		$file->store();
 		
-		if (!md5_file(storage($file->file)->getPath())) {
+		$error = false;
+		
+		try { $path = storage($file->file)->getPath(); }
+		catch (\Exception$e) { $error = true; }
+		
+		if ($error || md5_file($path) !== $file->checksum) {
 			#The file is corrupted on disk
 			$task = $this->dispatcher()->get(FilePullTask::class);
-			$task->load($this->uniqid);
+			$task->load(sprintf('%s:%s', $this->uniqid, $file->checksum));
+			
+			#Record that the file is invalid.
+			$file->expires = time();
+			$file->store();
 			
 			$this->dispatcher()->send($self, $task);
 		}
 		
 		$request = request($server->hostname . '/file/commit/' . $this->uniqid . '.json');
 		$request->header('Content-type', 'application/json');
-		$request->post($this->keys()->pack($server->uniqid, base64_encode(random_bytes(150))));
+		$request->post($this->keys()->pack($server->uniqid, ['expires' => $file->expires]));
 		$request->send()->expect(200);
 		
 		$this->done();

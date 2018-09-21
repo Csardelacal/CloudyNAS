@@ -39,6 +39,7 @@ class RevisionHealthCheckTask extends Task
 		 */
 		$query = db()->table('revision')
 			->getAll()
+			->group()->where('expires', null)->where('expires', '>', time())->endGroup()
 			->where('_id', '>', $this->getProgress())
 			->setOrder('uniqid', 'ASC');
 		
@@ -55,9 +56,18 @@ class RevisionHealthCheckTask extends Task
 			/*
 			 * Check if the revision has enough replicas of itself
 			 */
-			$files = db()->table('file')->get('revision', $record)->where('expires', $record->expires)->all();
+			$files = db()->table('file')
+				->get('revision', $record)
+				->group()->where('expires', null)->where('expires', '>=', $record->expires? $record->expires : time())
+				->endGroup();
 			
-			if ($files < $record->media->bucket->replicas) {
+			
+			if ($files->count() == 0) {
+				console()->error('Removing orphaned revision ' . $record->uniqid)->ln();
+				$record->expires = time();
+				$record->store();
+			}
+			elseif ($files->count() < $record->media->bucket->replicas) {
 				$task = $this->dispatcher()->get(FileDistributeTask::class);
 				$task->load($record->uniqid);
 				

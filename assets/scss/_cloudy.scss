@@ -37,27 +37,27 @@ THE SOFTWARE.
 		font-size: .8em;
 	}
 	
-	.progress-bar {
-		border-radius: 7.5px;
-		height: 15px;
-		width: 100%;
-		overflow: hidden;
-		text-align: left;
-		border: solid 1px #EEE;
-		box-shadow: -2px 1px 2px rgba(0, 0, 0, 0.1) inset;
-		
-		.progress {
-			text-align: right;
-			color: #FFF;
-			background-image: linear-gradient(0deg, #197abf, #3289c7 10%, #3289c7 90%, #197abf) ;
-			background-color: #3289c7;
-			height: 20px;
-			font-size: 9px;
-			font-weight: bold;
-			padding-right: 5px;
-			line-height: 15px;
-			vertical-align: middle;
-		}
-	}
+}
 	
+.progress-bar {
+	border-radius: 7.5px;
+	height: 15px;
+	width: 100%;
+	overflow: hidden;
+	text-align: left;
+	border: solid 1px #EEE;
+	box-shadow: -2px 1px 2px rgba(0, 0, 0, 0.1) inset;
+
+	.progress {
+		text-align: right;
+		color: #FFF;
+		background-image: linear-gradient(0deg, #197abf, #3289c7 10%, #3289c7 90%, #197abf) ;
+		background-color: #3289c7;
+		height: 20px;
+		font-size: 9px;
+		font-weight: bold;
+		padding-right: 5px;
+		line-height: 15px;
+		vertical-align: middle;
+	}
 }

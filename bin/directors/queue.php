@@ -46,6 +46,24 @@ class QueueDirector extends Director
 		$flipflop = new \cron\FlipFlop(realpath($file));
 		
 		console()->info('Queue started')->ln();
+
+		/*
+		 * Assemble the settings helper so we can quickly read the data from the 
+		 * server's configuration.
+		 */
+		$settings = new SettingsHelper(db()->setting);
+
+		/*
+		 * Prepare the keys. This allows the tasks to defer behavior to another 
+		 * server when needed.
+		 */
+		$keys = new KeyHelper(db(), $settings->read('uniqid'), $settings->read('pubkey'), $settings->read('privkey'));
+
+		/*
+		 * Initialize the task dispatcher. This object is in charge of fetching the
+		 * tasks.
+		 */
+		$dispatcher = new TaskDispatcher($keys);
 		
 		do {
 		
@@ -55,24 +73,6 @@ class QueueDirector extends Director
 			 * tasks within one cycle of the cron.
 			 */
 			$tasks = db()->table('task\queue')->getAll()->setOrder('scheduled', 'ASC')->range(0, 10);
-
-			/*
-			 * Assemble the settings helper so we can quickly read the data from the 
-			 * server's configuration.
-			 */
-			$settings = new SettingsHelper(db()->setting);
-
-			/*
-			 * Prepare the keys. This allows the tasks to defer behavior to another 
-			 * server when needed.
-			 */
-			$keys = new KeyHelper(db(), $settings->read('uniqid'), $settings->read('pubkey'), $settings->read('privkey'));
-
-			/*
-			 * Initialize the task dispatcher. This object is in charge of fetching the
-			 * tasks.
-			 */
-			$dispatcher = new TaskDispatcher($keys);
 
 			/*
 			 * Loop over the pending tasks.
@@ -97,8 +97,17 @@ class QueueDirector extends Director
 				 */
 				$p->load($task->settings);
 				$p->setProgress($task->progress);
-
-				$p->execute(db());
+				
+				try {
+					$p->execute(db());
+				}
+				catch (\Throwable$e) {
+					console()->error('Caught error processing task ' . get_class($p))->ln();
+					console()->error($e->getTraceAsString())->ln();
+					
+					$task->scheduled = time() + 300; #Retry in 5 minutes
+					$task->store();
+				}
 
 				if ($p->isDone()) {
 					$task->delete();
@@ -121,6 +130,7 @@ class QueueDirector extends Director
 		while (db()->table('task\queue')->get('scheduled', time(), '<=')->count() > 0 || $flipflop->wait());
 		
 		console()->info('Queue ended')->ln();
+		$settings->set('lastCron', time());
 	}
 	
 }

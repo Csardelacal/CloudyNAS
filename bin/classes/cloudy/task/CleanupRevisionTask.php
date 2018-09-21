@@ -1,4 +1,4 @@
-<?php
+<?php namespace cloudy\task;
 
 /* 
  * The MIT License
@@ -24,21 +24,51 @@
  * THE SOFTWARE.
  */
 
-current_context()->response->getHeaders()->contentType('json');
+class CleanupRevisionTask extends Task
+{
+	
+	public function execute($db) {
+		$expired = $db->table('revision')->get('expires', time() - (10 * 86400), '<')->where('expires', '!=', null)->range(0, 100);
+		
+		foreach ($expired as $revision) {
+			console()->info('Cleaning up revision ' . $revision->uniqid)->ln();
+			$files = $db->table('file')->get('revision', $revision)->all();
+			
+			if ($files->isEmpty()) {
+				$revision->delete();
+			}
+			else {
+				console()->error('Unsatisfied dependency when trying to delete revision ' . $revision->uniqid)->ln();
+				
+				$files->each(function($e) use ($revision) {
+					$e->expires = $revision->expires;
+					$e->store();
+					
+					$task = $this->dispatcher()->get(\cloudy\task\FileUpdateTask::class);
+					$task->load($e->uniqid);
+					$this->dispatcher()->send($e->server, $task);
+				});
+				
+				$revision->expires = time();
+				$revision->store();
+			}
+		}
+		
+		if ($expired->isEmpty()) {
+			$this->done();
+		}
+	}
 
-echo json_encode([
-	'status'  => 'OK',
-	'payload' => [ 
-		'role'     => $role, 
-		'poolid'   => $poolid, 
-		'uniqid'   => $uniqid, 
-		'pubkey'   => $pubkey, 
-		'cluster'  => $cluster, 
-		'active'   => $active,
-		'disabled' => $disabled,
-		'lastCron' => $lastCron,
-		'queue'    => ['length' => $queueLen],
-		'disk'     => [ 'size' => $size, 'free' => $free, 'writable' => $writable ],
-		'servers'  => $servers->toArray()
-	]
-]);
+	public function load($settings) {
+		return;
+	}
+
+	public function save() {
+		return;
+	}
+
+	public function version() {
+		return 1;
+	}
+
+}

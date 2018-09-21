@@ -1,4 +1,4 @@
-<?php
+<?php namespace cloudy\task;
 
 /* 
  * The MIT License
@@ -24,21 +24,42 @@
  * THE SOFTWARE.
  */
 
-current_context()->response->getHeaders()->contentType('json');
+class CleanupFileTask extends Task
+{
+	
+	public function execute($db) {
+		$expired = $db->table('file')->get('expires', time() - (7 * 86400), '<')->where('expires', '!=', null)->range(0, 100);
+		
+		foreach ($expired as $file) {
+			$revision = $file->revision;
+			
+			console()->info('Cleaning up ' . $file->uniqid)->ln();
+			
+			try {
+				storage()->get($file->file)->delete();
+			} 
+			catch (\Exception $ex) {
+				console()->error('File was not found on disk ' . $file->uniqid)->ln();
+			}
+			
+			$file->delete();
+		}
+		
+		if ($expired->isEmpty()) {
+			$this->done();
+		}
+	}
 
-echo json_encode([
-	'status'  => 'OK',
-	'payload' => [ 
-		'role'     => $role, 
-		'poolid'   => $poolid, 
-		'uniqid'   => $uniqid, 
-		'pubkey'   => $pubkey, 
-		'cluster'  => $cluster, 
-		'active'   => $active,
-		'disabled' => $disabled,
-		'lastCron' => $lastCron,
-		'queue'    => ['length' => $queueLen],
-		'disk'     => [ 'size' => $size, 'free' => $free, 'writable' => $writable ],
-		'servers'  => $servers->toArray()
-	]
-]);
+	public function load($settings) {
+		return;
+	}
+
+	public function save() {
+		return;
+	}
+
+	public function version() {
+		return 1;
+	}
+
+}

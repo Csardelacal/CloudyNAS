@@ -29,6 +29,8 @@ class FilePullTask extends Task
 	
 	private $uniqid;
 	
+	private $checksum;
+	
 	public function execute($db) {
 		$file = db()->table('file')->get('uniqid', $this->uniqid)->first()? : db()->table('file')->newRecord();
 		$self = db()->table('server')->get('uniqid', db()->table('setting')->get('key', 'uniqid')->first()->value)->first(true);
@@ -62,14 +64,16 @@ class FilePullTask extends Task
 		$file->mime = $response->mime();
 		
 		$file->uniqid = $this->uniqid;
+		$file->checksum = $this->checksum;
 		$file->server = $self;
 		$file->commited = true;
+		$file->expires  = md5_file($storage->getPath()) == $this->checksum? null : time();
 		$file->store();
 		
 		try {
 			$request = request($server->hostname . '/file/commit/' . $this->uniqid . '.json');
 			$request->header('Content-type', 'application/json');
-			$request->post($this->keys()->pack($server->uniqid, base64_encode(random_bytes(150))));
+			$request->post($this->keys()->pack($server->uniqid, ['expires' => $file->expires]));
 			$request->send()->expect(200);
 		}
 		catch (\Exception$e) {
@@ -83,11 +87,13 @@ class FilePullTask extends Task
 	}
 
 	public function load($settings) {
-		$this->uniqid = $settings;
+		$pieces = explode(':', $settings);
+		$this->uniqid = array_shift($pieces);
+		$this->checksum = array_shift($pieces);
 	}
 
 	public function save() {
-		return $this->uniqid;
+		return sprintf('%s:%s', $this->uniqid, $this->checksum);
 	}
 
 	public function version() {

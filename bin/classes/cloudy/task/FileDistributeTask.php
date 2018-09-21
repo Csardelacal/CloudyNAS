@@ -40,7 +40,7 @@ class FileDistributeTask extends Task
 		$bucket   = $revision->media->bucket;
 		$cluster  = $bucket->cluster;
 		
-		$servers = $db->table('server')->get('cluster', $cluster)->all()->filter(function ($e) { return $e->role & Role::ROLE_SLAVE; });
+		$servers = $db->table('server')->get('cluster', $cluster)->where('active', true)->all()->filter(function ($e) { return $e->role & Role::ROLE_SLAVE; });
 		$replicas = min((int)$servers->count(), $bucket->replicas);
 		
 		$total    = 0;
@@ -78,7 +78,7 @@ class FileDistributeTask extends Task
 					
 					$d = $this->dispatcher();
 					$t = $d->get(FilePullTask::class);
-					$t->load($file->uniqid);
+					$t->load(sprintf('%s:%s', $file->uniqid, $revision->checksum));
 					
 					$d->send(
 						$server, 

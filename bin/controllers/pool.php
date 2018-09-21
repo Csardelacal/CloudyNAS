@@ -77,6 +77,8 @@ class PoolController extends AuthenticatedController
 			$slave->active   = false;
 			$slave->disabled = null;
 			$slave->store();
+			
+			return $this->response->setBody('Redirect...')->getHeaders()->redirect(url('server', 'read', $slave->_id));
 		} 
 		catch (HTTPMethodException $ex) {
 			#Do nothing, show the form.

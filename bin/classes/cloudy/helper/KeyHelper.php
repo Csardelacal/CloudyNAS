@@ -49,6 +49,10 @@ class KeyHelper
 		return $this->pub;
 	}
 	
+	public function uniqid() {
+		return $this->uniqid;
+	}
+	
 	public function server($uniqid) {
 		$s = $this->db->table('server')->get('uniqid', $uniqid)->first(true);
 		return new \cloudy\encryption\Server($uniqid, $s->pubKey);

@@ -70,7 +70,7 @@ class MediaController extends AuthenticatedController
 		$file->server   = $master;
 		$file->file     = $_POST['file']->store()->uri();
 		$file->mime     = $_POST['mime'];
-		$file->checksum = md5_file($_POST['file']->store()->getPath());
+		$file->checksum = $revision->checksum;
 		$file->expires  = time() + 86400 * 7;
 		$file->commited = 1;
 		$file->store();
@@ -170,8 +170,6 @@ class MediaController extends AuthenticatedController
 			$task->load($file->uniqid);
 			$this->tasks->send($file->server, $task);
 		}
-		
-		die('OK');
 	}
 	
 }

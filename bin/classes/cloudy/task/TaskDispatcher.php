@@ -1,9 +1,13 @@
 <?php namespace cloudy\task;
 
 use cloudy\helper\KeyHelper;
+use cron\FlipFlop;
 use ServerModel;
+use spitfire\exceptions\PrivateException;
 use function collect;
+use function db;
 use function request;
+use function spitfire;
 
 /* 
  * The MIT License
@@ -32,6 +36,10 @@ use function request;
 class TaskDispatcher
 {
 	
+	/**
+	 *
+	 * @var KeyHelper
+	 */
 	private $keys;
 	private $known;
 	
@@ -50,6 +58,12 @@ class TaskDispatcher
 		$this->known->push(DiscoveryTask::class);
 		$this->known->push(TopographyTask::class);
 		$this->known->push(LeaderDiscoveryTask::class);
+		
+		$this->known->push(TaskDispatchTask::class);
+		
+		$this->known->push(CleanupFileTask::class);
+		$this->known->push(CleanupRevisionTask::class);
+		$this->known->push(CleanupMediaTask::class);
 	}
 	
 	/**
@@ -64,7 +78,7 @@ class TaskDispatcher
 			}
 		}
 		
-		throw new \spitfire\exceptions\PrivateException('Unknown task ' . $name, 1809121639);
+		throw new PrivateException('Unknown task ' . $name, 1809121639);
 	}
 	
 	/**
@@ -76,15 +90,37 @@ class TaskDispatcher
 	}
 		
 	public function send(ServerModel$server, Task$task) {
-		$r = request(rtrim($server->hostname, '/') . '/task/queue.json');
-		$r->header('Content-type', 'application/json');
-		$r->post($this->keys->pack($server->uniqid, [
-			'job' => get_class($task),
-			'version' => $task->version(),
-			'settings' => $task->save(),
-			'scheduled' => time()
-		]));
-		
-		$r->send()->expect(200);
+		if ($this->keys->uniqid() === $server->uniqid) {
+			/*
+			 * Queue the task to the server's internal task queue.
+			 */
+			$queue = db()->table('task\queue')->newRecord();
+			$queue->job = get_class($task);
+			$queue->version = $task->version();
+			$queue->settings = $task->save();
+			$queue->scheduled = time();
+			$queue->progress = null;
+			$queue->store();
+
+			$flipflop = new FlipFlop(realpath(spitfire()->getCWD() . '/bin/usr/.cron.lock'));
+			$flipflop->notify();
+		}
+		else {
+			$t    = $this->get(TaskDispatchTask::class);
+			$self = db()->table('server')->get('uniqid', $this->keys->uniqid())->first();
+			
+			$t->load([
+				'uniqid' => $server->uniqid,
+				'hostname' => $server->hostname,
+				'body' => $this->keys->pack($server->uniqid, [
+					'job' => get_class($task),
+					'version' => $task->version(),
+					'settings' => $task->save(),
+					'scheduled' => time()
+				])
+			]);
+			
+			$this->send($self, $t);
+		}
 	}
 }

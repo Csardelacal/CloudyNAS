@@ -1,4 +1,4 @@
-<?php
+<?php namespace cloudy\task;
 
 /* 
  * The MIT License
@@ -24,21 +24,47 @@
  * THE SOFTWARE.
  */
 
-current_context()->response->getHeaders()->contentType('json');
+class CleanupMediaTask extends Task
+{
+	
+	public function execute($db) {
+		$expired = $db->table('media')->get('expires', time() - (30 * 86400), '<')->where('expires', '!=', null)->range(0, 100);
+		
+		foreach ($expired as $media) {
+			console()->info('Cleaning up media ' . $media->uniqid)->ln();
+			$revisions = $db->table('revision')->get('media', $media)->all();
+			
+			if ($revisions->isEmpty()) {
+				$media->delete();
+			}
+			else {
+				console()->error('Unsatisfied dependency when trying to delete revision ' . $media->uniqid)->ln();;
+				
+				$revisions->each(function($e) use ($media) {
+					$e->expires = $media->expires;
+					$e->store();
+				});
+				
+				$media->expires = time();
+				$media->store();
+			}
+		}
+		
+		if ($expired->isEmpty()) {
+			$this->done();
+		}
+	}
 
-echo json_encode([
-	'status'  => 'OK',
-	'payload' => [ 
-		'role'     => $role, 
-		'poolid'   => $poolid, 
-		'uniqid'   => $uniqid, 
-		'pubkey'   => $pubkey, 
-		'cluster'  => $cluster, 
-		'active'   => $active,
-		'disabled' => $disabled,
-		'lastCron' => $lastCron,
-		'queue'    => ['length' => $queueLen],
-		'disk'     => [ 'size' => $size, 'free' => $free, 'writable' => $writable ],
-		'servers'  => $servers->toArray()
-	]
-]);
+	public function load($settings) {
+		return;
+	}
+
+	public function save() {
+		return;
+	}
+
+	public function version() {
+		return 1;
+	}
+
+}

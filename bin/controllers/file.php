@@ -49,6 +49,7 @@ class FileController extends AuthenticatedController
 		$file = db()->table('file')->get('uniqid', $uniqid)->first(true);
 		
 		$file->commited = true;
+		$file->expires  = isset($_POST['expires'])? $_POST['expires'] : null;
 		$file->store();
 	}
 	

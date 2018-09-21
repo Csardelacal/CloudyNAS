@@ -92,6 +92,12 @@ class LeaderDiscoveryTask extends Task
 				->post($keys->pack($e->uniqid, base64_encode(random_bytes(150))))
 				->send()->expect(200)->json()->payload;
 			
+			if (empty($response)) {
+				console()->error('Could not discover server ' . $e->uniqid)->ln();
+				console()->error($r->header('Content-type', 'application/json')->post($keys->pack($e->uniqid, base64_encode(random_bytes(150))))->send()->html());
+				return;
+			}
+			
 			/*
 			 * If the server is responding properly, then we report the server as
 			 * properly running and remove the reminder to automatically check after
@@ -101,9 +107,11 @@ class LeaderDiscoveryTask extends Task
 			 * to be overriden by a pool server)
 			 */
 			$e->lastSeen = time();
+			$e->lastCron = $response->lastCron;
 			$e->queueLen = $response->queue->length?? 0;
 			$e->size     = $response->disk->size?? null;
 			$e->free     = $response->disk->free?? null;
+			$e->writable = $response->disk->writable?? null;
 			$e->pubKey   = $response->pubkey;
 			$e->store();
 		});

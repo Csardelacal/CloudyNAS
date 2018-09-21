@@ -20,7 +20,7 @@
 				</div>
 				<div class="span l3">
 					<div  style="font-weight: bold;">
-						<?= $server->hostname ?>
+						<a href="<?= url('server', 'read', $server->_id) ?>"><?= $server->hostname ?></a>
 					</div>
 					<div>
 						<?= $server->role & cloudy\Role::ROLE_LEADER? 'Leader' : '' ?>
