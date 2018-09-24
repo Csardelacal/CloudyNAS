@@ -52,8 +52,15 @@ class FilePullTask extends Task
 		$request = request($server->hostname . '/file/retrieve/uniqid/' . $this->uniqid);
 		$request->header('Content-type', 'application/json');
 		$request->post($this->keys()->pack($server->uniqid, base64_encode(random_bytes(150))));
-
-		$response = $request->send();
+		
+		try {
+			$response = $request->send();
+			$response->expect(200);
+		}
+		catch (\spitfire\io\curl\BadStatusCodeException$e) {
+			console()->error('Error fetching file ' . $this->uniqid)->ln();
+			console()->error('Got code ' . $e->getCode())->ln();
+		}
 
 		try { $storage = $dir->open('uniqid_' . $this->uniqid); }
 		catch (\Exception$e) { $storage = $dir->make('uniqid_' . $this->uniqid); }
@@ -63,14 +70,25 @@ class FilePullTask extends Task
 		$file->file = $storage->uri();
 		$file->mime = $response->mime();
 		
+		if (md5_file($storage->getPath()) !== $this->checksum) {
+			$error = true;
+			console()->error('Checksum mismatch after downloading file ' . $this->uniqid)->ln();
+			console()->error('-> Expected ' . $this->checksum)->ln();
+			console()->error('-> Received ' . md5_file($storage->getPath()))->ln();
+		}
+		else {
+			$error = false;
+		}
+		
 		$file->uniqid = $this->uniqid;
 		$file->checksum = $this->checksum;
 		$file->server = $self;
 		$file->commited = true;
-		$file->expires  = md5_file($storage->getPath()) == $this->checksum? null : time();
+		$file->expires  = !$error? null : time();
 		$file->store();
 		
 		try {
+			console()->info('Committing expiration: ' . $file->expires)->ln();;
 			$request = request($server->hostname . '/file/commit/' . $this->uniqid . '.json');
 			$request->header('Content-type', 'application/json');
 			$request->post($this->keys()->pack($server->uniqid, ['expires' => $file->expires]));

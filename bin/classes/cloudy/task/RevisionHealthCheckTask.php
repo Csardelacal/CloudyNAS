@@ -57,10 +57,14 @@ class RevisionHealthCheckTask extends Task
 			 * Check if the revision has enough replicas of itself
 			 */
 			$files = db()->table('file')
-				->get('revision', $record)
-				->group()->where('expires', null)->where('expires', '>=', $record->expires? $record->expires : time())
-				->endGroup();
+				->get('revision', $record);
 			
+			if ($record->expires) {
+				$files->group()->where('expires', null)->where('expires', '>=', $record->expires? $record->expires : time())->endGroup();
+			}
+			else {
+				$files->where('expires', null);
+			}
 			
 			if ($files->count() == 0) {
 				console()->error('Removing orphaned revision ' . $record->uniqid)->ln();

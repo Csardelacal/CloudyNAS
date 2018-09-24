@@ -55,6 +55,75 @@ class ServerController extends AuthenticatedController
 		$server->store();
 	}
 	
+	public function enable(ServerModel$server) {
+		
+		if ($server->active) {
+			throw new PublicException('Server already active.', 400);
+		}
+		
+		if (!$server->writable) {
+			throw new PublicException('Server is not writable', 403);
+		}
+		
+		if ($server->queueLen > 0) {
+			throw new PublicException('Server is busy', 403);
+		}
+		
+		/*
+		 * If the server wishes to become a leader, we will need to ensure that it
+		 * has all the necessary data pertaining servers, clusters and buckets.
+		 * 
+		 * After that, we could transfer the ownership of the pool to the new leader.
+		 */
+		if ($server->role & cloudy\Role::ROLE_LEADER) {
+			#TODO: Implement
+			throw new PublicException('Not implemented', 500);
+		}
+		elseif (!$server->cluster) {
+			throw new PublicException('No cluster provided', 400);
+		}
+		
+		$old = db()
+			->table('server')
+			->get('cluster', $server->cluster)
+			->all()
+			->filter(function($e) { return $e->role & cloudy\Role::ROLE_MASTER; })
+			->rewind();
+		
+		if ($server->role & cloudy\Role::ROLE_MASTER && $old) {
+			#TODO: Implement
+			throw new PublicException('Not implemented', 500);
+		}
+		
+		$server->active = true;
+		$server->store();
+		
+		foreach (db()->table('server')->getAll()->all() as $server) {
+			$this->tasks->send($server, $this->tasks->get(cloudy\task\DiscoveryTask::class));
+		}
+	}
+	
+	public function disable(ServerModel$server) {
+		
+		if ($server->role & cloudy\Role::ROLE_MASTER || $server->role & cloudy\Role::ROLE_LEADER) {
+			throw new PublicException('You are required to appoint a new server for this task to disable masters or leaders', 403);
+		}
+		
+		if (db()->table('server')->get('cluster', $server->cluster)->where('active', true)->all()->count() < db()->table('bucket')->get('cluster', $server->cluster)->all()->extract('replicas')->sort()->last()) {
+			throw new PublicException('Removing this server would cripple the cluster. You must remove its buckets first', 403);
+		}
+		
+		$server->active = false;
+		$server->queueLen = $server->queueLen + 1;
+		$server->store();
+		
+		$this->tasks->send($server, $this->tasks->get(cloudy\task\FileShutdownTask::class));
+		
+		foreach (db()->table('server')->getAll()->all() as $server) {
+			$this->tasks->send($server, $this->tasks->get(cloudy\task\DiscoveryTask::class));
+		}
+	}
+	
 	public function info() {
 		
 		if ($this->_auth !== AuthenticatedController::AUTH_INT) {
@@ -104,10 +173,18 @@ class ServerController extends AuthenticatedController
 		
 		#TODO: Provide info about the buckets the server hosts
 		#TODO: Provide info about the cluster / masters
-		$dir = storage()->dir(Environment::get('uploads.directory'));
-		
-		$total = disk_total_space($dir->getPath());
-		$free  = disk_free_space($dir->getPath());
+		try {
+			$dir = storage()->dir(Environment::get('uploads.directory'));
+
+			$total = disk_total_space($dir->getPath());
+			$free  = disk_free_space($dir->getPath());
+			$write = $dir->isWritable();
+		}
+		catch (\Exception$e) {
+			$total = 0;
+			$free  = 0;
+			$write = false;
+		}
 		
 		$self = db()->table('server')->get('uniqid', $uniqid)->first();
 		
@@ -122,7 +199,7 @@ class ServerController extends AuthenticatedController
 		$this->view->set('queueLen', db()->table('task\queue')->getAll()->count());
 		$this->view->set('size',     $total);
 		$this->view->set('free',     $free);
-		$this->view->set('writable', !!storage()->dir(Environment::get('uploads.directory'))->isWritable());
+		$this->view->set('writable', !!$write);
 		$this->view->set('lastCron', $this->settings->read('lastCron'));
 	}
 	

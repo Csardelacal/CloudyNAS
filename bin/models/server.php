@@ -84,5 +84,64 @@ class ServerModel extends Model
 		 */
 		$schema->active    = new BooleanField();
 	}
+	
+	public function getMaster() {
+		return $this->getTable()->getDb()
+			->table('server')
+			->get('cluster', $this->cluster)
+			->where('active', true)
+			->all()
+			->filter(function ($e) { return $e->role & cloudy\Role::ROLE_MASTER; })
+			->rewind();
+	}
+	
+	public function resolve($link, $revisionid = null) {
+		
+		/*
+		 * In the special event that the server is, itself, the master and therefore
+		 * does not require a request to resolve.
+		 */
+		if ($this->role & cloudy\Role::ROLE_MASTER) {
+			
+			$link = db()->table('link')->get('uniqid', $link)->first(true);
+			$media = $link->media;
+			
+			$query = db()->table('revision')->get('media', $media)->where('uniqid', $revisionid);
+			$revisionid? $query->group()->where('expires', null)->where('expires', '>', time()) : $query->where('expires', null);
+			
+			return db()->table('file')->get('revision', $query->first(true))->where('server', $this)->first();
+		}
+		
+		/*
+		 * IMPLICIT ELSE-
+		 * 
+		 * Since this task relies on the network, and links generally don't change
+		 * too often, we use memcached to reduce the amount of requests and therefore
+		 * the stress on the network.
+		 */
+		$memcached = new \spitfire\cache\MemcachedAdapter();
+		
+		$file = $memcached->get('link_' . $link . '_' . $revisionid, function () use ($link, $revisionid) {
+			
+			$master  = $this->getMaster();
+			$request = request($revisionid? $master->hostname . '/link/read/' . $link . '/' . $revisionid . '.json' : $master->hostname . '/link/read/' . $link . '.json');
+			
+			/*
+			 * TODO: I'm almost DISGUSTED by myself pushing the call to current_context()
+			 * here and it should go ASAP. I'll look into refactoring this mess.
+			 */
+			$request->header('Content-type', 'application/json')
+			->post(current_context()->controller->keys->pack($master->uniqid, base64_encode(random_bytes(150))));
+
+			$files = $request->send()->expect(200)->json()->files;
+
+			foreach ($files as $file) {
+				if ($this->uniqid == $file->server) { return $file->uniqid; }
+			}
+
+		});
+
+		return $this->getTable()->getDb()->table('file')->get('uniqid', $file)->first();
+	}
 
 }

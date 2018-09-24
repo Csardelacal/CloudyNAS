@@ -72,7 +72,7 @@ class QueueDirector extends Director
 			 * 10, since it's unlikely that the server will be able to handle many heavy
 			 * tasks within one cycle of the cron.
 			 */
-			$tasks = db()->table('task\queue')->getAll()->setOrder('scheduled', 'ASC')->range(0, 10);
+			$tasks = db()->table('task\queue')->get('scheduled', time(), '<=')->setOrder('scheduled', 'ASC')->range(0, 10);
 
 			/*
 			 * Loop over the pending tasks.
@@ -100,24 +100,26 @@ class QueueDirector extends Director
 				
 				try {
 					$p->execute(db());
+					
+					if ($p->isDone()) {
+						$task->delete();
+					}
+					else {
+						$task->progress = $p->getProgress();
+						$task->scheduled = max(time(), $p->getScheduled()); #Defer long running tasks so they don't clog up the system
+						$task->store();
+					}
+
 				}
 				catch (\Throwable$e) {
 					console()->error('Caught error processing task ' . get_class($p))->ln();
+					console()->error($e->getMessage())->ln();
 					console()->error($e->getTraceAsString())->ln();
 					
 					$task->scheduled = time() + 300; #Retry in 5 minutes
 					$task->store();
 				}
 
-				if ($p->isDone()) {
-					$task->delete();
-				}
-				else {
-					$task->progress = $p->getProgress();
-					$task->scheduled = time(); #Defer long running tasks so they don't clog up the system
-					$task->store();
-				}
-				
 				
 				console()->success('Processed task ' . $task->job)->ln();
 			}

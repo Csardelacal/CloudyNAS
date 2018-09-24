@@ -68,10 +68,11 @@ class FileUpdateTask extends Task
 		
 		$error = false;
 		
-		try { $path = storage($file->file)->getPath(); }
+		try { $path = storage()->get($file->file)->getPath(); }
 		catch (\Exception$e) { $error = true; }
 		
 		if ($error || md5_file($path) !== $file->checksum) {
+			console()->error('Unable to verify file integrity of ' . $this->uniqid . ' while updating.')->ln();
 			#The file is corrupted on disk
 			$task = $this->dispatcher()->get(FilePullTask::class);
 			$task->load(sprintf('%s:%s', $this->uniqid, $file->checksum));

@@ -60,16 +60,16 @@ class ClusterModel extends Model
 		/*@var $servers \spitfire\core\Collection*/
 		$servers = $this->servers->getQuery()->all();
 		
-		if ($servers->isEmpty()) { return 0; }
-		else                     { return $servers->extract('size')->sum(); }
+		try { return $servers->extract('size')->sum(); }
+		catch (\Exception$e) { return 0;	}
 	}
 	
 	public function available() {
 		/*@var $servers \spitfire\core\Collection*/
 		$servers = $this->servers->getQuery()->all();
 		
-		if ($servers->isEmpty()) { return 0; }
-		else                     { return $servers->extract('free')->sum(); }
+		try { return $servers->extract('free')->sum(); }
+		catch (\Exception$e) { return 0;	}
 	}
-
+	
 }

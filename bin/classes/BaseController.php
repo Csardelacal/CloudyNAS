@@ -42,7 +42,7 @@ class BaseController extends Controller
 	 *
 	 * @var KeyHelper
 	 */
-	protected $keys;
+	public $keys;
 	
 	/**
 	 *

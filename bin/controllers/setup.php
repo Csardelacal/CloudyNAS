@@ -129,6 +129,19 @@ class SetupController extends AuthenticatedController
 			$e->disabled = null;
 			$e->store();
 			
+			$s = db()->table('server')->newRecord();
+			$s->lastSeen = time();
+			$s->size     = null;
+			$s->free     = null;
+			$s->cluster  = null;
+			$s->hostname = url()->absolute();
+			$s->uniqid   = $this->settings->read('uniqid');
+			$s->pubKey   = $this->settings->read('pubkey');
+			$s->role     = Role::ROLE_SLAVE;
+			$s->active   = false;
+			$s->disabled = null;
+			$s->store();
+			
 			/*
 			 * Let the view respond with a success message to the other server,
 			 * informing it that the request was a success and that this one is 

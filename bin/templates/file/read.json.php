@@ -31,6 +31,6 @@ echo json_encode([
 		'file' => $file->uniqid,
 		'server' => $file->server->uniqid,
 		'expires' => $file->expires,
-		'checksum' => $file->checksum
+		'checksum' => $file->revision->checksum
 	]
 ]);

@@ -116,7 +116,7 @@ class FileHealthCheckTask extends Task
 		$right = $remote->shift();
 
 		while ($left || $right) {
-			sleep(1);
+			//sleep(1);
 			/*
 			 * The records are equal, therefore nothing happens.
 			 */

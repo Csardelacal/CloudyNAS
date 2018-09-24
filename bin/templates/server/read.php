@@ -19,7 +19,7 @@
 			it's disabled again.
 		</p>
 		<?php else: ?>
-		<div style="font-weight: bold">Server is <span style="color: #900">inactive</span></div>
+		<div style="font-weight: bold">Server is <span style="color: #900">inactive</span> and <?= $server->writable? 'writable' : 'not writable' ?></div>
 		<p class="secondary small unpadded">
 			This server is not currently available to receive any tasks from the pool.
 			In this mode you can change the server's role, and move it to another cluster.
@@ -52,36 +52,28 @@
 			<div class="progress" style="width: <?= round((1 - $server->free / $server->size) * 100) ?>%"><?= round((1 - $server->free / $server->size) * 100) ?>%</div>
 		</div>
 
-		<div class="spacer" style="height: 15px"></div>
+		<div class="spacer" style="height: 25px"></div>
 		
-		<p class="small unpadded"><strong>Queue length.</strong></p>
+		<p class="small unpadded"><strong>Queue length: <?= (int)$server->queueLen ?> tasks</strong></p>
 		<p class="small secondary unpadded">Provides an overview of how busy the server is. If the queue value is consistently high, the server is having trouble processing it's task backlog.</p>
 		<p class="small secondary unpadded">Temporary activity and queue length spikes are normal during cluster shifting or health check operations.</p>
 		
-		<div class="spacer" style="height: 10px"></div>
-
-		<div class="progress-bar">
-			<div class="progress" style="width: <?= (int)$server->queueLen ?>%"><?= (int)$server->queueLen ?> tasks</div>
-		</div>
+		<div class="spacer" style="height: 25px"></div>
 		
-		<p class="small unpadded"><strong>Last cron execution</strong></p>
+		<p class="small unpadded"><strong>Last cron execution: <?= Time::relative($server->lastCron) ?></strong></p>
 		<p class="small secondary unpadded">The crons are required to run regularly on the system, to make sure that everything works properly.</p>
 		<p class="small secondary unpadded">If the cron is not run for a long period of time, it may indicate the server is not properly configured.</p>
 		
 		<div class="spacer" style="height: 10px"></div>
-
-		<div class="progress-bar">
-			<div class="progress" style="width: <?= (time() - $server->lastCron) / 60 ?>%"><?= (int)((time() - $server->lastCron) / 60) ?> minutes</div>
-		</div>
 	</div>
 	
 	<div class="span l1 dials">
 		<ul>
 			<!-- Allow to enable or disable the server-->
 			<?php if ($server->active): ?>
-			<li>Enable &centerdot; <a href="<?= url('server', 'setActive', 0, ['returnto' => \spitfire\core\http\URL::current()]) ?>">Disable</a></li>
+			<li>Enable &centerdot; <a href="<?= url('server', 'disable', $server->_id, ['returnto' => (string)\spitfire\core\http\URL::current()]) ?>">Disable</a></li>
 			<?php else: ?>
-			<li><a href="<?= url('server', 'setActive', 1, ['returnto' => \spitfire\core\http\URL::current()]) ?>">Enable</a> &centerdot; Disable</li>
+			<li><a href="<?= url('server', 'enable', $server->_id, ['returnto' => (string)\spitfire\core\http\URL::current()]) ?>">Enable</a> &centerdot; Disable</li>
 			<?php endif; ?>
 			
 			<!-- Change the server's cluster-->

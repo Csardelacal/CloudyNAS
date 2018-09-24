@@ -55,6 +55,8 @@ class TaskDispatcher
 		$this->known->push(FileHealthCheckTask::class);
 		$this->known->push(RevisionHealthCheckTask::class);
 		
+		$this->known->push(FileShutdownTask::class);
+		
 		$this->known->push(DiscoveryTask::class);
 		$this->known->push(TopographyTask::class);
 		$this->known->push(LeaderDiscoveryTask::class);

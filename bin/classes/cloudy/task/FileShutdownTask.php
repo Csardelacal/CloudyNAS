@@ -24,41 +24,51 @@
  * THE SOFTWARE.
  */
 
-class CleanupFileTask extends Task
+class FileShutdownTask extends Task
 {
 	
 	public function execute($db) {
-		$expired = $db->table('file')->get('expires', time() - (7 * 86400), '<')->where('expires', '!=', null)->range(0, 100);
+		
+		$expired = $db->table('file')->getAll()->group()->where('expires', '>', time())->where('expires', null)->endGroup()->range(0, 100);
+		$self = db()->table('server')->get('uniqid', db()->table('setting')->get('key', 'uniqid')->first()->value)->first(true);
+		
+		$cluster = $self->cluster;
+		$server  = db()->table('server')->get('cluster', $cluster)->where('active', true)->all()->filter(function($e) { return $e->role & \cloudy\Role::ROLE_MASTER; })->rewind();
+
 		
 		foreach ($expired as $file) {
-			
-			console()->info('Cleaning up ' . $file->uniqid)->ln();
+			$file->expires = time();
+			$file->store();
 			
 			try {
-				storage()->get($file->file)->delete();
-			} 
-			catch (\Exception $ex) {
-				console()->error('File was not found on disk ' . $file->uniqid)->ln();
+				$request = request($server->hostname . '/file/commit/' . $file->uniqid . '.json');
+				$request->header('Content-type', 'application/json');
+				$request->post($this->keys()->pack($server->uniqid, ['expires' => $file->expires]));
+				$request->send()->expect(200);
 			}
-			
-			$file->delete();
+			catch (\Exception$e) {
+				console()->error('Error committing file ' . $file->uniqid)->ln();
+			}
 		}
 		
-		if ($expired->isEmpty()) {
+		if (db()->table('file')->getAll()->count() == 0) {
 			$this->done();
+		}
+		elseif($expired->isEmpty()) {
+			$this->setScheduled(time() + 300);
 		}
 	}
 
 	public function load($settings) {
-		return;
+		
 	}
 
 	public function save() {
-		return;
+		
 	}
 
 	public function version() {
-		return 1;
+		
 	}
 
 }

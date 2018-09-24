@@ -45,7 +45,8 @@ class LinkController extends AuthenticatedController
 			$files    = db()->table('file')->get('revision', $revision)->all();
 		}
 		else {
-			
+			$revision = db()->table('revision')->get('media', $link->media)->where('uniqid', $revid)->first();
+			$files    = db()->table('file')->get('revision', $revision)->all();
 		}
 		
 		$this->view->set('link',  $link);

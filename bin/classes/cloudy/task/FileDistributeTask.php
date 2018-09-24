@@ -35,6 +35,7 @@ class FileDistributeTask extends Task
 	private $uniqid;
 	
 	public function execute($db) {
+		console()->info('Distributing ' . $this->uniqid)->ln();
 		
 		$revision = $db->table('revision')->get('uniqid', $this->uniqid)->first(true);
 		$bucket   = $revision->media->bucket;
@@ -50,10 +51,27 @@ class FileDistributeTask extends Task
 		 * that the application does not redistribute files to servers that already
 		 * contain a copy.
 		 */
-		$existing = db()->table('file')->get('revision', $revision)->where('expires', $revision->expires)->all();
+		$query = db()->table('file')->get('revision', $revision);
+		
+		if ($revision->expires) {
+			$query->group()->where('expires', null)->where('expires', '>=', $revision->expires? $revision->expires : time())->endGroup();
+		}
+		else {
+			$query->where('expires', null);
+		}
+		
+		$existing = $query->all();
 		
 		foreach ($existing as $s) {
 			$servers = $servers->filter(function ($e) use ($s) { return $e->unqiqid !== $s->uniqid; });
+		}
+		
+		/*
+		 * Check if there is a source file.
+		 */
+		if (!$db->table('file')->get('revision', $revision)->group()->where('expires', null)->where('expires', '>', time())->endGroup()->where('commited', true)->first()) {
+			$this->done();
+			return;
 		}
 		
 		for ($i = 0; $i < ($replicas - $existing->count()); $i++) {

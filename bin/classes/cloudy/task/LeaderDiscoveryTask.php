@@ -95,6 +95,8 @@ class LeaderDiscoveryTask extends Task
 			if (empty($response)) {
 				console()->error('Could not discover server ' . $e->uniqid)->ln();
 				console()->error($r->header('Content-type', 'application/json')->post($keys->pack($e->uniqid, base64_encode(random_bytes(150))))->send()->html());
+				
+				$this->done();
 				return;
 			}
 			

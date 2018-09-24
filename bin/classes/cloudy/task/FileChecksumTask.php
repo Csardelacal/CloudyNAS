@@ -69,6 +69,10 @@ class FileChecksumTask extends Task
 				$record->expires = time();
 				$record->store();
 				
+				console()->error('Checksum mismatch on file ' . $record->uniqid)->ln();
+				console()->error('-> Expected ' . $record->checksum)->ln();
+				console()->error('-> Received ' . md5_file($file))->ln();
+				
 				#If the master himself is running into the issue, there is no need to inform the master
 				#TODO: Refactor this block somewhere else.
 				if ($master->uniqid === $self->uniqid) {continue; }
