@@ -99,40 +99,37 @@ table {
     margin: 0;
     padding: 8px 20px; }
 
-form.regular .field {
+form.regular label {
   display: block;
-  box-sizing: border-box; }
-  form.regular .field label {
-    display: block;
-    font-size: .9em;
-    color: #555;
-    width: 100%; }
-  form.regular .field input[type=text],
-  form.regular .field input[type=email],
-  form.regular .field input[type=password],
-  form.regular .field textarea,
-  form.regular .field select {
-    width: 100%;
-    padding: 5px 10px;
-    font-size: 1.05em;
-    background: #FFF;
-    border: solid 1px #EEE;
-    box-sizing: border-box;
-    height: 2em; }
-    form.regular .field input[type=text].borderless,
-    form.regular .field input[type=email].borderless,
-    form.regular .field input[type=password].borderless,
-    form.regular .field textarea.borderless,
-    form.regular .field select.borderless {
-      border: none; }
-    form.regular .field input[type=text]:focus,
-    form.regular .field input[type=email]:focus,
-    form.regular .field input[type=password]:focus,
-    form.regular .field textarea:focus,
-    form.regular .field select:focus {
-      outline: none; }
-  form.regular .field textarea {
-    height: 150px; }
+  font-size: .9em;
+  color: #555;
+  width: 100%; }
+form.regular input[type=text],
+form.regular input[type=email],
+form.regular input[type=password],
+form.regular input[type=number],
+form.regular textarea {
+  width: 100%;
+  padding: 5px 10px;
+  font-size: 1.05em;
+  background: #FFF;
+  border: solid 1px #EEE;
+  box-sizing: border-box;
+  height: 2em; }
+  form.regular input[type=text].borderless,
+  form.regular input[type=email].borderless,
+  form.regular input[type=password].borderless,
+  form.regular input[type=number].borderless,
+  form.regular textarea.borderless {
+    border: none; }
+  form.regular input[type=text]:focus,
+  form.regular input[type=email]:focus,
+  form.regular input[type=password]:focus,
+  form.regular input[type=number]:focus,
+  form.regular textarea:focus {
+    outline: none; }
+form.regular textarea {
+  height: 150px; }
 form.regular .form-footer {
   padding-top: 15px;
   padding-right: 10px;
@@ -708,7 +705,7 @@ make them more usable.
     max-width: 71em; }
 
   .span {
-    margin-left: 1.0416666667%; }
+    margin-left: 2.0833333333%; }
     .span:first-child {
       margin-left: 1.0416666667%; }
 

@@ -31,8 +31,56 @@ class ClusterController extends BaseController
 		//TODO: Implement
 	}
 	
+	/**
+	 * 
+	 * @validate >> POST#name(string required)
+	 * @throws PublicException
+	 * @throws HTTPMethodException
+	 * @throws ValidationException
+	 */
 	public function create() {
-		//TODO: Implement
+		/*
+		 * Buckets can only be created by humans and authorized third parties. There's 
+		 * no need for our application to allow other stuff to happen
+		 */
+		if ($this->_auth === AuthenticatedController::AUTH_USER) {
+			#The user is authenticated, let him continue
+		}
+		
+		elseif ($this->_auth === AuthenticatedController::AUTH_APP) {
+			throw new PublicException('Not implemented', 502);
+		}
+		
+		else {
+			throw new PublicException('Unauthorized', 403);
+		}
+		
+		$self = db()->table('server')->get('uniqid', $this->settings->read('uniqid'))->first();
+		
+		/*
+		 * Only leaders are allowed to accept requests to create buckets.
+		 */
+		if (!($self->role & Role::ROLE_LEADER)) {
+			throw new PublicException('This server cannot accept new buckets', 403);
+		}
+		
+		try {
+			if (!$this->request->isPost()) { throw new HTTPMethodException('Not Posted'); }
+			if (!$this->validation->isEmpty()) { throw new ValidationException('Validation failed', 0, $this->validate->toArray()); }
+			
+			$record = db()->table('cluster')->newRecord();
+			$record->uniqid = uniqid();
+			$record->name = $_POST['name'];
+			$record->store();
+			
+			$this->view->set('result', $record);
+		} 
+		catch (HTTPMethodException $ex) {
+			#Do nothing, just show the form
+		}
+		catch (ValidationException $ex) {
+			$this->view->set('errors', $ex->getResult());
+		}
 	}
 	
 	public function read(ClusterModel$cluster) {
