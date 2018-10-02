@@ -123,7 +123,7 @@ class FileController extends AuthenticatedController
 		}
 		
 		if ($local && $local->file) {
-			$this->response->setBody(storage($local->file)->read())->getHeaders()
+			$this->response->setBody(storage($local->file))->getHeaders()
 				->set('Content-type', $local->mime);
 		}
 		elseif($self->role & cloudy\Role::ROLE_MASTER) {

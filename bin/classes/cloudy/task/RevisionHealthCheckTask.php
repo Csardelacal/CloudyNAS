@@ -56,14 +56,31 @@ class RevisionHealthCheckTask extends Task
 			/*
 			 * Check if the revision has enough replicas of itself
 			 */
-			$files = db()->table('file')
+			$fq = db()->table('file')
 				->get('revision', $record);
 			
 			if ($record->expires) {
-				$files->group()->where('expires', null)->where('expires', '>=', $record->expires? $record->expires : time())->endGroup();
+				$fq->group()->where('expires', null)->where('expires', '>=', $record->expires)->endGroup();
 			}
 			else {
-				$files->where('expires', null);
+				$fq->where('expires', null);
+			}
+			
+			$files = $fq->all();
+			$servers = collect();
+			
+			foreach ($files as $file) {
+				$uniqid = $file->server->uniqid;
+				
+				if ($servers->contains($uniqid)) {
+					$file->expires = time();
+					$file->store();
+					console()->error(sprintf('Found revision %s twice on server %s', $record->uniqid, $uniqid))->ln();
+					sleep(3);
+					return;
+				}
+				
+				$servers->push($uniqid);
 			}
 			
 			if ($files->count() == 0) {

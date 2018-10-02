@@ -36,7 +36,10 @@ class LinkController extends AuthenticatedController
 	}
 	
 	public function read($uniqid, $revid = null) {
-		//TODO: Add authentication
+		
+		if(!in_array($this->_auth, [AuthenticatedController::AUTH_INT, AuthenticatedController::AUTH_APP])) {
+			throw new \spitfire\exceptions\PublicException('Insufficient permissions', 401);
+		}
 		
 		$link = db()->table('link')->get('uniqid', $uniqid)->first(true);
 		

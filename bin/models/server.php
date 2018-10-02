@@ -103,11 +103,11 @@ class ServerModel extends Model
 		 */
 		if ($this->role & cloudy\Role::ROLE_MASTER) {
 			
-			$link = db()->table('link')->get('uniqid', $link)->first(true);
-			$media = $link->media;
+			$l = db()->table('link')->get('uniqid', $link)->first(true);
+			$media = $l->media;
 			
-			$query = db()->table('revision')->get('media', $media)->where('uniqid', $revisionid);
-			$revisionid? $query->group()->where('expires', null)->where('expires', '>', time()) : $query->where('expires', null);
+			$query = db()->table('revision')->get('media', $media);
+			$revisionid? $query->where('uniqid', $revisionid)->group()->where('expires', null)->where('expires', '>', time()) : $query->where('expires', null);
 			
 			return db()->table('file')->get('revision', $query->first(true))->where('server', $this)->first();
 		}

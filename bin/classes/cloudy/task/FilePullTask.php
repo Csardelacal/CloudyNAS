@@ -53,19 +53,31 @@ class FilePullTask extends Task
 		$request->header('Content-type', 'application/json');
 		$request->post($this->keys()->pack($server->uniqid, base64_encode(random_bytes(150))));
 		
+		try { $storage = $dir->open('uniqid_' . $this->uniqid); }
+		catch (\Exception$e) { $storage = $dir->make('uniqid_' . $this->uniqid); }
+		
 		try {
-			$response = $request->send();
+			
+			if ($storage instanceof \spitfire\io\stream\StreamTargetInterface) {
+				console()->info('Detected stream capable storage. Streaming...')->ln();
+				$writer = $storage->getStreamWriter();
+				$response = $request->stream(function($string) use ($writer) { return $writer->write($string); })->send();
+			}
+			else {
+				$response = $request->send();
+				$storage->write($response->html());
+			}
+			
 			$response->expect(200);
 		}
 		catch (\spitfire\io\curl\BadStatusCodeException$e) {
 			console()->error('Error fetching file ' . $this->uniqid)->ln();
 			console()->error('Got code ' . $e->getCode())->ln();
+			
+			#If the file is not okay, we delete it
+			$storage->delete();
 		}
-
-		try { $storage = $dir->open('uniqid_' . $this->uniqid); }
-		catch (\Exception$e) { $storage = $dir->make('uniqid_' . $this->uniqid); }
-
-		$storage->write($response->html());
+		
 
 		$file->file = $storage->uri();
 		$file->mime = $response->mime();

@@ -39,7 +39,7 @@ ini_set("display_errors" , 0);
  */
 include 'spitfire/bootstrap.php';
 
-ini_set('memory_limit', '128M');/**/
+ini_set('memory_limit', '512M');/**/
 
 /* Call the selected controller with the selected method. */
 spitfire()->fire();

@@ -54,7 +54,7 @@ class FileDistributeTask extends Task
 		$query = db()->table('file')->get('revision', $revision);
 		
 		if ($revision->expires) {
-			$query->group()->where('expires', null)->where('expires', '>=', $revision->expires? $revision->expires : time())->endGroup();
+			$query->group()->where('expires', null)->where('expires', '>=', $revision->expires)->endGroup();
 		}
 		else {
 			$query->where('expires', null);
@@ -63,7 +63,7 @@ class FileDistributeTask extends Task
 		$existing = $query->all();
 		
 		foreach ($existing as $s) {
-			$servers = $servers->filter(function ($e) use ($s) { return $e->unqiqid !== $s->uniqid; });
+			$servers = $servers->filter(function ($e) use ($s) { return $e->uniqid !== $s->uniqid; });
 		}
 		
 		/*
