@@ -1,5 +1,10 @@
 <?php
 
+use cloudy\Role;
+use spitfire\exceptions\HTTPMethodException;
+use spitfire\exceptions\PublicException;
+use spitfire\validation\ValidationException;
+
 /* 
  * The MIT License
  *
@@ -24,7 +29,7 @@
  * THE SOFTWARE.
  */
 
-class ClusterController extends BaseController
+class ClusterController extends AuthenticatedController
 {
 	
 	public function all() {
@@ -61,7 +66,7 @@ class ClusterController extends BaseController
 		 * Only leaders are allowed to accept requests to create buckets.
 		 */
 		if (!($self->role & Role::ROLE_LEADER)) {
-			throw new PublicException('This server cannot accept new buckets', 403);
+			throw new PublicException('This server cannot accept new clusters', 403);
 		}
 		
 		try {

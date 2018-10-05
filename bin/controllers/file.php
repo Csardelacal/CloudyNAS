@@ -127,7 +127,7 @@ class FileController extends AuthenticatedController
 				->set('Content-type', $local->mime);
 		}
 		elseif($self->role & cloudy\Role::ROLE_MASTER) {
-			$files = db()->table('file')->get('revision', $revision)->group()->where('expires', null)->where('expires', '>', time())->endGroup()->where('commited', true)->all();
+			$files = db()->table('file')->get('revision', $revision)->group()->where('expires', null)->where('expires', '>', time() - 86400)->endGroup()->where('commited', true)->all();
 			
 			if ($files->isEmpty()) { throw new PublicException('No candidate servers found', 404); }
 			

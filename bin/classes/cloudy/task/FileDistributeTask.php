@@ -1,8 +1,7 @@
 <?php namespace cloudy\task;
 
-use cloudy\helper\KeyHelper;
-use cloudy\helper\SettingsHelper;
 use cloudy\Role;
+use function console;
 use function db;
 
 /* 
@@ -29,7 +28,7 @@ use function db;
  * THE SOFTWARE.
  */
 
-class FileDistributeTask extends Task
+class FileDistributeTask extends TaskDispatchTask
 {
 	
 	private $uniqid;
@@ -60,7 +59,7 @@ class FileDistributeTask extends Task
 			$query->where('expires', null);
 		}
 		
-		$existing = $query->all();
+		$existing = $query->all()->extract('server');
 		
 		foreach ($existing as $s) {
 			$servers = $servers->filter(function ($e) use ($s) { return $e->uniqid !== $s->uniqid; });

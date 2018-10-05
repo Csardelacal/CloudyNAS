@@ -29,7 +29,7 @@ class FileShutdownTask extends Task
 	
 	public function execute($db) {
 		
-		$expired = $db->table('file')->getAll()->group()->where('expires', '>', time())->where('expires', null)->endGroup()->range(0, 100);
+		$expired = $db->table('file')->getAll()->group()->where('expires', '>', time() + 3 * 86400)->where('expires', null)->endGroup()->range(0, 100);
 		$self = db()->table('server')->get('uniqid', db()->table('setting')->get('key', 'uniqid')->first()->value)->first(true);
 		
 		$cluster = $self->cluster;
@@ -37,7 +37,7 @@ class FileShutdownTask extends Task
 
 		
 		foreach ($expired as $file) {
-			$file->expires = time();
+			$file->expires = time() + 3 * 86400;
 			$file->store();
 			
 			try {

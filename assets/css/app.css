@@ -14,7 +14,7 @@ and open the template in the editor.
 body {
   margin: 0;
   font-family: sans-serif;
-  background-color: #FAFAFA; }
+  background-color: #FCFCFC; }
 
 .hidden {
   display: none !important; }
@@ -1202,7 +1202,7 @@ THE SOFTWARE.
     width: 20px; }
 
 .navbar {
-  background: #EEE;
+  background: #FEFEFE;
   box-shadow: 0 2px 2px #DDD;
   border-bottom: 1px solid #CCC;
   display: table;

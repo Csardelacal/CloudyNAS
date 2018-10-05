@@ -90,6 +90,7 @@
 				</div>
 			</div>
 		</div>
+		<?= $every->next(); ?>
 		<?php endforeach; ?>
 	</div>
 
@@ -129,6 +130,7 @@
 				</div>
 			</div>
 		</div>
+		<?= $every->next(); ?>
 		<?php endforeach; ?>
 	</div>
 </div>
