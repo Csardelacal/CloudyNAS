@@ -47,9 +47,17 @@ class FilePullTask extends Task
 		}
 		
 		$cluster = $self->cluster;
-		$server  = db()->table('server')->get('cluster', $cluster)->where('active', true)->all()->filter(function($e) { return $e->role & \cloudy\Role::ROLE_MASTER; })->rewind();
-
-		$request = request($server->hostname . '/file/retrieve/uniqid/' . $this->uniqid);
+		$master  = db()->table('server')->get('cluster', $cluster)->where('active', true)->all()->filter(function($e) { return $e->role & \cloudy\Role::ROLE_MASTER; })->rewind();
+		
+		$r = request($master->hostname . '/file/read/' . $this->uniqid . '.json');
+		$r->header('Content-type', 'application/json');
+		$r->post($this->keys()->pack($master->uniqid, base64_encode(random_bytes(150))));
+		$resolve = $r->send()->expect(200)->json()->payload;
+		
+		$remote = $resolve->siblings[rand(0, count($resolve->siblings) - 1)];
+		$server = db()->table('server')->get('uniqid', $remote->server)->first();
+		
+		$request = request($server->hostname . '/file/retrieve/uniqid/' . $remote->uniqid);
 		$request->header('Content-type', 'application/json');
 		$request->post($this->keys()->pack($server->uniqid, base64_encode(random_bytes(150))));
 		

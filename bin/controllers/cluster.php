@@ -89,7 +89,20 @@ class ClusterController extends AuthenticatedController
 	}
 	
 	public function read(ClusterModel$cluster) {
-		//TODO: Implement
+		
+		/*
+		 * Buckets can only be created by humans and authorized third parties. There's 
+		 * no need for our application to allow other stuff to happen
+		 */
+		if ($this->_auth === AuthenticatedController::AUTH_USER || $this->_auth === AuthenticatedController::AUTH_APP) {
+			#The user is authenticated, let him continue
+		}
+		
+		else {
+			throw new PublicException('Unauthorized', 403);
+		}
+		
+		$this->view->set('cluster', $cluster);
 	}
 	
 	public function update(ClusterModel$cluster) {

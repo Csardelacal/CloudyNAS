@@ -36,22 +36,23 @@ class CleanupRevisionTask extends Task
 			
 			if ($files->isEmpty()) {
 				$revision->delete();
+				continue;
 			}
-			else {
-				console()->error('Unsatisfied dependency when trying to delete revision ' . $revision->uniqid)->ln();
-				
-				$files->each(function($e) use ($revision) {
-					$e->expires = $revision->expires;
-					$e->store();
-					
-					$task = $this->dispatcher()->get(\cloudy\task\FileUpdateTask::class);
-					$task->load($e->uniqid);
-					$this->dispatcher()->send($e->server, $task);
-				});
-				
-				$revision->expires = time();
-				$revision->store();
-			}
+			
+			//Implicit else
+			console()->error('Unsatisfied dependency when trying to delete revision ' . $revision->uniqid)->ln();
+
+			$files->each(function($e) use ($revision) {
+				$e->expires = $revision->expires;
+				$e->store();
+
+				$task = $this->dispatcher()->get(\cloudy\task\FileUpdateTask::class);
+				$task->load($e->uniqid);
+				$this->dispatcher()->send($e->server, $task);
+			});
+
+			$revision->expires = time();
+			$revision->store();
 		}
 		
 		if ($expired->isEmpty()) {

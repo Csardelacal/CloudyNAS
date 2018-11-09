@@ -40,6 +40,12 @@ class MediaModel extends Model
 		
 		$schema->created  = new IntegerField(true);
 		$schema->expires  = new IntegerField(true);
+		
+		/*
+		 * This property allows the system flag files / media / revisions that the 
+		 * system needs an admin to review because the file s apparently missing.
+		 */
+		$schema->damaged  = new BooleanField();
 	}
 	
 	public function onbeforesave() {

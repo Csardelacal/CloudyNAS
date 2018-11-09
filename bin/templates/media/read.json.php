@@ -31,7 +31,8 @@ foreach ($files as $file) {
 	$servers[] = [
 		'hostname' => $file->server->hostname,
 		'commited' => $file->commited,
-		'expires'  => $file->expires
+		'expires'  => $file->expires,
+		'uniqid'   => $file->uniqid
 	];
 }
 

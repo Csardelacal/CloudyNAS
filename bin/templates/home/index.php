@@ -116,7 +116,7 @@
 				</div>
 				<div class="span l3">
 					<div  style="font-weight: bold;">
-						<?= $bucket->name ?>
+						<a href="<?= url('bucket', 'read', $bucket->uniqid) ?>"><?= $bucket->name ?></a>
 					</div>
 					<div>
 						<?= $bucket->name ?> (<?= new \spitfire\io\Filesize($bucket->size()) ?> - estimated)

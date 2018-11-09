@@ -118,6 +118,9 @@ class BucketController extends AuthenticatedController
 		}
 		
 		$this->view->set('bucket', $bucket);
+		$this->view->set('self', $this->settings->read('uniqid'));
+		$this->view->set('keys', $this->keys);
+		
 	}
 	
 	public function update(BucketModel$bucket) {

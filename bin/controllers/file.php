@@ -38,6 +38,10 @@ class FileController extends AuthenticatedController
 		
 		$file = db()->table('file')->get('uniqid', $id)->first();
 		
+		if (!$file) {
+			throw new PublicException('No file ' . $id . ' found', 404);
+		}
+		
 		$this->view->set('file', $file);
 	}
 	
@@ -133,6 +137,17 @@ class FileController extends AuthenticatedController
 			
 			$server = $files[rand(0, $files->count() - 1)]->server->hostname;
 			$link   = db()->table('link')->get('media', $revision->media)->where('expires', null)->first(true);
+			
+			/*
+			 * Sometimes the application won't have a link ready to be shared. This
+			 * is used in case of the application not having a proper link.
+			 */
+			if (!$link) {
+				$link = db()->table('link')->newRecord();
+				$link->media = $revision->media;
+				$link->expires = null;
+				$link->store();
+			}
 			
 			return $this->response->setBody('Redirect...')->getHeaders()->redirect($server . '/file/retrieve/link/' . $link->uniqid . '/' . $revision->uniqid);
 		}

@@ -47,8 +47,12 @@ class MediaController extends AuthenticatedController
 			}
 		}
 		
-		if (db()->table('media')->get('bucket', $bucket)->where('name', $_POST['name'])->first()) {
+		if (db()->table('media')->get('bucket', $bucket)->where('name', $_POST['name'])->group()->where('expires', '>', time())->where('expires', null)->endGroup()->first()) {
 			throw new PublicException('File already exists. Please refer to the update() endpoint', 400);
+		}
+		
+		if (empty($_POST['file'])) {
+			throw new PublicException('No file sent', 400);
 		}
 		
 		

@@ -84,8 +84,8 @@ class RevisionHealthCheckTask extends Task
 			}
 			
 			if ($files->count() == 0) {
-				console()->error('Removing orphaned revision ' . $record->uniqid)->ln();
-				$record->expires = time();
+				console()->error('Found damaged (orphaned) revision ' . $record->uniqid)->ln();
+				$record->damaged = true;
 				$record->store();
 			}
 			elseif ($files->count() < $record->media->bucket->replicas) {

@@ -31,6 +31,10 @@ echo json_encode([
 		'file' => $file->uniqid,
 		'server' => $file->server->uniqid,
 		'expires' => $file->expires,
-		'checksum' => $file->revision->checksum
+		'checksum' => $file->revision->checksum,
+		 
+		'siblings' => db()->table('file')->get('revision', $file->revision)->where('commited', true)->all()->each(function ($e) { 
+			return ['uniqid' => $e->uniqid, 'server' => $e->server->uniqid];
+		})->toArray()
 	]
 ]);

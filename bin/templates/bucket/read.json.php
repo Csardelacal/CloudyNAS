@@ -34,12 +34,20 @@ foreach ($servers as $candidate) {
 	}
 }
 
+if ($master->uniqid === $self) {
+	$count = db()->table('media')->get('bucket', $bucket)->count();
+}
+else {
+	$count = null;
+}
+
 echo json_encode([
 	'payload' => [
 		'id'     => $bucket->uniqid,
 		'master' => $master? [
 			'uniqid'   => $master->uniqid,
 			'hostname' => $master->hostname
-		] : null
+		] : null,
+		'count'  => $count
 	]
 ]);

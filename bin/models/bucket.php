@@ -41,6 +41,7 @@ class BucketModel extends Model
 	
 	/**
 	 * 
+	 * @todo Future versions should include a mechanism to do housekeeping (number of files, file sizes, etc.)
 	 * @param Schema $schema
 	 */
 	public function definitions(Schema $schema) {

@@ -44,6 +44,7 @@ class FileUpdateTask extends Task
 		$json = $response->json();
 		
 		if (!$json->status === 'OK' || !$json->payload) {
+			var_dump($response);
 			throw new \spitfire\exceptions\PrivateException('Request failed', 1809080956);
 		}
 		
