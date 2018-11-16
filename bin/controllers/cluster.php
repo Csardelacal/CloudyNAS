@@ -103,6 +103,7 @@ class ClusterController extends AuthenticatedController
 		}
 		
 		$this->view->set('cluster', $cluster);
+		$this->view->set('servers', db()->table('server')->get('cluster', $cluster)->all());
 	}
 	
 	public function update(ClusterModel$cluster) {
@@ -111,6 +112,32 @@ class ClusterController extends AuthenticatedController
 	
 	public function delete(ClusterModel$cluster) {
 		//TODO: Implement
+	}
+	
+	public function addServer(ClusterModel$cluster, ServerModel$server) {
+		
+		/*
+		 * Buckets can only be created by humans and authorized third parties. There's 
+		 * no need for our application to allow other stuff to happen
+		 */
+		if ($this->_auth === AuthenticatedController::AUTH_USER) {
+			#The user is authenticated, let him continue
+		}
+		
+		else {
+			throw new PublicException('Unauthorized', 403);
+		}
+		
+		if ($server) {
+			$server->cluster = $cluster;
+			$server->store();
+			
+			$this->response->setBody('Redirecting...')->getHeaders()->redirect(url('cluster', 'read', $cluster->_id));
+		}
+		else {
+			$available = db()->table('server')->get('cluster', null)->where('active', false)->all();
+			$this->view->set('servers', $available);
+		}
 	}
 	
 }

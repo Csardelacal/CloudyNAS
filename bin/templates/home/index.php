@@ -73,7 +73,7 @@
 				</div>
 				<div class="span l3">
 					<div  style="font-weight: bold;">
-						<?= $cluster->name ?>
+						<a href="<?= url('cluster', 'read', $cluster->_id) ?>"><?= $cluster->name ?></a>
 					</div>
 					<div>
 						Cluster (<?= new spitfire\io\Filesize($cluster->available()) ?> Free)

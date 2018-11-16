@@ -1,4 +1,4 @@
-<?php namespace cloudy;
+<?php
 
 /* 
  * The MIT License
@@ -24,16 +24,22 @@
  * THE SOFTWARE.
  */
 
-class UUID
-{
+$items = [];
+
+foreach ($files as $item) {
 	
-	public static function v4() {
-		$data    = pack('N', time()) . random_bytes(12);
-		$data[6] = chr((ord($data[6]) | 0xC0) & 0x4F);
-		$data[8] = chr((ord($data[8]) | 0xC0) & 0xBF);
-		
-		$str = bin2hex($data);
-		return sprintf('%s-%s-%s-%s-%s', substr($str, 0, 8), substr($str, 8, 4), substr($str, 12, 4), substr($str, 16, 4), substr($str, 20));
-	}
+	$revision = db()->table('revision')->get('media', $item)->where('expires', null)->first();
 	
+	$items[] = [
+		'name'    => $item->name,
+		'uniqid'  => $item->uniqid,
+		'bucket'  => $bucket->uniqid,
+		'latest'  => $revision? $revision->uniqid : null,
+		'mime'    => $revision? $revision->mime : null
+	];
 }
+
+echo json_encode([
+	'status' => 'OK',
+	'media'  => $items
+]);

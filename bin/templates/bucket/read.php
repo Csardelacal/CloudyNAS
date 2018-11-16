@@ -87,3 +87,22 @@
 		</div>
 	</div>
 </div>
+
+<?php 
+	/*
+	 * I'm not entirely sold on this mechanism. This requires revisiting.
+	 */
+	$request = request($leader->hostname . '/media/all/' . $bucket->uniqid . '.json');
+	$request->header('Content-type', 'application/json');
+	$request->post($keys->pack($leader->uniqid, base64_encode(random_bytes(150))));
+	
+	$media = $request->send()->expect(200)->json()->media;
+?>
+
+<?php foreach ($media as $item): ?>
+<div class="row l5 m3 s3">
+	<div class="span l4 m2 m2"><?= __($item->name) ?></div>
+	<div class="span l1 m1 s1"><?= $item->mime? : '<i>Deleted</i>' ?></div>
+</div>
+<?php endforeach; ?>
+

@@ -29,6 +29,35 @@ use spitfire\exceptions\PublicException;
 class MediaController extends AuthenticatedController
 {
 	
+	public function all($bid) {
+		$bucket = db()->table('bucket')->get('uniqid', $bid)->first(true);
+		
+		if ($this->_auth === AuthenticatedController::AUTH_NONE) {
+			throw new PublicException('Authentication required', 403);
+		}
+		elseif ($this->_auth === AuthenticatedController::AUTH_APP) {
+			$grant = $this->sso->authApp($_GET['signature'], null, ['bucket.' . $bucket->uniqid]);
+			
+			if (!$grant->getContext('bucket.' . $bucket->uniqid)->exists()) {
+				$grant->getContext('bucket.' . $bucket->uniqid)->create(sprintf('Bucket %s (%s)', $bucket->name, $bucket->uniqid), 'Allows for read / write access to the bucket');
+			}
+			
+			if (!$grant->getContext('bucket.' . $bucket->uniqid)->isGranted()) {
+				throw new PublicException('Context level insufficient.', 403);
+			}
+		}
+		
+		$query = db()->table('media')->get('bucket', $bucket);
+		$query->setOrder('created', 'DESC');
+		
+		if (isset($_GET['until'])) {
+			$query->where('uniqid', '>', $_GET['until']);
+		}
+		
+		$this->view->set('files', $query->range(0, 50));
+		$this->view->set('bucket', $bucket);
+	}
+	
 	public function create() {
 		$bucket   = db()->table('bucket')->get('uniqid', $_POST['bucket'])->first(true);
 		
