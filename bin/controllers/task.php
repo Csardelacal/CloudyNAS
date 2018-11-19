@@ -1,7 +1,5 @@
 <?php
 
-use cloudy\task\TaskDispatcher;
-use spitfire\exceptions\PrivateException;
 use spitfire\exceptions\PublicException;
 
 /* 
@@ -31,9 +29,16 @@ use spitfire\exceptions\PublicException;
 class TaskController extends AuthenticatedController
 {
 	
+	/**
+	 * 
+	 * @throws PublicException
+	 */
 	public function queue() {
+		
+		$self = db()->table('server')->get('uniqid', $this->settings->read('uniqid'))->first();
+		
 		if ($this->_auth !== AuthenticatedController::AUTH_INT) {
-			throw new PrivateException('Authentication of the remote application failed', 403);
+			throw new PublicException('Authentication of the remote application failed', 403);
 		}
 		
 		$dispatcher = $this->tasks;
@@ -42,6 +47,11 @@ class TaskController extends AuthenticatedController
 		
 		if (!$task) {
 			throw new PublicException('No such task', 404);
+		}
+		
+		if ($self && !($self | $task->accessLevel())) {
+			trigger_error('Server received inappropriate task ' . $_POST['job'] . ' from ' . $_POST['source'], E_USER_NOTICE);
+			throw new PublicException('Invalid task', 403);
 		}
 		
 		$queue = db()->table('task\queue')->newRecord();

@@ -65,5 +65,9 @@ class TaskDispatchTask extends Task
 	public function version() {
 		return 1;
 	}
+	
+	public function accessLevel() {
+		return \cloudy\Role::ROLE_MASTER;
+	}
 
 }

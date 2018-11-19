@@ -109,9 +109,9 @@ class FilePullTask extends Task
 		
 		try {
 			console()->info('Committing expiration: ' . $file->expires)->ln();;
-			$request = request($server->hostname . '/file/commit/' . $this->uniqid . '.json');
+			$request = request($master->hostname . '/file/commit/' . $this->uniqid . '.json');
 			$request->header('Content-type', 'application/json');
-			$request->post($this->keys()->pack($server->uniqid, ['expires' => $file->expires]));
+			$request->post($this->keys()->pack($master->uniqid, ['expires' => $file->expires]));
 			$request->send()->expect(200);
 		}
 		catch (\Exception$e) {
