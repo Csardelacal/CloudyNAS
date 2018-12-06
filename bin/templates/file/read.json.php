@@ -33,8 +33,12 @@ echo json_encode([
 		'expires' => $file->expires,
 		'checksum' => $file->revision->checksum,
 		 
-		'siblings' => db()->table('file')->get('revision', $file->revision)->where('commited', true)->all()->each(function ($e) { 
-			return ['uniqid' => $e->uniqid, 'server' => $e->server->uniqid];
-		})->toArray()
+		'siblings' => db()->table('file')
+			->get('revision', $file->revision)
+			->where('commited', true)
+			->group()->where('expires', null)->where('expires', '>', time())->endGroup()
+			->all()->each(function ($e) { 
+				return ['uniqid' => $e->uniqid, 'server' => $e->server->uniqid];
+			})->toArray()
 	]
 ]);

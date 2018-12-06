@@ -94,7 +94,7 @@ class FileController extends AuthenticatedController
 		 * internal uniqids.
 		 */
 		if ($type === 'uniqid' && !($self->role & cloudy\Role::ROLE_MASTER)) {
-			throw new PublicException('Invalid request', 400);
+			//throw new PublicException('Invalid request', 400);
 		}
 		
 		/*
@@ -119,7 +119,7 @@ class FileController extends AuthenticatedController
 			$file = db()->table('file')->get('uniqid', $id)->first();
 			
 			$revision = $file->revision;
-			$local = db()->table('file')->get('revision', $revision)->where('server', $self)->first();
+			$local = $file;
 		}
 		else {
 			$revision = null;
