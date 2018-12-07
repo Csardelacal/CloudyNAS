@@ -86,6 +86,7 @@ class ServerController extends AuthenticatedController
 		$old = db()
 			->table('server')
 			->get('cluster', $server->cluster)
+			->where('active', true)
 			->all()
 			->filter(function($e) { return $e->role & cloudy\Role::ROLE_MASTER; })
 			->rewind();

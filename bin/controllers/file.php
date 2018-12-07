@@ -119,7 +119,7 @@ class FileController extends AuthenticatedController
 			$file = db()->table('file')->get('uniqid', $id)->first();
 			
 			$revision = $file->revision;
-			$local = $file;
+			$local = ($self->role & cloudy\Role::ROLE_MASTER)? db()->table('file')->get('revision', $revision)->where('server', $self)->first() : $file;
 		}
 		else {
 			$revision = null;
