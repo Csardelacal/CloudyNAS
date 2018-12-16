@@ -80,7 +80,7 @@ class KeyHelper
 			throw new PrivateException('This message was not intended for this server' . $body['target'] .  ' - ' . $this->uniqid, 1808241101);
 		}
 		
-		if ($body['time'] < time() - 3600) {
+		if ($body['time'] < time() - (86400 * 30)) { //FIXME: Temporary fix - some tasks expire before they can be processed
 			throw new PrivateException('Received expired message', 1808241102);
 		}
 		
