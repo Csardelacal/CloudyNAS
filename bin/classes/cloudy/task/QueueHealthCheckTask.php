@@ -1,7 +1,4 @@
-<?php namespace task;
-
-use spitfire\Model;
-use spitfire\storage\database\Schema;
+<?php namespace cloudy\task;
 
 /* 
  * The MIT License
@@ -27,20 +24,31 @@ use spitfire\storage\database\Schema;
  * THE SOFTWARE.
  */
 
-class QueueModel extends Model
+class QueueHealthCheckTask extends Task
 {
 	
-	/**
-	 * 
-	 * @param Schema $schema
-	 */
-	public function definitions(Schema $schema) {
-		$schema->job       = new \StringField(200);
-		$schema->version   = new \IntegerField(true);
-		$schema->settings  = new \TextField();
-		$schema->scheduled = new \IntegerField(true);
-		$schema->progress  = new \StringField(100);
-		$schema->locked    = new \IntegerField(true);
+	public function execute($db) {
+		
+		$expired = db()->table('task\queue')->get('locked', time() - 3600, '<')->all();
+		
+		foreach($expired as $task) {
+			$task->locked = null;
+			$task->store();
+		}
+		
+		$this->done();
+	}
+	
+	public function load($settings) {
+		return;
+	}
+	
+	public function save() {
+		return '';
+	}
+
+	public function version() {
+		return 1;
 	}
 
 }
