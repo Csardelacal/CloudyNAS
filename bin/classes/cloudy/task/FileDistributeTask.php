@@ -43,8 +43,6 @@ class FileDistributeTask extends TaskDispatchTask
 		$servers = $db->table('server')->get('cluster', $cluster)->where('active', true)->all()->filter(function ($e) { return $e->role & Role::ROLE_SLAVE; });
 		$replicas = min((int)$servers->count(), $bucket->replicas);
 		
-		$total    = 0;
-		
 		/*
 		 * Remove the servers that already contain copies of the files. This ensures 
 		 * that the application does not redistribute files to servers that already
@@ -75,10 +73,11 @@ class FileDistributeTask extends TaskDispatchTask
 		
 		for ($i = 0; $i < ($replicas - $existing->count()); $i++) {
 			$weighted = [];
+			$total    = 0;
 			
 			foreach ($servers as $server) {
 				$size = $server->size + 1;
-				$weight = (int)(pow($server->free / $size, 2) * 1000);
+				$weight = (int)(pow($server->free / $size, 2) * 10000);
 				$weighted[$weight + $total] = $server;
 				$total+= $weight;
 			}
@@ -86,7 +85,7 @@ class FileDistributeTask extends TaskDispatchTask
 			$rand = mt_rand(0, $total);
 			
 			foreach ($weighted as $weight => $server) {
-				if ($weight > $rand) {
+				if ($weight >= $rand) {
 					$file = $db->table('file')->newRecord();
 					$file->revision = $revision;
 					$file->server = $server;
