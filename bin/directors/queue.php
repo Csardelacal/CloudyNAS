@@ -38,11 +38,6 @@ class QueueDirector extends Director
 		$file = spitfire()->getCWD() . '/bin/usr/.cron.lock';
 		$fh = fopen($file, file_exists($file)? 'r' : 'w+');
 		
-		if (!flock($fh, LOCK_EX)) { 
-			console()->error('Could not acquire lock')->ln();
-			return 1; 
-		}
-		
 		$flipflop = new \cron\FlipFlop(realpath($file));
 		
 		console()->info('Queue started')->ln();
@@ -66,13 +61,32 @@ class QueueDirector extends Director
 		$dispatcher = new TaskDispatcher($keys);
 		
 		do {
+			
+			/*
+			 * The next bit of code is synchronous, and therefore needs to be locked
+			 */
+			if (!flock($fh, LOCK_EX)) { 
+				console()->error('Could not acquire lock')->ln();
+				return 1; 
+			}
 		
 			/*
 			 * Load the tasks the server is supposed to be processing. We limit it at
 			 * 10, since it's unlikely that the server will be able to handle many heavy
 			 * tasks within one cycle of the cron.
 			 */
-			$tasks = db()->table('task\queue')->get('scheduled', time(), '<=')->setOrder('scheduled', 'ASC')->range(0, 10);
+			$tasks = db()->table('task\queue')->get('scheduled', time(), '<=')->where('locked', NULL)->setOrder('scheduled', 'ASC')->range(0, 10);
+			
+			
+			foreach ($tasks as $task) {
+				$task->locked = time();
+				$task->store();
+			}
+			
+			/*
+			 * Release the lock, we have our list of tasks.
+			 */
+			flock($fh, LOCK_UN);
 
 			/*
 			 * Loop over the pending tasks.
@@ -107,6 +121,7 @@ class QueueDirector extends Director
 					else {
 						$task->progress = $p->getProgress();
 						$task->scheduled = max(time(), $p->getScheduled()); #Defer long running tasks so they don't clog up the system
+						$task->locked = null;
 						$task->store();
 					}
 
@@ -117,6 +132,7 @@ class QueueDirector extends Director
 					console()->error($e->getTraceAsString())->ln();
 					
 					$task->scheduled = time() + 300; #Retry in 5 minutes
+					$task->locked = null;
 					$task->store();
 				}
 
@@ -129,7 +145,7 @@ class QueueDirector extends Director
 			 */
 			if (time() - $start > 1200) { break; }
 		} 
-		while (db()->table('task\queue')->get('scheduled', time(), '<=')->count() > 0 || $flipflop->wait());
+		while (db()->table('task\queue')->get('scheduled', time(), '<=')->where('locked', NULL)->count() > 0 || $flipflop->wait());
 		
 		console()->info('Queue ended')->ln();
 		$settings->set('lastCron', time());

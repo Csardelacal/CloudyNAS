@@ -42,10 +42,9 @@ class FileChecksumTask extends Task
 			->where('_id', '>', $this->getProgress())
 			->group()->where('expires', null)->where('expires', '>', time())->endGroup()
 			->where('server', $self)
-			->setOrder('uniqid', 'ASC');
+			->setOrder('_id', 'ASC');
 		
 		$records = $query->range(0, $this->chunk);
-		
 		
 		foreach ($records as $record) {
 			try { $file = storage()->get($record->file)->getPath(); }

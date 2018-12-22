@@ -56,6 +56,7 @@ class CronDirector extends Director
 			 cloudy\task\DiscoveryTask::class,
 			 cloudy\task\LeaderDiscoveryTask::class,
 			 cloudy\task\TopographyTask::class,
+			 cloudy\task\QueueHealthCheckTask::class,
 			 
 			 cloudy\task\CleanupFileTask::class,
 			 cloudy\task\CleanupRevisionTask::class,

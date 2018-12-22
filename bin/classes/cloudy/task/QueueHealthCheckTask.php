@@ -1,4 +1,4 @@
-<?php
+<?php namespace cloudy\task;
 
 /* 
  * The MIT License
@@ -24,21 +24,31 @@
  * THE SOFTWARE.
  */
 
-echo json_encode([
-	'status' => 'OK',
-	'payload' => [
-		'revision' => $file->revision,
-		'file' => $file->uniqid,
-		'server' => $file->server->uniqid,
-		'expires' => $file->expires,
-		'checksum' => $file->revision->checksum,
-		 
-		'siblings' => db()->table('file')
-			->get('revision', $file->revision)
-			->where('commited', true)
-			->group()->where('expires', null)->where('expires', '>', time())->endGroup()
-			->all()->each(function ($e) { 
-				return ['uniqid' => $e->uniqid, 'server' => $e->server->uniqid];
-			})->toArray()
-	]
-]);
+class QueueHealthCheckTask extends Task
+{
+	
+	public function execute($db) {
+		
+		$expired = db()->table('task\queue')->get('locked', time() - 3600, '<')->all();
+		
+		foreach($expired as $task) {
+			$task->locked = null;
+			$task->store();
+		}
+		
+		$this->done();
+	}
+	
+	public function load($settings) {
+		return;
+	}
+	
+	public function save() {
+		return '';
+	}
+
+	public function version() {
+		return 1;
+	}
+
+}

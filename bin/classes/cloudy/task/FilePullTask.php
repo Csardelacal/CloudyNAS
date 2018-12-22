@@ -80,7 +80,7 @@ class FilePullTask extends Task
 		}
 		catch (\spitfire\io\curl\BadStatusCodeException$e) {
 			console()->error('Error fetching file ' . $this->uniqid)->ln();
-			console()->error('Got code ' . $e->getCode())->ln();
+			console()->error('Got: ' . $e->getMessage())->ln();
 			
 			#If the file is not okay, we delete it
 			$storage->delete();

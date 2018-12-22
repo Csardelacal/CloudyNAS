@@ -36,6 +36,8 @@ class FileDistributeTask extends TaskDispatchTask
 	public function execute($db) {
 		console()->info('Distributing ' . $this->uniqid)->ln();
 		
+		$db->execute('START TRANSACTION');
+		
 		$revision = $db->table('revision')->get('uniqid', $this->uniqid)->first(true);
 		$bucket   = $revision->media->bucket;
 		$cluster  = $bucket->cluster;
@@ -92,6 +94,8 @@ class FileDistributeTask extends TaskDispatchTask
 					$file->commited = false;
 					$file->store();
 					
+					console()->info('Sent pull task to server ' . $server->uniqid )->ln();
+					
 					$d = $this->dispatcher();
 					$t = $d->get(FilePullTask::class);
 					$t->load(sprintf('%s:%s', $file->uniqid, $revision->checksum));
@@ -110,6 +114,7 @@ class FileDistributeTask extends TaskDispatchTask
 		}
 		
 		$this->done(true);
+		$db->execute('COMMIT');
 	}
 
 	public function load($settings) {

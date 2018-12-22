@@ -40,6 +40,7 @@ class QueueModel extends Model
 		$schema->settings  = new \TextField();
 		$schema->scheduled = new \IntegerField(true);
 		$schema->progress  = new \StringField(100);
+		$schema->locked    = new \IntegerField(true);
 	}
 
 }
