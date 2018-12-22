@@ -121,6 +121,7 @@ class QueueDirector extends Director
 					else {
 						$task->progress = $p->getProgress();
 						$task->scheduled = max(time(), $p->getScheduled()); #Defer long running tasks so they don't clog up the system
+						$task->locked = null;
 						$task->store();
 					}
 
@@ -131,6 +132,7 @@ class QueueDirector extends Director
 					console()->error($e->getTraceAsString())->ln();
 					
 					$task->scheduled = time() + 300; #Retry in 5 minutes
+					$task->locked = null;
 					$task->store();
 				}
 

@@ -89,6 +89,7 @@ class RevisionHealthCheckTask extends Task
 				$record->store();
 			}
 			elseif ($files->count() < $record->media->bucket->replicas) {
+				console()->info('Found revision with ' . $files->count() . ' replicas, distributing again')->ln();
 				$task = $this->dispatcher()->get(FileDistributeTask::class);
 				$task->load($record->uniqid);
 				
