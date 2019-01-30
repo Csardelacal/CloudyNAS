@@ -122,8 +122,8 @@ class FileController extends AuthenticatedController
 			$local = ($self->role & cloudy\Role::ROLE_MASTER)? db()->table('file')->get('revision', $revision)->where('server', $self)->first() : $file;
 		}
 		else {
-			$revision = null;
 			$local = $self->resolve($id, $revisionid);
+			$revision = ($self->role & cloudy\Role::ROLE_MASTER)? $local->revision : null;
 		}
 		
 		if ($local && $local->file) {
