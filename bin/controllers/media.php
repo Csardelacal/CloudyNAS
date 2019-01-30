@@ -170,9 +170,16 @@ class MediaController extends AuthenticatedController
 		
 	}
 	
-	public function delete($uniqid) {
-		$media   = db()->table('media')->get('uniqid', $uniqid)->first(true);
-		$bucket  = $media->bucket;
+	public function delete($id, $_ = null) {
+		
+		if ($_=== null) {
+			$media   = db()->table('media')->get('uniqid', $id)->first(true);
+			$bucket  = $media->bucket;
+		}
+		else {
+			$bucket = db()->table('bucket')->get('uniqid', $id)->first(true);
+			$media  = db()->table('media')->get('name', $_)->where('bucket', $bucket)->first(true);
+		}
 		
 		if ($this->_auth === AuthenticatedController::AUTH_NONE) {
 			throw new PublicException('Authentication required', 403);
