@@ -48,8 +48,8 @@ class FileHealthCheckTask extends Task
 		$target  = $db->table('server')->get('uniqid', $this->server)->first();
 		
 		if (!$this->min || !$this->max) {
-			$min = db()->table('file')->get('server', $target)->group()->where('expires', null)->where('expires', '>', time())->endGroup()->setOrder('uniqid', 'ASC')->first()->uniqid;
-			$max = db()->table('file')->get('server', $target)->group()->where('expires', null)->where('expires', '>', time())->endGroup()->setOrder('uniqid', 'DESC')->first()->uniqid;
+			$min = db()->table('file')->get('server__id', $target->_id)->group()->where('expires', null)->where('expires', '>', time())->endGroup()->setOrder('uniqid', 'ASC')->first()->uniqid;
+			$max = db()->table('file')->get('server__id', $target->_id)->group()->where('expires', null)->where('expires', '>', time())->endGroup()->setOrder('uniqid', 'DESC')->first()->uniqid;
 		}
 		else {
 			$min = $this->min;
@@ -61,7 +61,7 @@ class FileHealthCheckTask extends Task
 		 * Get all the records that matchs the given range
 		 */
 		$query = db()->table('file')
-			->get('server', $target)
+			->get('server__id', $target->_id)
 			->group()->where('expires', null)->where('expires', '>', time())->endGroup()
 			->where('uniqid', '>=', max($this->getProgress(), $min))
 			->where('uniqid', '<=', $max)
@@ -88,7 +88,7 @@ class FileHealthCheckTask extends Task
 		
 		$nr = db()
 			->table('file')
-			->get('server', $target)
+			->get('server__id', $target->_id)
 			->group()->where('expires', null)->where('expires', '>', time())->endGroup()
 			->where('uniqid', '>', $records->last()->uniqid)
 			->setOrder('uniqid', 'ASC')->first();
