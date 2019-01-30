@@ -123,7 +123,7 @@ class FileController extends AuthenticatedController
 		}
 		else {
 			$local = $self->resolve($id, $revisionid);
-			$revision = ($self->role & cloudy\Role::ROLE_MASTER)? $local->revision : null;
+			$revision = null;
 		}
 		
 		if ($local && $local->file) {
@@ -131,7 +131,18 @@ class FileController extends AuthenticatedController
 				->set('Content-type', $local->mime);
 		}
 		elseif($self->role & cloudy\Role::ROLE_MASTER) {
-			$files = db()->table('file')->get('revision', $revision)->group()->where('expires', null)->where('expires', '>', time() - 86400)->endGroup()->where('commited', true)->all();
+			if (!$revision) {
+				
+				$l = db()->table('link')->get('uniqid', $id)->first(true);
+				$media = $l->media;
+
+				$query = db()->table('revision')->get('media', $media);
+				$revisionid? $query->where('uniqid', $revisionid)->group()->where('expires', null)->where('expires', '>', time()) : $query->where('expires', null);
+				
+				$revision = $query->first(true);
+			}
+			
+			$files = db()->table('file')->get('revision', $revision)->group()->where('expires', null)->where('expires', '>', time())->endGroup()->where('commited', true)->all();
 			
 			if ($files->isEmpty()) { throw new PublicException('No candidate servers found', 404); }
 			
