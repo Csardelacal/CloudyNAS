@@ -133,7 +133,7 @@ class FileController extends AuthenticatedController
 		elseif($self->role & cloudy\Role::ROLE_MASTER) {
 			if (!$revision) {
 				
-				$l = db()->table('link')->get('uniqid', $id)->first(true);
+				$l = db()->table('link')->get('uniqid', $id)->group()->where('expires', '>', time())->where('expires', null)->endGroup()->first(true);
 				$media = $l->media;
 
 				$query = db()->table('revision')->get('media', $media);

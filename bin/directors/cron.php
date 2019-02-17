@@ -60,7 +60,8 @@ class CronDirector extends Director
 			 
 			 cloudy\task\CleanupFileTask::class,
 			 cloudy\task\CleanupRevisionTask::class,
-			 cloudy\task\CleanupMediaTask::class
+			 cloudy\task\CleanupMediaTask::class,
+			 cloudy\task\CleanupLinkTask::class
 		];
 		
 		foreach ($run as $t) {
