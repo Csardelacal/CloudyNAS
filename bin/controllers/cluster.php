@@ -114,10 +114,10 @@ class ClusterController extends AuthenticatedController
 		//TODO: Implement
 	}
 	
-	public function addServer(ClusterModel$cluster, ServerModel$server) {
+	public function addServer(ClusterModel$cluster, ServerModel$server = null) {
 		
 		/*
-		 * Buckets can only be created by humans and authorized third parties. There's 
+		 * Servers can only be created by humans and admins. There's 
 		 * no need for our application to allow other stuff to happen
 		 */
 		if ($this->_auth === AuthenticatedController::AUTH_USER) {
@@ -128,6 +128,11 @@ class ClusterController extends AuthenticatedController
 			throw new PublicException('Unauthorized', 403);
 		}
 		
+		if ($this->request->isPost()) {
+			$this->response->setBody('Redirecting...')->getHeaders()->redirect(url('cluster', 'addServer', $cluster->_id, $_POST['server']));
+			return;
+		}
+		
 		if ($server) {
 			$server->cluster = $cluster;
 			$server->store();
@@ -135,7 +140,7 @@ class ClusterController extends AuthenticatedController
 			$this->response->setBody('Redirecting...')->getHeaders()->redirect(url('cluster', 'read', $cluster->_id));
 		}
 		else {
-			$available = db()->table('server')->get('cluster', null)->where('active', false)->all();
+			$available = db()->table('server')->get('active', false)->all();
 			$this->view->set('servers', $available);
 		}
 	}

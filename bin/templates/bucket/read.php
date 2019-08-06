@@ -63,9 +63,9 @@
 		
 		<div class="spacer" style="height: 25px"></div>
 		
-		<p class="small unpadded"><strong>Custer: <?= $bucket->cluster->uniqid ?></strong></p>
-		<p class="small secondary unpadded">This server acts as a directory (dispatcher) of the cluster this bucket resides on.</p>
-		<p class="small secondary unpadded">It will be in charge of distributing files across the servers in the cluster.</p>
+		<p class="small unpadded"><strong>Cluster: <a href="<?= url('cluster', 'read', $bucket->cluster->_id) ?>"><?= $bucket->cluster->uniqid ?></a></strong></p>
+		<p class="small secondary unpadded">A cluster is a group of servers that associate to provide more cumulative storage than individual machines.</p>
+		<p class="small secondary unpadded">The slaves in this cluster contain the data, while the master dispatches it.</p>
 		
 		<div class="spacer" style="height: 25px"></div>
 		
