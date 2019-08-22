@@ -49,7 +49,17 @@ class TaskController extends AuthenticatedController
 			throw new PublicException('No such task', 404);
 		}
 		
-		if ($self && !($self | $task->accessLevel())) {
+		if (!$self) {
+			throw new PublicException('Server did not find itself. This is a bug', 500);
+		}
+		
+		/*
+		 * Check that the server has the appropriate role for the task. Every task
+		 * features a distinct access level. If the server is not an approriate
+		 * target for this task, it should reject it so the master is aware of it's
+		 * inability to fulfill this request.
+		 */
+		if (!($self->role & $task->accessLevel())) {
 			trigger_error('Server received inappropriate task ' . $_POST['job'] . ' from ' . $_POST['source'], E_USER_NOTICE);
 			throw new PublicException('Invalid task', 403);
 		}
