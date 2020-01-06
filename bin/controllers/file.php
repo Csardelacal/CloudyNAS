@@ -81,7 +81,7 @@ class FileController extends AuthenticatedController
 		 * This means that data could be leaked in an unstoppable manner if the 
 		 * uniqid gets exposed at some point.
 		 */
-		if ($type === 'uniqid' && !in_array($this->_auth, [AuthenticatedController::AUTH_INT, AuthenticatedController::AUTH_APP])) {
+		if ($type === 'uniqid' && !in_array($this->_auth, [AuthenticatedController::AUTH_INT, AuthenticatedController::AUTH_APP, AuthenticatedController::AUTH_USER])) {
 			throw new PublicException('Not authenticated properly', 403);
 		}
 		

@@ -88,21 +88,59 @@
 	</div>
 </div>
 
-<?php 
-	/*
-	 * I'm not entirely sold on this mechanism. This requires revisiting.
-	 */
-	$request = request($leader->hostname . '/media/all/' . $bucket->uniqid . '.json');
-	$request->header('Content-type', 'application/json');
-	$request->post($keys->pack($leader->uniqid, base64_encode(random_bytes(150))));
-	
-	$media = $request->send()->expect(200)->json()->media;
-?>
+<template id="file">
+	<div class="row l5 m3 s3">
+		<div class="span l4 m2 m2"><a id="name"></a></div>
+		<div class="span l1 m1 s1"><span id="mime"></span></div>
+	</div>
+</template>
 
-<?php foreach ($media as $item): ?>
-<div class="row l5 m3 s3">
-	<div class="span l4 m2 m2"><?= __($item->name) ?></div>
-	<div class="span l1 m1 s1"><?= $item->mime? : '<i>Deleted</i>' ?></div>
+<div id="file-list"></div>
+
+<div style="text-align: center; padding: 30px 0;">
+	<a id="load-more" style="cursor: pointer;">Load more</a>
 </div>
-<?php endforeach; ?>
 
+<script type="text/javascript">
+(function () {
+	var token = '<?= $authUser->token ?>';
+	var leader = '<?= $leader->hostname ?>';
+	var uniqid = '<?= $bucket->uniqid ?>';
+	var until = undefined;
+	
+	var more = function () {
+		var xhr = new XMLHttpRequest();
+		
+		if (!until) {
+			xhr.open('GET', leader + '/media/all/' + uniqid + '.json?token=' + token);
+		}
+		else {
+			xhr.open('GET', leader + '/media/all/' + uniqid + '.json?token=' + token + '&until=' + until);
+		}
+		
+		xhr.onreadystatechange = function () {
+			if (xhr.readyState === 4) {
+				console.log(xhr.responseText);
+				var json = JSON.parse(xhr.responseText);
+				until = json.media[json.media.length - 1].uniqid;
+				
+				var template = document.querySelector('#file');
+				
+				for (var i = 0; i < json.media.length; i++) {
+					var clone = document.importNode(template.content, true);
+					clone.querySelector('#name').textContent = json.media[i].name;
+					clone.querySelector('#name').href = leader + '/media/read/' + uniqid + '/' + json.media[i].name + '/?token=' + token;
+					clone.querySelector('#mime').textContent = json.media[i].mime || 'Deleted';
+					
+					document.querySelector('#file-list').appendChild(clone);
+				}
+			}
+		}
+		xhr.send();
+	}
+	
+	document.getElementById('load-more').addEventListener('click', more);
+	more();
+	
+}());
+</script>
