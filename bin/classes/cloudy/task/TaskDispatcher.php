@@ -67,6 +67,7 @@ class TaskDispatcher
 		$this->known->push(CleanupFileTask::class);
 		$this->known->push(CleanupRevisionTask::class);
 		$this->known->push(CleanupMediaTask::class);
+		$this->known->push(CleanupLinkTask::class);
 	}
 	
 	/**
