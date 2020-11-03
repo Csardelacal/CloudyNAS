@@ -123,12 +123,106 @@ class BucketController extends AuthenticatedController
 		
 	}
 	
+	/**
+	 * 
+	 * @param string $uniqid
+	 * @validate >> POST#name(string required)
+	 * @validate >> POST#replicas(positive number required)
+	 * @throws PublicException
+	 * @throws HTTPMethodException
+	 */
 	public function update(BucketModel$bucket) {
+		
+		/*
+		 * If the client consuming this endpoint has provided no authentication at
+		 * all, the server will immediately reject the request.
+		 */
+		if ($this->_auth === AuthenticatedController::AUTH_NONE) {
+			throw new PublicException('Authentication is required to access this endpoint', 403);
+		}
+		
+		/*
+		 * If it is an application, we need to make sure that the application was 
+		 * granted r/w access on the data in the first place.
+		 */
+		elseif ($this->_auth === AuthenticatedController::AUTH_APP) {
+			$grant = $this->sso->authApp($_GET['signature'], null, ['bucket.' . $bucket->uniqid]);
+			
+			if (!$grant->getContext('bucket.' . $bucket->uniqid)->exists()) {
+				$grant->getContext('bucket.' . $bucket->uniqid)->create(sprintf('Bucket %s (%s)', $bucket->name, $bucket->uniqid), 'Allows for read / write access to the bucket');
+			}
+			
+			if (!$grant->getContext('bucket.' . $bucket->uniqid)->isGranted()) {
+				throw new PublicException('Context level insufficient.', 403);
+			}
+		}
+		
+		try {
+			if (!$this->request->isPost()) { throw new HTTPMethodException('Not posted'); }
+			if (!$this->validation->isEmpty()) { throw new ValidationException('Validation failed', 0, $this->validate->toArray()); }
+			
+			/**
+			 * I am most certainly not amused by this block. It looks big and clunky
+			 * and it's really hard to understand what it's trying to achieve.
+			 * 
+			 * This would probably be a great fit for a dependency injection mechanism.
+			 * 
+			 * In case you didn't notice, changing the number of replicas for the bucket,
+			 * will cause the system to perform a health check to ensure that it has 
+			 * enough replicas of all the files available.
+			 */
+			if ($_POST['replicas'] != $bucket->replicas) {
+				$dispatcher = new cloudy\task\TaskDispatcher($this->keys);
+				$task = $dispatcher->get(\cloudy\task\RevisionHealthCheckTask::class);
+				$master = db()->table('server')->get('cluster', $bucket->cluster)->where('active', true)->all()->filter(function ($e) { return $e->role & Role::ROLE_MASTER; })->rewind();
+				$dispatcher->send($master, $task);
+			}
+			
+			$bucket->name = $_POST['name'];
+			$bucket->replicas = $_POST['replicas'];
+			$bucket->store();
+			
+			$this->view->set('result', $bucket);
+		} 
+		catch (HTTPMethodException $ex) {
+			/*Do nothing, show the form*/
+		}
+		
+		$this->view->set('bucket', $bucket);
+		$this->view->set('self', $this->settings->read('uniqid'));
+		$this->view->set('keys', $this->keys);
 		//TODO: Implement
 	}
 	
 	public function delete(BucketModel$bucket) {
-		//TODO: Implement
+		/*
+		 * If the client consuming this endpoint has provided no authentication at
+		 * all, the server will immediately reject the request.
+		 */
+		if ($this->_auth === AuthenticatedController::AUTH_NONE) {
+			throw new PublicException('Authentication is required to access this endpoint', 403);
+		}
+		
+		/*
+		 * If it is an application, we need to make sure that the application was 
+		 * granted r/w access on the data in the first place.
+		 */
+		elseif ($this->_auth === AuthenticatedController::AUTH_APP) {
+			throw new PublicException('Only humans can delete buckets. Sorry', 403);
+		}
+		
+		if (!spitfire\core\Environment::get('cloudy.bucket.delete')) {
+			throw new PublicException('Deleting a bucket is not possible. Safe mode engaged. Enable cloudy.bucket.delete in the environments to do so', 403);
+		}
+		
+		
+		$dispatcher = new cloudy\task\TaskDispatcher($this->keys);
+		$task = $dispatcher->get(\cloudy\task\BucketDeleteTask::class);
+		$task->load($bucket->uniqid);
+		$leader = db()->table('server')->getAll()->where('active', true)->all()->filter(function ($e) { return $e->role & Role::ROLE_LEADER; })->rewind();
+		$dispatcher->send($leader, $task);
+		
+		$this->view->set('result', true);
 	}
 	
 }

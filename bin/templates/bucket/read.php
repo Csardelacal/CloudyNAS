@@ -12,9 +12,12 @@
 	$stats = $request->send()->expect(200)->json()->payload;
 ?>
 
-<div class="row l1">
-	<div class="span">
+<div class="row l3">
+	<div class="span l2">
 		<div class="heading" data-sticky="top"><?= __($bucket->name) ?></div>
+	</div>
+	<div class="span l1 align-right">
+		<a href="<?= url('bucket', 'update', $bucket->_id) ?>" class="button outline small">Edit</a>
 	</div>
 </div>
 
