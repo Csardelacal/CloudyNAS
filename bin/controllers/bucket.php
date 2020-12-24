@@ -79,6 +79,18 @@ class BucketController extends AuthenticatedController
 			$record->cluster = db()->table('cluster')->get('_id', $_POST['cluster'])->first(true);
 			$record->store();
 			
+			/*
+			 * A new bucket changes the topography of the network, and therefore the
+			 * other servers should be informed about the change. The leader will 
+			 * report the change to all the servers that are active on the network.
+			 */
+			$dispatcher = new cloudy\task\TaskDispatcher($this->keys);
+			
+			db()->table('server')->get('active', true)->all()->each(function ($e) use ($dispatcher) {
+				$task = $dispatcher->get(\cloudy\task\TopographyTask::class);
+				$dispatcher->send($e, $task);
+			});
+			
 			$this->view->set('result', $record);
 		} 
 		catch (HTTPMethodException $ex) {
