@@ -1,0 +1,8 @@
+parameters:
+	scanDirectories:
+		- spitfire/
+	excludePaths:
+		analyse:
+			- bin/templates
+includes:
+	- phpstan-baseline.neon

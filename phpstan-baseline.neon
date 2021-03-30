@@ -1,0 +1,882 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Property AuthenticatedController\\:\\:\\$sso \\(auth\\\\SSO\\) does not accept auth\\\\SSOCache\\.$#"
+			count: 1
+			path: bin/classes/AuthenticatedController.php
+
+		-
+			message: "#^Call to an undefined method auth\\\\SSOCache\\:\\:authApp\\(\\)\\.$#"
+			count: 1
+			path: bin/classes/AuthenticatedController.php
+
+		-
+			message: "#^Call to an undefined method auth\\\\SSOCache\\:\\:makeToken\\(\\)\\.$#"
+			count: 1
+			path: bin/classes/AuthenticatedController.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\DB\\:\\:\\$setting\\.$#"
+			count: 1
+			path: bin/classes/BaseController.php
+
+		-
+			message: "#^Variable \\$signatures might not be defined\\.$#"
+			count: 1
+			path: bin/classes/auth/AppAuthentication.php
+
+		-
+			message: "#^Unreachable statement \\- code above always terminates\\.$#"
+			count: 1
+			path: bin/classes/auth/Request.php
+
+		-
+			message: "#^Call to method getPath\\(\\) on an unknown class auth\\\\Settings\\.$#"
+			count: 1
+			path: bin/classes/auth/SSO.php
+
+		-
+			message: "#^Call to method getPort\\(\\) on an unknown class auth\\\\Settings\\.$#"
+			count: 1
+			path: bin/classes/auth/SSO.php
+
+		-
+			message: "#^Call to method getProtocol\\(\\) on an unknown class auth\\\\Settings\\.$#"
+			count: 1
+			path: bin/classes/auth/SSO.php
+
+		-
+			message: "#^Call to method getServer\\(\\) on an unknown class auth\\\\Settings\\.$#"
+			count: 1
+			path: bin/classes/auth/SSO.php
+
+		-
+			message: "#^Call to method getUser\\(\\) on an unknown class auth\\\\Settings\\.$#"
+			count: 1
+			path: bin/classes/auth/SSO.php
+
+		-
+			message: "#^Call to method getPassword\\(\\) on an unknown class auth\\\\Settings\\.$#"
+			count: 1
+			path: bin/classes/auth/SSO.php
+
+		-
+			message: "#^Instanceof between string\\|null and auth\\\\Token will always evaluate to false\\.$#"
+			count: 1
+			path: bin/classes/auth/SSO.php
+
+		-
+			message: "#^Variable \\$http_response_header in isset\\(\\) always exists and is not nullable\\.$#"
+			count: 1
+			path: bin/classes/auth/Token.php
+
+		-
+			message: "#^Parameter \\$url of method auth\\\\URLReflection\\:\\:fromURL\\(\\) has invalid typehint type auth\\\\Settings\\.$#"
+			count: 1
+			path: bin/classes/auth/URLReflection.php
+
+		-
+			message: "#^Return typehint of method auth\\\\URLReflection\\:\\:fromURL\\(\\) has invalid type auth\\\\Settings\\.$#"
+			count: 1
+			path: bin/classes/auth/URLReflection.php
+
+		-
+			message: "#^Class auth\\\\URLReflection constructor invoked with 8 parameters, 7 required\\.$#"
+			count: 1
+			path: bin/classes/auth/URLReflection.php
+
+		-
+			message: "#^Undefined variable\\: \\$result$#"
+			count: 2
+			path: bin/classes/cloudy/encryption/Key.php
+
+		-
+			message: "#^Instantiated class cloudy\\\\encryption\\\\PrivateException not found\\.$#"
+			count: 1
+			path: bin/classes/cloudy/encryption/Key.php
+
+		-
+			message: "#^Throwing object of an unknown class cloudy\\\\encryption\\\\PrivateException\\.$#"
+			count: 1
+			path: bin/classes/cloudy/encryption/Key.php
+
+		-
+			message: "#^Parameter \\#1 \\$name of method cloudy\\\\task\\\\TaskDispatcher\\:\\:get\\(\\) expects cloudy\\\\task\\\\type, string given\\.$#"
+			count: 2
+			path: bin/classes/cloudy/task/BucketDeleteTask.php
+
+		-
+			message: "#^Variable \\$media might not be defined\\.$#"
+			count: 1
+			path: bin/classes/cloudy/task/BucketDeleteTask.php
+
+		-
+			message: "#^Call to method get\\(\\) on an unknown class spitfire\\\\SpitFire\\\\storage\\\\objectStorage\\\\NodeInterface\\.$#"
+			count: 1
+			path: bin/classes/cloudy/task/CleanupFileTask.php
+
+		-
+			message: "#^Parameter \\#1 \\$name of method cloudy\\\\task\\\\TaskDispatcher\\:\\:get\\(\\) expects cloudy\\\\task\\\\type, string given\\.$#"
+			count: 1
+			path: bin/classes/cloudy/task/CleanupRevisionTask.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\DB\\:\\:\\$setting\\.$#"
+			count: 3
+			path: bin/classes/cloudy/task/DiscoveryTask.php
+
+		-
+			message: "#^Call to an undefined method spitfire\\\\storage\\\\objectStorage\\\\NodeInterface\\:\\:getPath\\(\\)\\.$#"
+			count: 1
+			path: bin/classes/cloudy/task/FileChecksumTask.php
+
+		-
+			message: "#^Call to method get\\(\\) on an unknown class spitfire\\\\SpitFire\\\\storage\\\\objectStorage\\\\NodeInterface\\.$#"
+			count: 2
+			path: bin/classes/cloudy/task/FileChecksumTask.php
+
+		-
+			message: "#^Variable \\$record might not be defined\\.$#"
+			count: 1
+			path: bin/classes/cloudy/task/FileChecksumTask.php
+
+		-
+			message: "#^Parameter \\#1 \\$name of method cloudy\\\\task\\\\TaskDispatcher\\:\\:get\\(\\) expects cloudy\\\\task\\\\type, string given\\.$#"
+			count: 1
+			path: bin/classes/cloudy/task/FileDistributeTask.php
+
+		-
+			message: "#^Parameter \\#1 \\$name of method cloudy\\\\task\\\\TaskDispatcher\\:\\:get\\(\\) expects cloudy\\\\task\\\\type, string given\\.$#"
+			count: 1
+			path: bin/classes/cloudy/task/FileHealthCheckTask.php
+
+		-
+			message: "#^Call to method delete\\(\\) on an unknown class spitfire\\\\SpitFire\\\\storage\\\\objectStorage\\\\NodeInterface\\.$#"
+			count: 1
+			path: bin/classes/cloudy/task/FilePullTask.php
+
+		-
+			message: "#^Call to an undefined method spitfire\\\\storage\\\\objectStorage\\\\NodeInterface\\:\\:write\\(\\)\\.$#"
+			count: 1
+			path: bin/classes/cloudy/task/FilePullTask.php
+
+		-
+			message: "#^Variable \\$response might not be defined\\.$#"
+			count: 1
+			path: bin/classes/cloudy/task/FilePullTask.php
+
+		-
+			message: "#^Call to an undefined method spitfire\\\\storage\\\\objectStorage\\\\NodeInterface\\:\\:getPath\\(\\)\\.$#"
+			count: 2
+			path: bin/classes/cloudy/task/FilePullTask.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between bool and 'OK' will always evaluate to false\\.$#"
+			count: 1
+			path: bin/classes/cloudy/task/FileUpdateTask.php
+
+		-
+			message: "#^Parameter \\#1 \\$name of method cloudy\\\\task\\\\TaskDispatcher\\:\\:get\\(\\) expects cloudy\\\\task\\\\type, string given\\.$#"
+			count: 2
+			path: bin/classes/cloudy/task/FileUpdateTask.php
+
+		-
+			message: "#^Call to an undefined method spitfire\\\\storage\\\\objectStorage\\\\NodeInterface\\:\\:getPath\\(\\)\\.$#"
+			count: 1
+			path: bin/classes/cloudy/task/FileUpdateTask.php
+
+		-
+			message: "#^Call to method get\\(\\) on an unknown class spitfire\\\\SpitFire\\\\storage\\\\objectStorage\\\\NodeInterface\\.$#"
+			count: 1
+			path: bin/classes/cloudy/task/FileUpdateTask.php
+
+		-
+			message: "#^Variable \\$path might not be defined\\.$#"
+			count: 1
+			path: bin/classes/cloudy/task/FileUpdateTask.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\DB\\:\\:\\$setting\\.$#"
+			count: 3
+			path: bin/classes/cloudy/task/LeaderDiscoveryTask.php
+
+		-
+			message: "#^Call to method dir\\(\\) on an unknown class spitfire\\\\SpitFire\\\\storage\\\\objectStorage\\\\NodeInterface\\.$#"
+			count: 1
+			path: bin/classes/cloudy/task/LeaderDiscoveryTask.php
+
+		-
+			message: "#^Call to an undefined method spitfire\\\\storage\\\\objectStorage\\\\NodeInterface\\:\\:getPath\\(\\)\\.$#"
+			count: 2
+			path: bin/classes/cloudy/task/LeaderDiscoveryTask.php
+
+		-
+			message: "#^Parameter \\#1 \\$name of method cloudy\\\\task\\\\TaskDispatcher\\:\\:get\\(\\) expects cloudy\\\\task\\\\type, string given\\.$#"
+			count: 1
+			path: bin/classes/cloudy/task/RevisionHealthCheckTask.php
+
+		-
+			message: "#^Variable \\$record might not be defined\\.$#"
+			count: 1
+			path: bin/classes/cloudy/task/RevisionHealthCheckTask.php
+
+		-
+			message: "#^Variable \\$body might not be defined\\.$#"
+			count: 1
+			path: bin/classes/cloudy/task/TaskDispatchTask.php
+
+		-
+			message: "#^Parameter \\$name of method cloudy\\\\task\\\\TaskDispatcher\\:\\:get\\(\\) has invalid typehint type cloudy\\\\task\\\\type\\.$#"
+			count: 1
+			path: bin/classes/cloudy/task/TaskDispatcher.php
+
+		-
+			message: "#^Instantiated class cloudy\\\\task\\\\type not found\\.$#"
+			count: 1
+			path: bin/classes/cloudy/task/TaskDispatcher.php
+
+		-
+			message: "#^Method cloudy\\\\task\\\\TaskDispatcher\\:\\:get\\(\\) should return cloudy\\\\task\\\\Task but returns cloudy\\\\task\\\\type\\.$#"
+			count: 1
+			path: bin/classes/cloudy/task/TaskDispatcher.php
+
+		-
+			message: "#^Parameter \\#1 \\$name of method cloudy\\\\task\\\\TaskDispatcher\\:\\:get\\(\\) expects cloudy\\\\task\\\\type, string given\\.$#"
+			count: 1
+			path: bin/classes/cloudy/task/TaskDispatcher.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\DB\\:\\:\\$setting\\.$#"
+			count: 3
+			path: bin/classes/cloudy/task/TopographyTask.php
+
+		-
+			message: "#^Call to an undefined method object\\:\\:html\\(\\)\\.$#"
+			count: 1
+			path: bin/classes/cloudy/task/TopographyTask.php
+
+		-
+			message: "#^Parameter \\#2 \\$proj of function ftok expects string, int given\\.$#"
+			count: 1
+			path: bin/classes/cron/FlipFlop.php
+
+		-
+			message: "#^Negated boolean expression is always true\\.$#"
+			count: 1
+			path: bin/classes/signature/Signature.php
+
+		-
+			message: "#^Result of \\|\\| is always true\\.$#"
+			count: 1
+			path: bin/classes/signature/Signature.php
+
+		-
+			message: "#^Parameter \\#5 \\$context of class signature\\\\Signature constructor expects string, array\\<int, string\\> given\\.$#"
+			count: 1
+			path: bin/classes/signature/Signature.php
+
+		-
+			message: "#^Parameter \\#7 \\$salt of class signature\\\\Signature constructor expects string\\|null, signature\\\\Checksum given\\.$#"
+			count: 1
+			path: bin/classes/signature/Signature.php
+
+		-
+			message: "#^Access to an undefined property BucketController\\:\\:\\$validate\\.$#"
+			count: 2
+			path: bin/controllers/bucket.php
+
+		-
+			message: "#^Access to an undefined property BucketController\\:\\:\\$validation\\.$#"
+			count: 2
+			path: bin/controllers/bucket.php
+
+		-
+			message: "#^Parameter \\#1 \\$name of method cloudy\\\\task\\\\TaskDispatcher\\:\\:get\\(\\) expects cloudy\\\\task\\\\type, string given\\.$#"
+			count: 3
+			path: bin/controllers/bucket.php
+
+		-
+			message: "#^Parameter \\#3 \\$context of method auth\\\\SSO\\:\\:authApp\\(\\) expects string\\|null, array\\<int, string\\> given\\.$#"
+			count: 2
+			path: bin/controllers/bucket.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$uniqid$#"
+			count: 1
+			path: bin/controllers/bucket.php
+
+		-
+			message: "#^Access to an undefined property BucketModel\\:\\:\\$uniqid\\.$#"
+			count: 6
+			path: bin/controllers/bucket.php
+
+		-
+			message: "#^Access to an undefined property BucketModel\\:\\:\\$name\\.$#"
+			count: 2
+			path: bin/controllers/bucket.php
+
+		-
+			message: "#^Access to an undefined property BucketModel\\:\\:\\$replicas\\.$#"
+			count: 2
+			path: bin/controllers/bucket.php
+
+		-
+			message: "#^Access to an undefined property BucketModel\\:\\:\\$cluster\\.$#"
+			count: 1
+			path: bin/controllers/bucket.php
+
+		-
+			message: "#^Access to an undefined property ClusterController\\:\\:\\$validate\\.$#"
+			count: 1
+			path: bin/controllers/cluster.php
+
+		-
+			message: "#^Access to an undefined property ClusterController\\:\\:\\$validation\\.$#"
+			count: 1
+			path: bin/controllers/cluster.php
+
+		-
+			message: "#^Access to an undefined property ClusterModel\\:\\:\\$_id\\.$#"
+			count: 2
+			path: bin/controllers/cluster.php
+
+		-
+			message: "#^Access to an undefined property ServerModel\\:\\:\\$cluster\\.$#"
+			count: 1
+			path: bin/controllers/cluster.php
+
+		-
+			message: "#^Parameter \\#1 \\$name of method cloudy\\\\task\\\\TaskDispatcher\\:\\:get\\(\\) expects cloudy\\\\task\\\\type, string given\\.$#"
+			count: 1
+			path: bin/controllers/file.php
+
+		-
+			message: "#^Parameter \\#1 \\$body of method spitfire\\\\core\\\\Response\\:\\:setBody\\(\\) expects spitfire\\\\core\\\\Context\\|string, spitfire\\\\SpitFire\\\\storage\\\\objectStorage\\\\NodeInterface\\|spitfire\\\\storage\\\\objectStorage\\\\DriveDispatcher given\\.$#"
+			count: 1
+			path: bin/controllers/file.php
+
+		-
+			message: "#^Binary operation \"&\" between string and 4 results in an error\\.$#"
+			count: 1
+			path: bin/controllers/home.php
+
+		-
+			message: "#^Parameter \\#3 \\$context of method auth\\\\SSO\\:\\:authApp\\(\\) expects string\\|null, array\\<int, string\\> given\\.$#"
+			count: 1
+			path: bin/controllers/link.php
+
+		-
+			message: "#^Parameter \\#3 \\$context of method auth\\\\SSO\\:\\:authApp\\(\\) expects string\\|null, array\\<int, string\\> given\\.$#"
+			count: 4
+			path: bin/controllers/media.php
+
+		-
+			message: "#^Parameter \\#1 \\$name of method cloudy\\\\task\\\\TaskDispatcher\\:\\:get\\(\\) expects cloudy\\\\task\\\\type, string given\\.$#"
+			count: 2
+			path: bin/controllers/media.php
+
+		-
+			message: "#^Access to an undefined property ServerModel\\:\\:\\$active\\.$#"
+			count: 4
+			path: bin/controllers/server.php
+
+		-
+			message: "#^Access to an undefined property ServerModel\\:\\:\\$cluster\\.$#"
+			count: 4
+			path: bin/controllers/server.php
+
+		-
+			message: "#^Access to an undefined property ServerModel\\:\\:\\$writable\\.$#"
+			count: 1
+			path: bin/controllers/server.php
+
+		-
+			message: "#^Access to an undefined property ServerModel\\:\\:\\$queueLen\\.$#"
+			count: 3
+			path: bin/controllers/server.php
+
+		-
+			message: "#^Parameter \\#1 \\$name of method cloudy\\\\task\\\\TaskDispatcher\\:\\:get\\(\\) expects cloudy\\\\task\\\\type, string given\\.$#"
+			count: 3
+			path: bin/controllers/server.php
+
+		-
+			message: "#^Call to method dir\\(\\) on an unknown class spitfire\\\\SpitFire\\\\storage\\\\objectStorage\\\\NodeInterface\\.$#"
+			count: 1
+			path: bin/controllers/server.php
+
+		-
+			message: "#^Call to an undefined method spitfire\\\\storage\\\\objectStorage\\\\NodeInterface\\:\\:getPath\\(\\)\\.$#"
+			count: 2
+			path: bin/controllers/server.php
+
+		-
+			message: "#^Access to an undefined property SetupController\\:\\:\\$user\\.$#"
+			count: 1
+			path: bin/controllers/setup.php
+
+		-
+			message: "#^Negated boolean expression is always false\\.$#"
+			count: 1
+			path: bin/controllers/task.php
+
+		-
+			message: "#^Cannot call method getRaw\\(\\) on array\\<string, mixed\\>\\.$#"
+			count: 1
+			path: bin/controllers/user.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\DB\\:\\:\\$setting\\.$#"
+			count: 2
+			path: bin/directors/cron.php
+
+		-
+			message: "#^Parameter \\#1 \\$name of method cloudy\\\\task\\\\TaskDispatcher\\:\\:get\\(\\) expects cloudy\\\\task\\\\type, class\\-string given\\.$#"
+			count: 1
+			path: bin/directors/cron.php
+
+		-
+			message: "#^Parameter \\#1 \\$name of method cloudy\\\\task\\\\TaskDispatcher\\:\\:get\\(\\) expects cloudy\\\\task\\\\type, string given\\.$#"
+			count: 4
+			path: bin/directors/cron.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\DB\\:\\:\\$setting\\.$#"
+			count: 1
+			path: bin/directors/queue.php
+
+		-
+			message: "#^Negated boolean expression is always false\\.$#"
+			count: 1
+			path: bin/directors/queue.php
+
+		-
+			message: "#^Variable \\$code might not be defined\\.$#"
+			count: 2
+			path: bin/error_pages/default.json.php
+
+		-
+			message: "#^Variable \\$exception might not be defined\\.$#"
+			count: 1
+			path: bin/error_pages/default.json.php
+
+		-
+			message: "#^Variable \\$message might not be defined\\.$#"
+			count: 2
+			path: bin/error_pages/default.json.php
+
+		-
+			message: "#^Variable \\$code might not be defined\\.$#"
+			count: 1
+			path: bin/error_pages/default.php
+
+		-
+			message: "#^Variable \\$message might not be defined\\.$#"
+			count: 2
+			path: bin/error_pages/default.php
+
+		-
+			message: "#^Parameter \\#2 \\$newvalue of function ini_set expects string, true given\\.$#"
+			count: 1
+			path: bin/error_pages/default.php
+
+		-
+			message: "#^Variable \\$exception might not be defined\\.$#"
+			count: 1
+			path: bin/error_pages/default.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$uniqid\\.$#"
+			count: 1
+			path: bin/models/bucket.php
+
+		-
+			message: "#^Access to private property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$name\\.$#"
+			count: 1
+			path: bin/models/bucket.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$replicas\\.$#"
+			count: 1
+			path: bin/models/bucket.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$cluster\\.$#"
+			count: 1
+			path: bin/models/bucket.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$secondaryCluster\\.$#"
+			count: 1
+			path: bin/models/bucket.php
+
+		-
+			message: "#^Method BucketModel\\:\\:definitions\\(\\) should return spitfire\\\\storage\\\\database\\\\Schema but return statement is missing\\.$#"
+			count: 1
+			path: bin/models/bucket.php
+
+		-
+			message: "#^Access to an undefined property BucketModel\\:\\:\\$cluster\\.$#"
+			count: 2
+			path: bin/models/bucket.php
+
+		-
+			message: "#^Access to an undefined property BucketModel\\:\\:\\$replicas\\.$#"
+			count: 2
+			path: bin/models/bucket.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$uniqid\\.$#"
+			count: 1
+			path: bin/models/cluster.php
+
+		-
+			message: "#^Access to private property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$name\\.$#"
+			count: 1
+			path: bin/models/cluster.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$servers\\.$#"
+			count: 1
+			path: bin/models/cluster.php
+
+		-
+			message: "#^Method ClusterModel\\:\\:definitions\\(\\) should return spitfire\\\\storage\\\\database\\\\Schema but return statement is missing\\.$#"
+			count: 1
+			path: bin/models/cluster.php
+
+		-
+			message: "#^Access to an undefined property ClusterModel\\:\\:\\$servers\\.$#"
+			count: 2
+			path: bin/models/cluster.php
+
+		-
+			message: "#^Access to private property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$name\\.$#"
+			count: 3
+			path: bin/models/cron.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$state\\.$#"
+			count: 1
+			path: bin/models/cron.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$lastrun\\.$#"
+			count: 1
+			path: bin/models/cron.php
+
+		-
+			message: "#^Method CronModel\\:\\:definitions\\(\\) should return spitfire\\\\storage\\\\database\\\\Schema but return statement is missing\\.$#"
+			count: 1
+			path: bin/models/cron.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$uniqid\\.$#"
+			count: 1
+			path: bin/models/file.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$revision\\.$#"
+			count: 1
+			path: bin/models/file.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$server\\.$#"
+			count: 1
+			path: bin/models/file.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$expires\\.$#"
+			count: 1
+			path: bin/models/file.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$commited\\.$#"
+			count: 1
+			path: bin/models/file.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$mime\\.$#"
+			count: 1
+			path: bin/models/file.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$checksum\\.$#"
+			count: 1
+			path: bin/models/file.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$file\\.$#"
+			count: 1
+			path: bin/models/file.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$created\\.$#"
+			count: 1
+			path: bin/models/file.php
+
+		-
+			message: "#^Method FileModel\\:\\:definitions\\(\\) should return spitfire\\\\storage\\\\database\\\\Schema but return statement is missing\\.$#"
+			count: 1
+			path: bin/models/file.php
+
+		-
+			message: "#^Access to an undefined property FileModel\\:\\:\\$uniqid\\.$#"
+			count: 1
+			path: bin/models/file.php
+
+		-
+			message: "#^Access to an undefined property FileModel\\:\\:\\$created\\.$#"
+			count: 1
+			path: bin/models/file.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$uniqid\\.$#"
+			count: 1
+			path: bin/models/link.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$media\\.$#"
+			count: 1
+			path: bin/models/link.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$expires\\.$#"
+			count: 1
+			path: bin/models/link.php
+
+		-
+			message: "#^Method LinkModel\\:\\:definitions\\(\\) should return spitfire\\\\storage\\\\database\\\\Schema but return statement is missing\\.$#"
+			count: 1
+			path: bin/models/link.php
+
+		-
+			message: "#^Access to an undefined property LinkModel\\:\\:\\$uniqid\\.$#"
+			count: 1
+			path: bin/models/link.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$bucket\\.$#"
+			count: 1
+			path: bin/models/media.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$uniqid\\.$#"
+			count: 1
+			path: bin/models/media.php
+
+		-
+			message: "#^Access to private property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$name\\.$#"
+			count: 1
+			path: bin/models/media.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$created\\.$#"
+			count: 1
+			path: bin/models/media.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$expires\\.$#"
+			count: 1
+			path: bin/models/media.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$damaged\\.$#"
+			count: 1
+			path: bin/models/media.php
+
+		-
+			message: "#^Method MediaModel\\:\\:definitions\\(\\) should return spitfire\\\\storage\\\\database\\\\Schema but return statement is missing\\.$#"
+			count: 1
+			path: bin/models/media.php
+
+		-
+			message: "#^Access to an undefined property MediaModel\\:\\:\\$uniqid\\.$#"
+			count: 1
+			path: bin/models/media.php
+
+		-
+			message: "#^Access to an undefined property MediaModel\\:\\:\\$created\\.$#"
+			count: 1
+			path: bin/models/media.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$media\\.$#"
+			count: 1
+			path: bin/models/revision.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$uniqid\\.$#"
+			count: 1
+			path: bin/models/revision.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$mime\\.$#"
+			count: 1
+			path: bin/models/revision.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$created\\.$#"
+			count: 1
+			path: bin/models/revision.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$expires\\.$#"
+			count: 1
+			path: bin/models/revision.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$checksum\\.$#"
+			count: 1
+			path: bin/models/revision.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$damaged\\.$#"
+			count: 1
+			path: bin/models/revision.php
+
+		-
+			message: "#^Method RevisionModel\\:\\:definitions\\(\\) should return spitfire\\\\storage\\\\database\\\\Schema but return statement is missing\\.$#"
+			count: 1
+			path: bin/models/revision.php
+
+		-
+			message: "#^Access to an undefined property RevisionModel\\:\\:\\$uniqid\\.$#"
+			count: 1
+			path: bin/models/revision.php
+
+		-
+			message: "#^Access to an undefined property RevisionModel\\:\\:\\$created\\.$#"
+			count: 1
+			path: bin/models/revision.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$hostname\\.$#"
+			count: 1
+			path: bin/models/server.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$uniqid\\.$#"
+			count: 1
+			path: bin/models/server.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$pubKey\\.$#"
+			count: 1
+			path: bin/models/server.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$role\\.$#"
+			count: 1
+			path: bin/models/server.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$lastSeen\\.$#"
+			count: 1
+			path: bin/models/server.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$lastCron\\.$#"
+			count: 1
+			path: bin/models/server.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$queueLen\\.$#"
+			count: 1
+			path: bin/models/server.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$cluster\\.$#"
+			count: 1
+			path: bin/models/server.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$size\\.$#"
+			count: 1
+			path: bin/models/server.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$free\\.$#"
+			count: 1
+			path: bin/models/server.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$writable\\.$#"
+			count: 1
+			path: bin/models/server.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$disabled\\.$#"
+			count: 1
+			path: bin/models/server.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$active\\.$#"
+			count: 1
+			path: bin/models/server.php
+
+		-
+			message: "#^Method ServerModel\\:\\:definitions\\(\\) should return spitfire\\\\storage\\\\database\\\\Schema but return statement is missing\\.$#"
+			count: 1
+			path: bin/models/server.php
+
+		-
+			message: "#^Access to an undefined property ServerModel\\:\\:\\$cluster\\.$#"
+			count: 1
+			path: bin/models/server.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$key\\.$#"
+			count: 1
+			path: bin/models/setting.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$value\\.$#"
+			count: 1
+			path: bin/models/setting.php
+
+		-
+			message: "#^Method SettingModel\\:\\:definitions\\(\\) should return spitfire\\\\storage\\\\database\\\\Schema but return statement is missing\\.$#"
+			count: 1
+			path: bin/models/setting.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$job\\.$#"
+			count: 1
+			path: bin/models/task/queue.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$version\\.$#"
+			count: 1
+			path: bin/models/task/queue.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$settings\\.$#"
+			count: 1
+			path: bin/models/task/queue.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$scheduled\\.$#"
+			count: 1
+			path: bin/models/task/queue.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$progress\\.$#"
+			count: 1
+			path: bin/models/task/queue.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$locked\\.$#"
+			count: 1
+			path: bin/models/task/queue.php
+
+		-
+			message: "#^Method task\\\\QueueModel\\:\\:definitions\\(\\) should return spitfire\\\\storage\\\\database\\\\Schema but return statement is missing\\.$#"
+			count: 1
+			path: bin/models/task/queue.php
+
+		-
+			message: "#^Parameter \\#2 \\$value of method spitfire\\\\core\\\\Environment\\:\\:set\\(\\) expects string, true given\\.$#"
+			count: 1
+			path: bin/settings/environments.sample.php
+
